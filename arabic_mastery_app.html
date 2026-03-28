@@ -1,0 +1,2234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Marwan's Arabic Learning App</title>
+<meta name="theme-color" content="#1a6b50">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Arabic">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#faf9f6;--bg2:#f2f0eb;--bg3:#e8e5de;
+  --text:#1c1a16;--text2:#6b6760;--text3:#9b9890;
+  --border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.15);
+  --green:#1a6b50;--green-l:#e8f4ef;--green-m:#4a9e7e;--green-d:#0d4232;
+  --gold:#c4973a;--red:#a32d2d;--red-l:#fcebeb;
+  --amber:#c4793a;--amber-l:#faeeda;--amber-d:#633806;
+  --purple-l:#eeedfe;--purple-d:#3c3489;
+  --blue-l:#e6f1fb;--blue-d:#0c447c;
+  --r:10px;--rl:14px;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#16140f;--bg2:#1e1c16;--bg3:#28251e;
+  --text:#f0ede6;--text2:#9b9890;--text3:#6b6760;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.14);
+  --green-l:#0a2e22;--green-d:#9FE1CB;
+  --red-l:#501313;--red:#f7c1c1;
+  --amber-l:#412402;--amber-d:#FAC775;
+  --purple-l:#26215C;--purple-d:#CECBF6;
+  --blue-l:#042C53;--blue-d:#B5D4F4;
+}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.page{display:none;flex-direction:column}.page.active{display:flex}
+.wrap{max-width:540px;margin:0 auto;padding:1.75rem 1.25rem 3rem;width:100%;overflow-x:hidden}
+#p-welcome{min-height:100vh;align-items:center;justify-content:center;padding:2rem 1.5rem;text-align:center;position:relative;overflow:hidden}
+@keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes scaleUp{from{opacity:0;transform:scale(0.85)}to{opacity:1;transform:scale(1)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+#splash{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;z-index:10;background:var(--bg)}
+.splash-arabic{font-size:72px;color:var(--green);line-height:1;opacity:0;animation:scaleUp 1s 0.3s ease forwards}
+.splash-roman{font-size:14px;color:var(--text3);letter-spacing:0.15em;margin-top:12px;opacity:0;animation:fadeIn 0.8s 1s ease forwards}
+#intro-seq{opacity:0;transition:opacity 0.5s;max-width:340px;margin:0 auto}
+#intro-seq.visible{opacity:1}
+.intro-line{font-family:'Lora',serif;font-size:18px;font-weight:400;color:var(--text);line-height:1.6;margin-bottom:1.5rem;opacity:0;transform:translateY(8px);transition:opacity 0.7s ease,transform 0.7s ease}
+.intro-line.shown{opacity:1;transform:translateY(0)}
+.intro-line.dim{color:var(--text2)}
+.intro-line em{font-style:italic;color:var(--green-m)}
+.intro-divider{width:32px;height:1px;background:var(--gold);margin:0 auto 1.5rem;opacity:0;transition:opacity 0.7s ease}
+.intro-divider.shown{opacity:1}
+.btn-cta{display:inline-block;padding:13px 32px;background:var(--green);color:#fff;border:none;border-radius:40px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer;opacity:0;transform:translateY(8px);transition:opacity 0.7s ease,transform 0.7s ease,background 0.2s}
+.btn-cta.shown{opacity:1;transform:translateY(0)}.btn-cta:hover{background:var(--green-d)}
+.step-dots{display:flex;gap:6px;justify-content:center;margin-bottom:1.75rem}
+.sdot{width:6px;height:6px;border-radius:50%;background:var(--bg3);transition:all 0.3s}
+.sdot.active{background:var(--green);width:20px;border-radius:4px}.sdot.done{background:var(--green-m)}
+.step-tag{font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--green-m);margin-bottom:8px}
+.step-title{font-family:'Lora',serif;font-size:22px;font-weight:400;line-height:1.3;margin-bottom:6px}
+.step-sub{font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:1.25rem}
+.multi-hint{font-size:11px;color:var(--text3);font-style:italic;margin-bottom:8px}
+.field{width:100%;padding:12px 14px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;margin-bottom:1.25rem;transition:border-color 0.2s}
+.field:focus{outline:none;border-color:var(--green)}.field::placeholder{color:var(--text3)}
+textarea.field{resize:none;line-height:1.6;font-size:14px}
+.choices{display:flex;flex-direction:column;gap:8px;margin-bottom:1.25rem}
+.ch{display:flex;align-items:flex-start;gap:13px;padding:13px 15px;border:1px solid var(--border2);border-radius:var(--r);cursor:pointer;background:var(--bg);text-align:left;transition:all 0.15s;width:100%}
+.ch:hover{background:var(--bg2)}.ch.sel{border-color:var(--green);background:var(--green-l)}
+.ch-icon{width:36px;height:36px;border-radius:8px;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.ch.sel .ch-icon{background:rgba(26,107,80,0.12)}
+.ch-body{flex:1}.ch-title{font-size:14px;font-weight:500;color:var(--text)}.ch-desc{font-size:12px;color:var(--text2);margin-top:2px;line-height:1.5}
+.ch-tick,.ch-sq{width:18px;height:18px;border:1.5px solid var(--border2);flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;transition:all 0.15s}
+.ch-tick{border-radius:50%}.ch-sq{border-radius:4px}
+.ch.sel .ch-tick,.ch.sel .ch-sq{background:var(--green);border-color:var(--green)}
+.ch.sel .ch-tick::after,.ch.sel .ch-sq::after{content:'';width:6px;height:4px;border-left:1.5px solid #fff;border-bottom:1.5px solid #fff;transform:rotate(-45deg) translateY(-1px);display:block}
+.other-wrap{display:none;margin-top:6px}.other-wrap.vis{display:block}
+.other-field{width:100%;padding:10px 13px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;margin-top:4px}
+.other-field:focus{outline:none;border-color:var(--green)}.other-field::placeholder{color:var(--text3)}
+.btn-primary{width:100%;padding:13px;background:var(--green);color:#fff;border:none;border-radius:40px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer;transition:background 0.2s}
+.btn-primary:hover{background:var(--green-d)}.btn-primary:disabled{opacity:0.35;cursor:not-allowed}
+.btn-ghost{width:100%;padding:11px;background:transparent;color:var(--text2);border:none;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;margin-top:8px}
+.btn-ghost:hover{color:var(--text)}
+.btn-outline{width:100%;padding:11px;border:1px solid var(--border2);border-radius:var(--r);background:transparent;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;margin-top:8px}
+.btn-outline:hover{background:var(--bg2)}
+.sum-arabic{font-size:22px;color:var(--green);direction:rtl;text-align:center;padding:6px 0 4px}
+.sum-card{background:var(--bg2);border-radius:var(--rl);padding:1.1rem 1.25rem;margin-bottom:1.25rem}
+.sum-row{display:flex;justify-content:space-between;align-items:baseline;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px}
+.sum-row:last-child{border-bottom:none}.sum-k{color:var(--text2)}.sum-v{font-weight:500;text-align:right;max-width:60%}
+.bridge{background:var(--bg2);border-radius:var(--rl);padding:1.25rem;margin-bottom:1rem}
+.bridge-title{font-size:14px;font-weight:500;margin-bottom:6px}
+.bridge-sub{font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:10px}
+.lrow{display:flex;align-items:center;gap:10px;padding:6px 10px;background:var(--bg);border-radius:var(--r);margin-bottom:4px}
+.lnum{width:22px;height:22px;border-radius:50%;background:var(--green-l);color:var(--green-d);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;flex-shrink:0}
+.ltext{font-size:12px;font-weight:500}.lsub{font-size:11px;color:var(--text3)}
+.milestone-proposal{background:var(--bg2);border-radius:var(--rl);padding:1.25rem;margin-bottom:1rem}
+.mp-ms{display:flex;gap:12px;padding:9px 0;border-bottom:1px solid var(--border);align-items:flex-start}
+.mp-ms:last-child{border-bottom:none}
+.mp-dot{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;flex-shrink:0;margin-top:1px}
+.mp-a{background:var(--green-l);color:var(--green-d)}.mp-f{background:var(--bg3);color:var(--text3)}.mp-g{background:var(--purple-l);color:var(--purple-d)}
+.mp-day{font-size:10px;color:var(--text3);margin-bottom:1px}.mp-title{font-size:13px;font-weight:500}.mp-desc{font-size:11px;color:var(--text2);margin-top:1px;line-height:1.5}
+.gen-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;text-align:center;padding:2rem 1.25rem}
+.gen-icon{font-size:36px;color:var(--green);margin-bottom:1.25rem;animation:pulse 2s ease-in-out infinite}
+.gen-track{width:100%;max-width:300px;height:4px;background:var(--bg3);border-radius:20px;overflow:hidden;margin:1.5rem auto}
+.gen-fill{height:100%;border-radius:20px;background:var(--green);transition:width 0.5s ease}
+.pips{display:flex;gap:4px;margin-bottom:10px}.pip{height:4px;flex:1;border-radius:20px;background:var(--bg3)}.pip.done{background:var(--green)}.pip.active{background:var(--green-m)}
+.test-meta{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.25rem}
+.lvl-name{font-size:13px;font-weight:500}.set-sub{font-size:11px;color:var(--text3);margin-top:2px}.q-ctr{font-size:12px;color:var(--text3)}
+.qcard{background:var(--bg);border:1px solid var(--border);border-radius:var(--rl);padding:1.75rem 1.5rem;margin-bottom:1.5rem;min-height:140px;display:flex;flex-direction:column;justify-content:center}
+.qtype-lbl{font-size:11px;font-weight:500;letter-spacing:0.08em;color:var(--text3);text-transform:uppercase;margin-bottom:12px}
+.qtext{font-size:19px;color:var(--text);line-height:1.6;text-align:center;font-weight:500}.qarabic{font-size:42px;color:var(--text);direction:rtl;text-align:center;padding:14px 0;line-height:1.4;font-weight:400}
+.opts{display:flex;flex-direction:column;gap:12px;margin-bottom:1.5rem}
+.opt{padding:18px 14px;border:1px solid var(--border2);border-radius:var(--r);cursor:pointer;font-size:17px;color:var(--text);background:var(--bg);text-align:center;font-family:'DM Sans',sans-serif;transition:all 0.1s;width:100%;line-height:1.4}
+.opt:hover{background:var(--bg2)}.opt.correct{border-color:var(--green);background:var(--green-l);color:var(--green-d)}.opt.wrong{border-color:var(--red);background:var(--red-l);color:var(--red)}
+.feedback{padding:12px 16px;border-radius:var(--r);margin-bottom:1rem;font-size:15px;display:none;text-align:center}
+.feedback.correct{background:var(--green-l);color:var(--green-d);display:block}.feedback.wrong{background:var(--red-l);color:var(--red);display:block}
+.sr-card{background:var(--bg2);border-radius:var(--rl);padding:1.25rem;margin-bottom:1rem;text-align:center}
+.sr-big{font-size:28px;font-weight:500}.sr-sub{font-size:12px;color:var(--text2);margin-top:3px;margin-bottom:10px}
+.verdict{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500;display:inline-block}
+.v-pass{background:var(--green-l);color:var(--green-d)}.v-fail{background:var(--red-l);color:var(--red)}.v-perfect{background:var(--purple-l);color:var(--purple-d)}
+.sr-msg{font-size:13px;color:var(--text2);margin-bottom:1rem;line-height:1.6}
+.score-rows{display:flex;flex-direction:column;gap:7px;margin-bottom:1.25rem}
+.srow{display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg2);border-radius:var(--r)}
+.sl{font-size:12px;font-weight:500;min-width:60px}.sbar{flex:1;height:6px;background:var(--bg);border-radius:20px;overflow:hidden}
+.sbar-fill{height:100%;border-radius:20px;background:var(--green)}.spct{font-size:12px;color:var(--text2);min-width:36px;text-align:right}
+.curr-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--rl);padding:1.25rem;margin-bottom:1rem}
+.curr-hd{font-size:11px;font-weight:500;letter-spacing:0.08em;color:var(--text3);text-transform:uppercase;margin-bottom:10px}
+.crow{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}.crow:last-child{border-bottom:none}
+.cdot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px}.cinfo{flex:1}.cname{font-size:13px;font-weight:500}.cdesc{font-size:11px;color:var(--text2);margin-top:2px}
+.cbadge{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:500;flex-shrink:0;margin-top:2px}
+.cb-fast{background:var(--green-l);color:var(--green-d)}.cb-focus{background:var(--amber-l);color:var(--amber-d)}.cb-review{background:var(--blue-l);color:var(--blue-d)}
+.app-header{background:var(--bg);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10}
+.app-header-inner{max-width:540px;margin:0 auto;padding:12px 1.25rem;display:flex;align-items:center;justify-content:space-between}
+.app-logo{font-family:'Lora',serif;font-size:16px;font-weight:400}.app-logo span{color:var(--green)}
+.user-pill{display:flex;align-items:center;gap:6px;padding:5px 10px;border:1px solid var(--border2);border-radius:20px;font-size:12px;color:var(--text2);cursor:pointer;background:transparent}
+.user-pill:hover{background:var(--bg2)}.uav{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:500}
+.app-nav{display:flex;gap:2px;max-width:540px;margin:0 auto;padding:0 1.25rem}
+.nav-btn{flex:1;padding:8px 4px;border:none;background:transparent;font-size:11px;color:var(--text3);cursor:pointer;border-radius:var(--r);border-bottom:2px solid transparent;transition:all 0.15s;font-family:'DM Sans',sans-serif}
+.nav-btn.active{color:var(--green);border-bottom-color:var(--green);font-weight:500}
+.course-wrap{max-width:540px;margin:0 auto;padding:1.25rem 1.25rem 3rem}
+.unit-section{margin-bottom:16px}.unit-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.unit-lbl{font-size:10px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3)}
+.unit-badge{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:500}
+.ub-locked{background:var(--bg2);color:var(--text3)}.ub-active{background:var(--amber-l);color:var(--amber-d)}.ub-mastered{background:var(--green-l);color:var(--green-d)}
+.unit-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden}.unit-card.locked{opacity:0.4;pointer-events:none}
+.stage-strip{display:flex;border-bottom:1px solid var(--border)}
+.stage-tab{flex:1;padding:8px 4px;text-align:center;font-size:11px;color:var(--text3);border-bottom:2px solid transparent;cursor:pointer;transition:all 0.15s}
+.stage-tab.active{color:var(--green);border-bottom-color:var(--green);font-weight:500}.stage-tab.done{color:var(--green-m)}.stage-tab.locked-tab{color:var(--text3);cursor:default;opacity:0.5}
+.lesson-item{display:flex;align-items:center;gap:12px;padding:12px 14px;cursor:pointer;border-bottom:1px solid var(--border);transition:background 0.1s}
+.lesson-item:last-child{border-bottom:none}.lesson-item:hover{background:var(--bg2)}
+.l-info{flex:1;min-width:0}.l-title{font-size:14px;font-weight:500;color:var(--text)}.l-sub{font-size:12px;color:var(--text2);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.l-badge{font-size:10px;padding:3px 8px;border-radius:20px;font-weight:500;flex-shrink:0}
+.lb-done{background:var(--green-l);color:var(--green-d)}.lb-weak{background:var(--amber-l);color:var(--amber-d)}
+.mq-stage-banner{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:var(--r);margin-bottom:12px}
+.mq-s1{background:var(--purple-l)}.mq-s2{background:var(--amber-l)}.mq-s3{background:var(--green-l)}
+.mq-stage-icon{font-size:16px}.mq-stage-title{font-size:13px;font-weight:500}.mq-stage-desc{font-size:11px;margin-top:1px}
+.mq-s1 .mq-stage-title,.mq-s1 .mq-stage-desc{color:var(--purple-d)}.mq-s2 .mq-stage-title,.mq-s2 .mq-stage-desc{color:var(--amber-d)}.mq-s3 .mq-stage-title,.mq-s3 .mq-stage-desc{color:var(--green-d)}
+.mq-progress{display:flex;align-items:center;gap:8px;margin-bottom:1rem}
+.mq-prog-label{font-size:11px;color:var(--text3);min-width:80px}.mq-prog-track{flex:1;height:5px;background:var(--bg3);border-radius:20px;overflow:hidden}
+.mq-prog-fill{height:100%;border-radius:20px;transition:width 0.4s}
+.mq-s1-fill{background:var(--purple-d)}.mq-s2-fill{background:var(--amber)}.mq-s3-fill{background:var(--green)}
+.consec-dots{display:flex;gap:5px}.consec-dot{width:10px;height:10px;border-radius:50%;border:1.5px solid var(--border2)}.consec-dot.filled{background:var(--green);border-color:var(--green)}
+.phrase-study{background:var(--bg);border:1px solid var(--border);border-radius:var(--rl);padding:1.25rem;margin-bottom:10px}
+.ps-arabic{font-size:28px;direction:rtl;color:var(--text);line-height:1.4;margin-bottom:4px}.ps-roman{font-size:13px;color:var(--text2);font-style:italic;margin-bottom:4px}
+.ps-english{font-size:14px;font-weight:500;color:var(--text);margin-bottom:3px}.ps-note{font-size:11px;color:var(--text3);line-height:1.5}
+.ps-tag{font-size:10px;padding:2px 6px;border-radius:20px;font-weight:500;display:inline-block;margin-top:4px}
+.ps-tag-msa{background:var(--blue-l);color:var(--blue-d)}.ps-tag-dialect{background:var(--green-l);color:var(--green-d)}
+.fail-card{background:var(--bg2);border-radius:var(--rl);padding:1.25rem;margin-bottom:1rem;text-align:center}
+.fail-score{font-size:32px;font-weight:500}.fail-label{font-size:12px;color:var(--text2);margin-top:3px;margin-bottom:12px}
+.fail-weak{background:var(--bg);border-radius:var(--r);padding:10px 14px;margin-bottom:12px;text-align:left}
+.fw-title{font-size:11px;font-weight:500;letter-spacing:0.07em;text-transform:uppercase;color:var(--text3);margin-bottom:6px}
+.fw-word{display:inline-block;margin:2px 4px;padding:3px 8px;background:var(--amber-l);color:var(--amber-d);border-radius:20px;font-size:12px;direction:rtl}
+.fail-options{display:flex;flex-direction:column;gap:8px}
+.fail-btn{padding:12px;border-radius:var(--r);font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;border:1px solid var(--border2);background:transparent;color:var(--text);text-align:left;display:flex;align-items:center;gap:10px}
+.fail-btn:hover{background:var(--bg2)}.fail-btn-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.unlock-card{background:var(--green-l);border:1px solid rgba(26,107,80,0.2);border-radius:var(--rl);padding:1.5rem;text-align:center;margin-bottom:1rem}
+.unlock-icon{font-size:32px;margin-bottom:8px}.unlock-title{font-family:'Lora',serif;font-size:20px;font-weight:400;color:var(--green-d);margin-bottom:4px}
+.unlock-sub{font-size:13px;color:var(--green-m);line-height:1.6;margin-bottom:8px}
+.unlock-context{font-family:'Lora',serif;font-size:14px;font-style:italic;color:var(--green-d);line-height:1.6;padding:10px 14px;background:rgba(26,107,80,0.08);border-radius:var(--r);margin-top:8px}
+.unit-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0}
+.us-stat{background:rgba(26,107,80,0.1);border-radius:var(--r);padding:8px 4px;text-align:center}
+.us-n{font-size:16px;font-weight:500;color:var(--green-d)}.us-l{font-size:10px;color:var(--green-m);margin-top:1px}
+.enrichment-banner{background:var(--amber-l);border:1px solid rgba(196,121,58,0.2);border-radius:var(--rl);padding:1rem 1.25rem;margin-bottom:1rem;display:flex;align-items:center;gap:10px}
+.eb-icon{font-size:20px;flex-shrink:0}.eb-title{font-size:13px;font-weight:500;color:var(--amber-d)}.eb-sub{font-size:11px;color:var(--amber-d);margin-top:2px;line-height:1.5;opacity:0.8}
+.enrichment-prompt{background:var(--bg);border:1px solid var(--border);border-radius:var(--rl);padding:1.25rem;margin-bottom:10px}
+.ep-label{font-size:10px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+.ep-text{font-size:14px;color:var(--text);line-height:1.7;direction:rtl;text-align:right}.ep-translation{font-size:12px;color:var(--text2);margin-top:6px;font-style:italic}
+.checkpoint-banner{background:var(--purple-l);border:1px solid rgba(60,52,137,0.15);border-radius:var(--rl);padding:1rem 1.25rem;margin-bottom:1rem;display:flex;align-items:center;gap:10px}
+.cb-icon{font-size:20px;flex-shrink:0}.cb-title{font-size:13px;font-weight:500;color:var(--purple-d)}.cb-sub{font-size:11px;color:var(--purple-d);margin-top:2px;opacity:0.8}
+.chat-wrap{display:flex;flex-direction:column;gap:10px;margin-bottom:1rem;min-height:200px;padding:4px 0}
+.chat-msg{max-width:85%;padding:10px 14px;border-radius:14px;font-size:14px;line-height:1.6}
+.chat-claude{background:var(--bg2);color:var(--text);border-bottom-left-radius:4px;direction:rtl;align-self:flex-start}
+.chat-user{background:var(--green);color:#fff;border-bottom-right-radius:4px;align-self:flex-end}
+.chat-input-row{display:flex;gap:8px;margin-bottom:1rem}
+.chat-input{flex:1;padding:10px 14px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px}
+.chat-input:focus{outline:none;border-color:var(--green)}
+.chat-send{padding:10px 16px;background:var(--green);color:#fff;border:none;border-radius:var(--r);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500}
+.chat-send:hover{background:var(--green-d)}
+.debrief-section{background:var(--bg2);border-radius:var(--rl);padding:1.25rem;margin-bottom:10px}
+.ds-label{font-size:10px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+.fluency-band{display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:500;background:var(--green-l);color:var(--green-d);margin-bottom:8px}
+.prog-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--rl);padding:1.25rem;margin-bottom:10px}
+.prog-track{background:var(--bg2);border-radius:20px;height:6px;overflow:hidden;margin:6px 0}
+.prog-fill{height:100%;border-radius:20px;background:var(--green);transition:width 0.5s}
+.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:8px}.week-day{text-align:center}
+.wday-lbl{font-size:10px;color:var(--text3);margin-bottom:4px}.wday-dot{width:26px;height:26px;border-radius:50%;margin:0 auto;border:1px solid var(--border)}.wday-dot.done{background:var(--green-l);border-color:#9FE1CB}
+.weak-list{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}.weak-tag{padding:3px 9px;background:var(--amber-l);color:var(--amber-d);border-radius:20px;font-size:12px;direction:rtl}
+.celeb-wrap{text-align:center;padding:2rem 1.25rem 3rem;max-width:540px;margin:0 auto;width:100%}
+.celeb-arabic{font-size:56px;color:var(--green);line-height:1;margin-bottom:1rem}
+.celeb-title{font-family:'Lora',serif;font-size:26px;font-weight:400;margin-bottom:6px}
+.celeb-divider{width:36px;height:1px;background:var(--gold);margin:12px auto 14px}
+.celeb-sub{font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:2rem;max-width:320px;margin-left:auto;margin-right:auto}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1rem}
+.stat-big{background:var(--bg2);border-radius:var(--r);padding:14px 8px;text-align:center}
+.stat-n{font-size:22px;font-weight:500;color:var(--green)}.stat-l{font-size:11px;color:var(--text3);margin-top:2px;line-height:1.4}
+.fun-stat{background:var(--bg2);border-radius:var(--r);padding:10px 14px;margin-bottom:6px;display:flex;align-items:center;gap:10px}
+.fun-stat-icon{font-size:18px;flex-shrink:0}.fun-stat-text{font-size:13px;color:var(--text);line-height:1.5}.fun-stat-text strong{color:var(--green)}
+.break-opts{display:flex;flex-direction:column;gap:8px;margin-bottom:1.25rem}
+.break-opt{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--border2);border-radius:var(--r);cursor:pointer;background:var(--bg);transition:all 0.15s}
+.break-opt:hover{background:var(--bg2)}.break-opt.sel{border-color:var(--green);background:var(--green-l)}
+.break-opt-icon{font-size:18px;flex-shrink:0}.break-opt-label{font-size:14px;font-weight:500}.break-opt-sub{font-size:12px;color:var(--text2);margin-top:1px}
+.ms-row{display:flex;gap:12px;padding:11px 0;border-bottom:1px solid var(--border);align-items:flex-start}.ms-row:last-child{border-bottom:none}
+.ms-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;flex-shrink:0;margin-top:1px}
+.ms-active{background:var(--green-l);color:var(--green-d)}.ms-future{background:var(--bg2);color:var(--text3)}.ms-goal{background:var(--purple-l);color:var(--purple-d)}
+.ms-day{font-size:10px;color:var(--text3);margin-bottom:2px}.ms-title{font-size:13px;font-weight:500}.ms-desc{font-size:12px;color:var(--text2);margin-top:2px;line-height:1.5}
+.api-setup{background:var(--bg2);border-radius:var(--rl);padding:1.25rem;margin-bottom:1rem}
+.api-status{display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:10px}
+.api-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}.api-dot-ok{background:var(--green)}.api-dot-no{background:var(--red)}
+.output-evaluating{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text2);padding:10px 0}
+.potd-card{background:var(--green-l);border:1px solid rgba(26,107,80,0.15);border-radius:var(--rl);padding:1.25rem;margin-bottom:1rem}
+.potd-label{font-size:10px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--green-m);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.potd-arabic{font-size:32px;color:var(--green-d);direction:rtl;text-align:center;line-height:1.4;margin-bottom:4px}
+.potd-roman{font-size:13px;color:var(--green-m);text-align:center;font-style:italic;margin-bottom:6px}
+.potd-english{font-size:15px;font-weight:500;color:var(--green-d);text-align:center;margin-bottom:6px}
+.potd-note{font-size:12px;color:var(--green-m);text-align:center;line-height:1.5}
+.offline-badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:3px 8px;border-radius:20px;background:var(--green-l);color:var(--green-d)}
+.download-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}.download-item:last-child{border-bottom:none}
+.dl-name{font-weight:500}.dl-btn{font-size:12px;padding:4px 10px;border:1px solid var(--border2);border-radius:20px;background:transparent;cursor:pointer;color:var(--text2);font-family:'DM Sans',sans-serif}
+.dl-btn:hover{background:var(--bg2)}.dl-cached{color:var(--green-m);font-size:11px}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:100;align-items:flex-end;justify-content:center}
+.modal-overlay.open{display:flex}.modal-box{background:var(--bg);border-radius:var(--rl) var(--rl) 0 0;width:100%;max-width:540px;max-height:85vh;overflow-y:auto}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg)}
+.modal-title{font-size:15px;font-weight:500}.modal-close{border:1px solid var(--border2);background:transparent;border-radius:var(--r);padding:5px 12px;font-size:12px;cursor:pointer;color:var(--text2);font-family:'DM Sans',sans-serif}
+.modal-body{padding:0.75rem 1.25rem 1rem}
+.ph-ar{font-size:22px;direction:rtl;color:var(--text);line-height:1.3}.ph-ro{font-size:12px;color:var(--text2);font-style:italic;margin-top:2px}
+.ph-en{font-size:13px;font-weight:500;color:var(--text);margin-top:3px}.ph-note{font-size:11px;color:var(--text3);margin-top:2px}
+.phrase-row{padding:10px 0;border-bottom:1px solid var(--border)}.phrase-row:last-child{border-bottom:none}
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1.25rem}
+.stat{background:var(--bg2);border-radius:var(--r);padding:10px;text-align:center}.stat-n{font-size:20px;font-weight:500}.stat-l{font-size:11px;color:var(--text3);margin-top:1px}
+.footer-note{font-size:11px;color:var(--text3);text-align:center;line-height:1.7;margin-top:8px}
+/* AUTH */
+.auth-wrap{max-width:400px;margin:0 auto;padding:2rem 1.25rem;width:100%;text-align:center}
+.auth-title{font-family:'Lora',serif;font-size:22px;font-weight:400;margin-bottom:6px}
+.auth-sub{font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:1.5rem}
+.auth-divider{display:flex;align-items:center;gap:10px;margin:1rem 0}
+.auth-divider-line{flex:1;height:1px;background:var(--border2)}
+.auth-divider-text{font-size:12px;color:var(--text3)}
+.auth-small{font-size:12px;color:var(--text3);margin-top:10px;cursor:pointer}
+.auth-small:hover{color:var(--text2)}
+.auth-small a{color:var(--green);text-decoration:none}
+.auth-msg{font-size:13px;padding:10px 14px;border-radius:var(--r);margin-bottom:1rem;display:none}
+.auth-msg.success{background:var(--green-l);color:var(--green-d);display:block}
+.auth-msg.error{background:var(--red-l);color:var(--red);display:block}
+.avatar-ring{width:48px;height:48px;border-radius:50%;background:var(--green-l);display:flex;align-items:center;justify-content:center;font-size:20px;margin:0 auto 12px;border:2px solid rgba(26,107,80,0.2)}
+.sync-banner{background:var(--blue-l);border:1px solid rgba(12,68,124,0.15);border-radius:var(--rl);padding:1rem 1.25rem;margin-bottom:1rem;display:flex;align-items:flex-start;gap:10px}
+.sync-banner-icon{font-size:20px;flex-shrink:0}
+.sync-banner-title{font-size:13px;font-weight:500;color:var(--blue-d)}
+.sync-banner-sub{font-size:11px;color:var(--blue-d);margin-top:2px;line-height:1.5;opacity:0.85}
+.sync-banner-btn{font-size:12px;padding:4px 10px;border:1px solid var(--blue-d);border-radius:20px;background:transparent;color:var(--blue-d);cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:6px;display:inline-block}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite;vertical-align:middle;margin-right:5px}
+</style>
+</head>
+<body>
+
+<!-- WELCOME -->
+<div id="p-welcome" class="page active">
+  <div id="splash"><div class="splash-arabic">مرحباً</div><div class="splash-roman">marhaba</div></div>
+  <div id="intro-seq">
+    <div class="intro-line" id="il-1">This course finds your level<br>before teaching you anything.</div>
+    <div class="intro-divider" id="il-div"></div>
+    <div class="intro-line dim" id="il-2">You'll start with a short placement test.<br>It adapts as you go, stopping when it finds your ceiling.<br>Your curriculum is built from there.</div>
+    <div class="intro-line dim" id="il-3">As you progress, the course keeps adjusting.<br>Words you struggle with follow you until they stick.<br><em>Support fades as your confidence grows.</em></div>
+    <div class="intro-line dim" id="il-4">The goal is simple:<br>by the end, you hold a real conversation.</div>
+    <button class="btn-cta" id="il-btn" onclick="showLoginAfterIntro()">let's begin →</button>
+  </div>
+</div>
+
+<!-- LOGIN -->
+<div id="p-login" class="page">
+  <div class="auth-wrap">
+    <div style="margin-bottom:1.5rem;margin-top:2rem">
+      <div class="avatar-ring">م</div>
+      <div class="auth-title">Welcome back</div>
+      <div class="auth-sub">Enter your email to continue.<br>New? We'll create your account automatically.</div>
+    </div>
+    <div class="auth-msg" id="auth-msg"></div>
+    <div id="auth-email-step">
+      <input class="field" id="auth-email" type="email" placeholder="your@email.com" oninput="onAuthEmail()" onkeydown="if(event.key==='Enter')authContinue()"/>
+      <button class="btn-primary" id="btn-auth-continue" onclick="authContinue()" disabled>continue →</button>
+      
+      
+      <div class="auth-small" onclick="togglePasswordMode()">use password instead</div>
+    </div>
+    <div id="auth-password-step" style="display:none">
+      <div style="font-size:13px;color:var(--text2);margin-bottom:10px" id="auth-email-display"></div>
+      <input class="field" id="auth-password" type="password" placeholder="password" onkeydown="if(event.key==='Enter')authPassword()"/>
+      <button class="btn-primary" onclick="authPassword()">sign in →</button>
+      <div class="auth-small" onclick="togglePasswordMode()">← use magic link instead</div>
+    </div>
+    <div class="auth-divider" style="margin-top:1.25rem"><div class="auth-divider-line"></div><div class="auth-divider-text">or</div><div class="auth-divider-line"></div></div>
+    <button onclick="continueAsGuest()" style="width:100%;padding:11px;border:1px solid var(--border2);border-radius:40px;background:transparent;color:var(--text2);font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;margin-bottom:4px">continue without account</button>
+    <div style="font-size:11px;color:var(--text3);line-height:1.6;text-align:center;padding:0 8px">Sign in later to sync progress across devices</div>
+    <div id="auth-magic-sent" style="display:none;text-align:center;padding:1rem 0">
+      <div style="font-size:32px;margin-bottom:12px">📬</div>
+      <div style="font-family:'Lora',serif;font-size:18px;margin-bottom:8px">Check your email</div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.7">We sent a login link to<br><strong id="magic-email-display"></strong><br>Click it to sign in.</div>
+      <div class="auth-small" style="margin-top:16px" onclick="resetAuthForm()">use a different email</div>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 1 -->
+<div id="p-name" class="page"><div class="wrap">
+  <div class="step-dots"><div class="sdot active"></div><div class="sdot"></div><div class="sdot"></div><div class="sdot"></div></div>
+  <div class="step-tag">Step 1 of 4</div><div class="step-title">What's your name?</div>
+  <div class="step-sub">We'll use this to personalise your experience throughout the course.</div>
+  <input class="field" id="inp-name" type="text" placeholder="Enter your name..." oninput="onName()"/>
+  <button class="btn-primary" id="btn-name" onclick="go('p-speaker')" disabled>continue →</button>
+</div></div>
+
+<!-- STEP 2 -->
+<div id="p-speaker" class="page"><div class="wrap">
+  <div class="step-dots"><div class="sdot done"></div><div class="sdot active"></div><div class="sdot"></div><div class="sdot"></div></div>
+  <div class="step-tag">Step 2 of 4</div><div class="step-title">How would you describe your Arabic?</div>
+  <div class="step-sub">Be honest — this shapes your entire curriculum. There's no wrong answer.</div>
+  <div class="choices" id="c-speaker">
+    <button class="ch" onclick="pick1('speaker',this,'new')"><div class="ch-icon">✦</div><div class="ch-body"><div class="ch-title">Complete beginner</div><div class="ch-desc">Little to no Arabic. We'll start with the alphabet.</div></div><div class="ch-tick"></div></button>
+    <button class="ch" onclick="pick1('speaker',this,'heritage')"><div class="ch-icon">🌿</div><div class="ch-body"><div class="ch-title">Heritage speaker</div><div class="ch-desc">Arabic was spoken around me growing up but I've lost much of it.</div></div><div class="ch-tick"></div></button>
+    <button class="ch" onclick="pick1('speaker',this,'basic')"><div class="ch-icon">◈</div><div class="ch-body"><div class="ch-title">Basic knowledge</div><div class="ch-desc">Some words and phrases but can't hold a conversation.</div></div><div class="ch-tick"></div></button>
+    <button class="ch" onclick="pick1('speaker',this,'intermediate')"><div class="ch-icon">◉</div><div class="ch-body"><div class="ch-title">Intermediate</div><div class="ch-desc">Simple conversations but want to go deeper.</div></div><div class="ch-tick"></div></button>
+    <button class="ch" onclick="pick1('speaker',this,'advanced')"><div class="ch-icon">❋</div><div class="ch-body"><div class="ch-title">Advanced / fluent</div><div class="ch-desc">Speak well but want to refine or expand.</div></div><div class="ch-tick"></div></button>
+  </div>
+  <button class="btn-primary" id="btn-speaker" onclick="go('p-goals')" disabled>continue →</button>
+  <button class="btn-ghost" onclick="go('p-name')">← back</button>
+</div></div>
+
+<!-- STEP 3 -->
+<div id="p-goals" class="page"><div class="wrap">
+  <div class="step-dots"><div class="sdot done"></div><div class="sdot done"></div><div class="sdot active"></div><div class="sdot"></div></div>
+  <div class="step-tag">Step 3 of 4</div><div class="step-title">What do you want to achieve?</div>
+  <div class="step-sub">Select everything that applies — your curriculum will be weighted toward your goals.</div>
+  <div class="multi-hint">Select all that apply</div>
+  <div class="choices" id="c-goals">
+    <button class="ch" onclick="pickM('goals',this,'conversation')"><div class="ch-icon">💬</div><div class="ch-body"><div class="ch-title">Everyday conversation</div><div class="ch-desc">Talk comfortably in daily situations.</div></div><div class="ch-sq"></div></button>
+    <button class="ch" onclick="pickM('goals',this,'family')"><div class="ch-icon">🫂</div><div class="ch-body"><div class="ch-title">Connecting with family</div><div class="ch-desc">Speak with relatives, understand gatherings.</div></div><div class="ch-sq"></div></button>
+    <button class="ch" onclick="pickM('goals',this,'travel')"><div class="ch-icon">✈️</div><div class="ch-body"><div class="ch-title">Travel & survival</div><div class="ch-desc">Navigate markets, restaurants, transport.</div></div><div class="ch-sq"></div></button>
+    <button class="ch" onclick="pickM('goals',this,'reading')"><div class="ch-icon">📖</div><div class="ch-body"><div class="ch-title">Reading & writing</div><div class="ch-desc">Read Arabic script, write messages.</div></div><div class="ch-sq"></div></button>
+    <button class="ch" onclick="pickM('goals',this,'professional')"><div class="ch-icon">💼</div><div class="ch-body"><div class="ch-title">Professional or academic</div><div class="ch-desc">Formal Arabic for work or study.</div></div><div class="ch-sq"></div></button>
+    <button class="ch" onclick="pickM('goals',this,'culture')"><div class="ch-icon">🎭</div><div class="ch-body"><div class="ch-title">Culture & identity</div><div class="ch-desc">Heritage, music, poetry, film.</div></div><div class="ch-sq"></div></button>
+  </div>
+  <div style="margin-bottom:1.25rem">
+    <div style="font-size:11px;color:var(--text3);margin-bottom:6px;font-style:italic">Anything else? (optional)</div>
+    <textarea class="field" id="goals-extra" rows="3" placeholder="e.g. I want to read the Quran, visiting Palestine in 6 months, talk to my grandparents..."></textarea>
+  </div>
+  <button class="btn-primary" id="btn-goals" onclick="go('p-dialect')" disabled>continue →</button>
+  <button class="btn-ghost" onclick="go('p-speaker')">← back</button>
+</div></div>
+
+<!-- STEP 4 -->
+<div id="p-dialect" class="page"><div class="wrap">
+  <div class="step-dots"><div class="sdot done"></div><div class="sdot done"></div><div class="sdot done"></div><div class="sdot active"></div></div>
+  <div class="step-tag">Step 4 of 4</div><div class="step-title">Which Arabic do you want to learn?</div>
+  <div class="step-sub">You can always add more later.</div>
+  <div class="choices" id="c-dialect">
+    <button class="ch" onclick="pick1('dialect',this,'msa')"><div class="ch-icon">📜</div><div class="ch-body"><div class="ch-title">Modern Standard Arabic (MSA)</div><div class="ch-desc">Formal written language — news, literature, official settings.</div></div><div class="ch-tick"></div></button>
+    <button class="ch" onclick="pick1('dialect',this,'palestinian')"><div class="ch-icon">🫒</div><div class="ch-body"><div class="ch-title">Levantine — Palestinian dialect</div><div class="ch-desc">Spoken dialect, widely understood across the Levant.</div></div><div class="ch-tick"></div></button>
+    <button class="ch" onclick="pick1('dialect',this,'other')"><div class="ch-icon">🌍</div><div class="ch-body"><div class="ch-title">Another dialect</div><div class="ch-desc">Egyptian, Moroccan, Gulf, Lebanese, Syrian and more.</div><div class="other-wrap" id="other-wrap" onclick="event.stopPropagation()"><input class="other-field" id="inp-other" type="text" placeholder="e.g. Egyptian, Moroccan, Gulf..." oninput="onOther()"/></div></div><div class="ch-tick"></div></button>
+  </div>
+  <button class="btn-primary" id="btn-dialect" onclick="onDialectContinue()" disabled>see my plan →</button>
+  <button class="btn-ghost" onclick="go('p-goals')">← back</button>
+</div></div>
+
+<!-- SUMMARY -->
+<div id="p-summary" class="page"><div class="wrap">
+  <div class="step-tag" style="text-align:center">You're all set</div>
+  <div class="step-title" style="text-align:center;margin-bottom:4px" id="sum-title"></div>
+  <div class="sum-arabic" id="sum-arabic"></div>
+  <div class="step-sub" style="text-align:center;margin-top:8px;margin-bottom:1.25rem" id="sum-desc"></div>
+  <div class="sum-card" id="sum-card"></div>
+  <div id="beginner-bridge" style="display:none">
+    <div class="bridge">
+      <div class="bridge-title">Your starting point</div>
+      <div class="bridge-sub">You'll begin with the Arabic alphabet — learning to read and pronounce letters alongside your first words.</div>
+      <div class="lrow"><div class="lnum">1</div><div><div class="ltext">Arabic alphabet</div><div class="lsub">Letters, sounds, groupings by shape</div></div></div>
+      <div class="lrow"><div class="lnum">2</div><div><div class="ltext">First words</div><div class="lsub">English letters alongside Arabic script</div></div></div>
+      <div class="lrow"><div class="lnum">3</div><div><div class="ltext">Basic conversation</div><div class="lsub">Greetings, family, essential phrases</div></div></div>
+    </div>
+    <button class="btn-primary" onclick="goToGeneration()">build my course →</button>
+  </div>
+  <div id="placement-bridge" style="display:none">
+    <div class="bridge">
+      <div class="bridge-title">Next: adaptive placement test</div>
+      <div class="bridge-sub">Covers all 5 levels. Builds your personalised curriculum. About 10 minutes.</div>
+      <div class="lrow"><div class="lnum">1</div><div><div class="ltext">Survival basics</div><div class="lsub">Greetings, numbers, family</div></div></div>
+      <div class="lrow"><div class="lnum">2</div><div><div class="ltext">Daily life</div><div class="lsub">Home, food, routine</div></div></div>
+      <div class="lrow"><div class="lnum">3</div><div><div class="ltext">Verbs & action</div><div class="lsub">Tenses, sentences</div></div></div>
+      <div class="lrow"><div class="lnum">4</div><div><div class="ltext">Expression</div><div class="lsub">Opinions, emotions</div></div></div>
+      <div class="lrow"><div class="lnum">5</div><div><div class="ltext">Fluency</div><div class="lsub">Idioms, cultural phrases</div></div></div>
+    </div>
+    <button class="btn-primary" onclick="startPlacement()">start placement test →</button>
+  </div>
+  <button class="btn-ghost" onclick="go('p-dialect')">← back</button>
+</div></div>
+
+<!-- PLACEMENT TEST -->
+<div id="p-test" class="page"><div class="wrap">
+  <div class="pips" id="pips"></div>
+  <div class="test-meta"><div><div class="lvl-name" id="lname"></div><div class="set-sub" id="set-sub"></div></div><div class="q-ctr" id="qctr"></div></div>
+  <div class="qcard"><div class="qtype-lbl">multiple choice</div><div class="qtext" id="qtext"></div><div class="qarabic" id="qarabic" style="display:none"></div></div>
+  <div class="opts" id="opts"></div>
+  <div class="feedback" id="feedback"></div>
+  <button class="btn-outline" id="btn-tnext" style="display:none" onclick="nextQ()">next →</button>
+</div></div>
+
+<div id="p-set" class="page"><div class="wrap">
+  <div class="sr-card"><div class="sr-big" id="sr-score"></div><div class="sr-sub" id="sr-sub2"></div><div><span class="verdict" id="sr-v"></span></div></div>
+  <div class="sr-msg" id="sr-msg"></div>
+  <button class="btn-primary" id="sr-btn" onclick="afterSet()"></button>
+</div></div>
+
+<!-- RESULTS + MILESTONE CONFIRMATION -->
+<div id="p-results" class="page"><div class="wrap">
+  <div class="step-tag">Placement complete</div>
+  <div class="step-title" id="res-title"></div>
+  <div class="step-sub" id="res-sub"></div>
+  <div class="score-rows" id="score-rows"></div>
+  <div style="font-size:13px;font-weight:500;margin-bottom:10px">Your proposed 90-day curriculum</div>
+  <div class="milestone-proposal" id="milestone-proposal"><div style="font-size:12px;color:var(--text3);text-align:center;padding:12px">Generating your personalised plan...</div></div>
+  <div style="margin-bottom:1rem">
+    <div style="font-size:11px;color:var(--text3);margin-bottom:6px;font-style:italic">Want to adjust anything? (optional)</div>
+    <textarea class="field" id="milestone-feedback" rows="3" placeholder="e.g. I want more grammar, less cultural vocab, I have a trip in 3 months..."></textarea>
+  </div>
+  <button class="btn-primary" onclick="buildCourse()">build my course →</button>
+  <button class="btn-outline" id="btn-redo" onclick="redoMilestones()" style="display:none">↗ redo based on this feedback</button>
+</div></div>
+
+<!-- PLACEMENT OUTPUT SECTION -->
+<div id="p-output" class="page"><div class="wrap">
+  <div class="pips" id="output-pips"></div>
+  <div style="background:var(--purple-l);border-radius:var(--rl);padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:10px">
+    <div style="font-size:20px">✍️</div>
+    <div>
+      <div style="font-size:13px;font-weight:500;color:var(--purple-d)" id="output-level-title">Level check</div>
+      <div style="font-size:11px;color:var(--purple-d);margin-top:2px;opacity:0.85">Type your response in Arabic. There are no wrong answers — just show what you know.</div>
+    </div>
+  </div>
+  <div style="font-size:15px;color:var(--text);line-height:1.6;margin-bottom:1.25rem;padding:1rem 1.25rem;background:var(--bg2);border-radius:var(--rl)" id="output-scenario"></div>
+  <textarea class="field" id="output-response" rows="5" placeholder="اكتب هنا... (write here in Arabic or English — do your best)" style="font-size:16px;line-height:1.7"></textarea>
+  <button class="btn-primary" id="btn-output-submit" onclick="submitOutput()">submit →</button>
+  <div style="font-size:11px;color:var(--text3);text-align:center;margin-top:8px">This helps us understand how you actually use the language, not just recognise it.</div>
+</div></div>
+
+<!-- GENERATING -->
+<div id="p-generating" class="page">
+  <div class="gen-wrap">
+    <div class="gen-icon">✦</div>
+    <div class="step-title" style="margin-bottom:8px">Building your course</div>
+    <div class="step-sub" style="max-width:280px;margin:0 auto">Generating your first two units based on your profile and goals.</div>
+    <div class="gen-track"><div class="gen-fill" id="gen-fill" style="width:0%"></div></div>
+    <div style="font-size:12px;color:var(--text3)" id="gen-label">Analysing your results...</div>
+  </div>
+</div>
+
+<!-- MAIN COURSE APP -->
+<div id="p-course" class="page">
+  <div class="app-header">
+    <div class="app-header-inner">
+      <div class="app-logo">مرحباً <span>Arabic</span></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div class="offline-badge" id="offline-badge" style="display:none">📥 offline</div>
+        <div class="user-pill" id="user-pill" onclick="showUserMenu()"><div class="uav" id="user-av"></div><span id="user-name-lbl"></span></div>
+      </div>
+    </div>
+    <div class="app-nav">
+      <button class="nav-btn active" onclick="showTab('lessons',this)">Lessons</button>
+      <button class="nav-btn" onclick="showTab('progress',this)">Progress</button>
+      <button class="nav-btn" onclick="showTab('checkpoints',this)">Checkpoints</button>
+      <button class="nav-btn" onclick="showTab('settings',this)">Settings</button>
+    </div>
+  </div>
+  <div id="tab-lessons" class="course-wrap">
+    <div class="stat-grid"><div class="stat"><div class="stat-n" id="s-words">0</div><div class="stat-l">words mastered</div></div><div class="stat"><div class="stat-n" id="s-units">0</div><div class="stat-l">units done</div></div><div class="stat"><div class="stat-n" id="s-streak">0</div><div class="stat-l">day streak</div></div></div>
+    <div id="potd-card" class="potd-card" style="display:none">
+      <div class="potd-label">✦ phrase of the day</div>
+      <div class="potd-arabic" id="potd-arabic"></div>
+      <div class="potd-roman" id="potd-roman"></div>
+      <div class="potd-english" id="potd-english"></div>
+      <div class="potd-note" id="potd-note"></div>
+    </div>
+    <div class="enrichment-banner" id="enrichment-banner" style="display:none"><div class="eb-icon">⚡</div><div><div class="eb-title">Enrichment mode active</div><div class="eb-sub">All units complete — daily prompts keep you sharp until your checkpoint.</div></div></div>
+    <div id="units-list"></div>
+    <div id="enrichment-prompts" style="display:none">
+      <div style="font-size:10px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:8px">Today's practice</div>
+      <div id="enrichment-content"></div>
+    </div>
+  </div>
+  <div id="tab-progress" class="course-wrap" style="display:none">
+    <div class="prog-card">
+      <div style="font-size:14px;font-weight:500;margin-bottom:3px" id="prog-level">Beginner</div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:10px" id="prog-desc">Building your foundation</div>
+      <div class="prog-track" style="height:7px"><div class="prog-fill" id="prog-bar" style="width:0%"></div></div>
+      <div style="font-size:11px;color:var(--text3);margin-top:5px" id="prog-pct">0% of vocabulary mastered</div>
+    </div>
+    <div class="prog-card"><div style="font-size:10px;font-weight:500;letter-spacing:0.08em;color:var(--text3);text-transform:uppercase;margin-bottom:8px">Unit mastery</div><div id="unit-mastery-list"></div></div>
+    <div class="prog-card" id="weak-card" style="display:none"><div style="font-size:10px;font-weight:500;letter-spacing:0.08em;color:var(--text3);text-transform:uppercase;margin-bottom:6px">Words to review</div><div style="font-size:12px;color:var(--text2);margin-bottom:8px">These words have appeared in failed sets. They'll come up more often until you nail them.</div><div class="weak-list" id="weak-list"></div></div>
+    <div class="prog-card"><div style="font-size:10px;font-weight:500;letter-spacing:0.08em;color:var(--text3);text-transform:uppercase;margin-bottom:6px">This week</div><div class="week-grid" id="week-grid"></div></div>
+    <div class="prog-card"><div style="font-size:10px;font-weight:500;letter-spacing:0.08em;color:var(--text3);text-transform:uppercase;margin-bottom:10px">90-day roadmap</div><div id="ms-list"></div></div>
+  </div>
+  <div id="tab-checkpoints" class="course-wrap" style="display:none"><div id="checkpoint-list"></div><div id="conversation-history"></div></div>
+  <div id="tab-settings" class="course-wrap" style="display:none">
+
+    <div class="prog-card">
+      <div style="font-size:10px;font-weight:500;letter-spacing:0.08em;color:var(--text3);text-transform:uppercase;margin-bottom:8px">Download units in advance</div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:10px">Going offline? Download future units now so you can study without internet.</div>
+      <div id="download-ahead-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- QUIZ SCREEN -->
+<div id="p-quiz" class="page"><div class="wrap"><div id="quiz-content"></div></div></div>
+
+<!-- CHECKPOINT SCREEN -->
+<div id="p-checkpoint" class="page"><div class="wrap"><div id="checkpoint-content"></div></div></div>
+
+<!-- PHASE CELEBRATION -->
+<div id="p-celebration" class="page">
+  <div class="celeb-wrap">
+    <div class="celeb-arabic">مبروك</div>
+    <div class="celeb-title" id="celeb-title">Phase 1 complete.</div>
+    <div class="celeb-divider"></div>
+    <div class="celeb-sub" id="celeb-sub">90 days. You set a goal and you followed through.</div>
+    <div class="stats-grid" id="celeb-stats"></div>
+    <div id="celeb-fun-stats"></div>
+    <div style="margin-top:1.5rem">
+      <button class="btn-primary" onclick="go('p-phase2')">what's next? →</button>
+      <button class="btn-ghost" onclick="go('p-break')">I need a break first</button>
+    </div>
+  </div>
+</div>
+
+<!-- BREAK FLOW -->
+<div id="p-break" class="page"><div class="wrap">
+  <div class="step-tag">Take a break</div><div class="step-title">How long do you need?</div>
+  <div class="step-sub">Your course will be exactly where you left it. No pressure, no streak to protect.</div>
+  <div class="break-opts">
+    <div class="break-opt" onclick="pickBreak(this,'days')"><div class="break-opt-icon">🌤</div><div><div class="break-opt-label">A few days</div><div class="break-opt-sub">We'll send a gentle nudge in 3 days</div></div></div>
+    <div class="break-opt" onclick="pickBreak(this,'weeks')"><div class="break-opt-icon">📅</div><div><div class="break-opt-label">1–2 weeks</div><div class="break-opt-sub">We'll check in after 10 days</div></div></div>
+    <div class="break-opt" onclick="pickBreak(this,'month')"><div class="break-opt-icon">🌙</div><div><div class="break-opt-label">A month or more</div><div class="break-opt-sub">We'll be here whenever you're ready</div></div></div>
+  </div>
+  <button class="btn-primary" id="btn-break" onclick="confirmBreak()" disabled>take my break</button>
+  <button class="btn-ghost" onclick="go('p-celebration')">← back</button>
+</div></div>
+
+<!-- PHASE 2 PLANNING -->
+<div id="p-phase2" class="page"><div class="wrap">
+  <div class="step-tag">Phase 2</div><div class="step-title">What matters most now?</div>
+  <div class="step-sub">Your goals may have shifted after 90 days of actually using the language.</div>
+  <div class="multi-hint">Select all that apply</div>
+  <div class="choices" id="c-phase2-goals">
+    <button class="ch" onclick="pickM('p2goals',this,'deeper')"><div class="ch-icon">💬</div><div class="ch-body"><div class="ch-title">Deeper conversation</div><div class="ch-desc">Express opinions, tell stories, handle the unexpected.</div></div><div class="ch-sq"></div></button>
+    <button class="ch" onclick="pickM('p2goals',this,'family')"><div class="ch-icon">🫂</div><div class="ch-body"><div class="ch-title">Family connection</div><div class="ch-desc">Deeper vocabulary, cultural references, emotional language.</div></div><div class="ch-sq"></div></button>
+    <button class="ch" onclick="pickM('p2goals',this,'reading')"><div class="ch-icon">📖</div><div class="ch-body"><div class="ch-title">Reading Arabic script</div><div class="ch-desc">Read without harakaat — signs, messages, social media.</div></div><div class="ch-sq"></div></button>
+    <button class="ch" onclick="pickM('p2goals',this,'grammar')"><div class="ch-icon">🔧</div><div class="ch-body"><div class="ch-title">Grammar & structure</div><div class="ch-desc">Understand why sentences work — verb conjugations, patterns.</div></div><div class="ch-sq"></div></button>
+    <button class="ch" onclick="pickM('p2goals',this,'travel')"><div class="ch-icon">✈️</div><div class="ch-body"><div class="ch-title">Travel & immersion</div><div class="ch-desc">Preparing for a trip or extended time in an Arabic-speaking place.</div></div><div class="ch-sq"></div></button>
+    <button class="ch" onclick="pickM('p2goals',this,'culture')"><div class="ch-icon">🎭</div><div class="ch-body"><div class="ch-title">Culture & identity</div><div class="ch-desc">Music, poetry, film, history — the full cultural layer.</div></div><div class="ch-sq"></div></button>
+  </div>
+  <div style="margin-bottom:1.25rem">
+    <div style="font-size:11px;color:var(--text3);margin-bottom:6px;font-style:italic">Anything else? (optional)</div>
+    <textarea class="field" id="p2-extra" rows="3" placeholder="e.g. I'm visiting Palestine in 3 months, I want to read the Quran..."></textarea>
+  </div>
+  <div class="bridge" style="margin-bottom:1.25rem">
+    <div class="bridge-title">How long should Phase 2 be?</div>
+    <div style="display:flex;gap:8px;margin-top:10px" id="dur-btns">
+      <button class="ch" onclick="pickDur(this,'30')" style="flex:1;padding:10px 4px;text-align:center;justify-content:center"><div style="font-size:18px;font-weight:500">30</div><div style="font-size:11px;color:var(--text2)">days</div></button>
+      <button class="ch sel" onclick="pickDur(this,'60')" style="flex:1;padding:10px 4px;text-align:center;justify-content:center"><div style="font-size:18px;font-weight:500">60</div><div style="font-size:11px;color:var(--text2)">days</div></button>
+      <button class="ch" onclick="pickDur(this,'90')" style="flex:1;padding:10px 4px;text-align:center;justify-content:center"><div style="font-size:18px;font-weight:500">90</div><div style="font-size:11px;color:var(--text2)">days</div></button>
+      <button class="ch" onclick="pickDur(this,'180')" style="flex:1;padding:10px 4px;text-align:center;justify-content:center"><div style="font-size:18px;font-weight:500">6</div><div style="font-size:11px;color:var(--text2)">months</div></button>
+    </div>
+    <div style="font-size:12px;color:var(--text3);margin-top:8px;line-height:1.5" id="dur-hint">Good for building on Phase 1 momentum with a focused sprint.</div>
+  </div>
+  <button class="btn-primary" id="btn-p2" onclick="buildPhase2()" disabled>build Phase 2 →</button>
+</div></div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal-box">
+    <div class="modal-head"><div class="modal-title" id="modal-title"></div><button class="modal-close" onclick="closeModal()">close</button></div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════
+// CONFIG
+// ═══════════════════════════
+const API_URL='https://xkhulybdrxdzakarivvi.supabase.co/functions/v1/claude';
+const API_MODEL='claude-sonnet-4-20250514';
+
+const GREETINGS={
+  new:{ar:'أَهْلاً وَسَهْلاً',msg:'Welcome. Every expert was once a beginner.'},
+  heritage:{ar:'مَرْحَبَاً بِعَوْدَتِكَ',msg:"Welcome back to a language that was always yours."},
+  basic:{ar:'يَلَّا نِكْمِل',msg:"You already have a foundation — let's build on it."},
+  intermediate:{ar:'رَائِع، هَيَّا بِنَا',msg:"Great. Let's take your Arabic to the next level."},
+  advanced:{ar:'أَهْلاً بِالْمُتَقَدِّمِين',msg:"Welcome. We'll sharpen, deepen and refine."}
+};
+const SPEAKER_L={new:'Complete beginner',heritage:'Heritage speaker',basic:'Basic knowledge',intermediate:'Intermediate',advanced:'Advanced / fluent'};
+const GOAL_L={conversation:'Everyday conversation',family:'Connecting with family',travel:'Travel & survival',reading:'Reading & writing',professional:'Professional / academic',culture:'Culture & identity'};
+const DIALECT_L={msa:'Modern Standard Arabic',palestinian:'Levantine — Palestinian dialect'};
+const DUR_HINTS={'30':'A focused sprint — 2 units, 1 checkpoint.','60':'Good momentum — 3–4 units, 1 checkpoint.','90':'A full second cycle at higher level. 5–6 units, 2 checkpoints.','180':'Six months — ideal if you have a trip or event to prepare for.'};
+
+// ═══════════════════════════
+// UNIT CONTENT
+// ═══════════════════════════
+const STATIC_UNITS=[
+  {id:'u1',title:'Greetings & family',icon:'👋',words:18,phrases:[
+    {id:'p1',ar:'مَرْحَبَا',ro:'marhaba',en:'Hello',note:'Universal friendly greeting',msa:true},
+    {id:'p2',ar:'كَيْفَك؟',ro:"keefak? (m) / keefek? (f)",en:'How are you?',note:"Changes based on who you're asking",msa:false},
+    {id:'p3',ar:'الحَمْدُ لِلّٰه، مْنِيح',ro:'hamdillah, mneeh',en:"Praise God, I'm well",note:'Standard positive reply',msa:false},
+    {id:'p4',ar:'مَعَ السَّلَامَة',ro:"ma3 assalame",en:'Goodbye (go in safety)',note:'Said to the person leaving',msa:false},
+    {id:'p5',ar:'اللّٰه يِسَلِّمَك',ro:'allah yisalmak',en:'Goodbye (reply)',note:'Said by the person staying',msa:false},
+    {id:'p6',ar:'أَخُوي',ro:'akhawi',en:'My brother',note:'Affectionate form',msa:false},
+    {id:'p7',ar:'أُمِّي',ro:'immi',en:'My mother',note:"Always immi not ummi in Palestinian",msa:false},
+    {id:'p8',ar:'العَيْلَة',ro:'il-3ayle',en:'The family',note:'Palestinian word',msa:false},
+    {id:'p9',ar:'الأَهْل',ro:'il-ahl',en:'The folks (affectionate)',note:'More intimate than العائلة',msa:true},
+    {id:'p10',ar:'عَمِّي',ro:'ammi',en:"Uncle (dad's side)",note:'',msa:true},
+    {id:'p11',ar:'خَالِي',ro:'khali',en:"Uncle (mum's side)",note:'Different word — different side',msa:true},
+    {id:'p12',ar:'أَنَا تَعْبَان',ro:'ana t3aban',en:"I'm tired",note:'t3abane for female',msa:false},
+    {id:'p13',ar:'أَنَا جُوعَان',ro:'ana jo3an',en:"I'm hungry",note:'',msa:false},
+    {id:'p14',ar:'أَنَا مَبْسُوط',ro:'ana mabsoot',en:"I'm happy",note:'Very Palestinian',msa:false},
+    {id:'p15',ar:'بِدِّي',ro:'biddi',en:'I want',note:'Palestinian — not ureed',msa:false},
+    {id:'p16',ar:'مَا بِدِّي',ro:'ma biddi',en:"I don't want",note:'Negate with ما',msa:false},
+    {id:'p17',ar:'بُكْرَا',ro:'bukra',en:'Tomorrow',note:'Palestinian form',msa:false},
+    {id:'p18',ar:'إِمْبَارِح',ro:'imbaari7',en:'Yesterday',note:"Not ams — that's MSA",msa:false},
+  ]},
+  {id:'u2',title:'Home & daily life',icon:'🏠',words:16,phrases:[
+    {id:'p19',ar:'بَيْت',ro:'bayt',en:'House / home',note:'',msa:true},
+    {id:'p20',ar:'غُرْفَة',ro:'ghurfe',en:'Room',note:'',msa:true},
+    {id:'p21',ar:'مَطْبَخ',ro:'matbakh',en:'Kitchen',note:'',msa:true},
+    {id:'p22',ar:'حَمَّام',ro:'hammam',en:'Bathroom',note:'',msa:true},
+    {id:'p23',ar:'نَام',ro:'naam',en:'To sleep / he slept',note:'Very common daily verb',msa:false},
+    {id:'p24',ar:'صَحَّى',ro:'saha',en:'To wake up',note:'',msa:false},
+    {id:'p25',ar:'رَاح',ro:'raah',en:'He went',note:'Past tense of go',msa:false},
+    {id:'p26',ar:'إِجَا',ro:'ija',en:'He came',note:'Palestinian form',msa:false},
+    {id:'p27',ar:'كَبِير',ro:'kbeer',en:'Big',note:'',msa:true},
+    {id:'p28',ar:'صَغِير',ro:'zgheer',en:'Small',note:'',msa:true},
+    {id:'p29',ar:'حَار',ro:'haar',en:'Hot',note:'',msa:true},
+    {id:'p30',ar:'بَارِد',ro:'baarid',en:'Cold',note:'',msa:true},
+    {id:'p31',ar:'زَاكِي',ro:'zaaki',en:'Delicious',note:'Very Palestinian',msa:false},
+    {id:'p32',ar:'مْنِيح',ro:'mneeh',en:'Good / fine',note:'',msa:false},
+    {id:'p33',ar:'تَفَضَّل',ro:'tfaddal',en:'Please go ahead / come in',note:'Palestinian hospitality',msa:false},
+    {id:'p34',ar:'قَهْوَة',ro:'ahwe',en:'Coffee',note:'Pronounced ahwe in Palestinian',msa:true},
+  ]},
+  {id:'u3',title:'Food, markets & money',icon:'🥙',words:16,phrases:[
+    {id:'p35',ar:'أَدِّيش؟',ro:'addeesh?',en:'How much?',note:'Essential market phrase',msa:false},
+    {id:'p36',ar:'غَالِي',ro:'ghaali',en:'Expensive',note:'',msa:true},
+    {id:'p37',ar:'رَخِيص',ro:'rakhees',en:'Cheap',note:'',msa:true},
+    {id:'p38',ar:'بِدِّي أَشْتِرِي',ro:'biddi ashtiri',en:'I want to buy',note:'',msa:false},
+    {id:'p39',ar:'خُبْز',ro:'khubz',en:'Bread',note:'Staple of every Palestinian meal',msa:true},
+    {id:'p40',ar:'زَيْت زَيْتُون',ro:'zayt zaytoon',en:'Olive oil',note:'Central to Palestinian cooking',msa:true},
+    {id:'p41',ar:'فَلَافِل',ro:'falafel',en:'Falafel',note:'',msa:true},
+    {id:'p42',ar:'مَنْسَف',ro:'mansaf',en:'Mansaf',note:'Traditional celebratory dish',msa:false},
+    {id:'p43',ar:'سُوق',ro:'sooq',en:'Market',note:'',msa:true},
+    {id:'p44',ar:'دُكَّان',ro:'dukkaan',en:'Shop / small store',note:'',msa:false},
+    {id:'p45',ar:'فُلُوس',ro:'floos',en:'Money',note:'Very colloquial',msa:false},
+    {id:'p46',ar:'بِكَم هَاد؟',ro:'bikam haad?',en:'How much is this?',note:'Market essential',msa:false},
+    {id:'p47',ar:'عِنْدَك…؟',ro:'3indak…?',en:'Do you have…?',note:'',msa:false},
+    {id:'p48',ar:'بَدِّي أَاكُل',ro:'biddi aakul',en:'I want to eat',note:'',msa:false},
+    {id:'p49',ar:'هَاد زَاكِي كْتِير',ro:'haad zaaki kteer',en:'This is very delicious',note:'Always appreciated',msa:false},
+    {id:'p50',ar:'الحِسَاب مِن فَضْلَك',ro:'il-hisaab min fadlak',en:'The bill please',note:'',msa:false},
+  ]},
+];
+
+const MILESTONES=[
+  {day:'Day 1–10',title:'Reactivation',desc:'Greetings, family, feelings. 50 words active.',type:'active'},
+  {day:'Day 11–20',title:'Daily life basics',desc:'Home, food, numbers, time. 100 words.',type:'future'},
+  {day:'Day 21–30',title:'Day-30 checkpoint',desc:'2-minute conversation with a family member?',type:'future'},
+  {day:'Day 31–50',title:'Travel & navigation',desc:'Getting around, shopping. 200 words active.',type:'future'},
+  {day:'Day 51–60',title:'Day-60 checkpoint',desc:'Navigate a market? 4-minute conversation.',type:'future'},
+  {day:'Day 61–75',title:'Verbs & storytelling',desc:'Past, present, future tense. Tell a short story.',type:'future'},
+  {day:'Day 76–89',title:'Fluency sprint',desc:'Complex sentences, opinions, cultural phrases. 350+ words.',type:'future'},
+  {day:'Day 90',title:'Final goal',desc:'Hold a 5–7 min open conversation. Celebrate.',type:'goal'},
+];
+
+const P_LEVELS=[{name:'Level 1 — survival basics',short:'L1'},{name:'Level 2 — daily life',short:'L2'},{name:'Level 3 — verbs & action',short:'L3'},{name:'Level 4 — expression',short:'L4'},{name:'Level 5 — fluency',short:'L5'}];
+
+const BANKS=[
+  // LEVEL 1 — SURVIVAL BASICS (35 questions, easy → harder)
+  [
+    {t:'What does مَرْحَبَا mean?',o:['Goodbye','Hello','Thank you','Please'],a:1},
+    {t:'How do you say "my mother"?',o:['أختي','أبوي','أخوي','أمي'],a:3},
+    {ar:'بُكْرَا',t:'What does this mean?',o:['Yesterday','Now','Tomorrow','Later'],a:2},
+    {t:'"I\'m hungry" in Arabic?',o:['أنا تعبان','أنا عطشان','أنا جوعان','أنا مريض'],a:2},
+    {ar:'كَيْفَك؟',t:'What is this asking?',o:['Where going?','What do you want?','How are you?','Your name?'],a:2},
+    {t:'Goodbye to the person leaving?',o:['مرحبا','الله يسلمك','مع السلامة','أهلاً'],a:2},
+    {t:'What does إِمْبَارِح mean?',o:['Tomorrow','Now','Today','Yesterday'],a:3},
+    {t:'Affectionate word for family?',o:['الأسرة','الأهل','العائلة','البيت'],a:1},
+    {ar:'أَنَا مَبْسُوط',t:'What does this mean?',o:["I\'m tired","I\'m hungry","I\'m sick","I\'m happy"],a:3},
+    {t:'"I want" in Palestinian dialect?',o:['أريد','بدي','أبغى','عندي'],a:1},
+    {t:'Paternal uncle (dad\'s side)?',o:['خالي','عمي','أبوي','جدي'],a:1},
+    {t:'"I don\'t want"?',o:['ما عندي','ما بدي','ما فيني','ما بعرف'],a:1},
+    {t:'What does هَلَّق mean?',o:['Later','Yesterday','Now','Tomorrow'],a:2},
+    {ar:'الْحَمْدُ لِلّٰه',t:'When do you say this?',o:['Goodbye','Greeting','Answering "how are you"','Asking something'],a:2},
+    {t:'Which means "a lot / very"?',o:['كتير','بدي','هلق','منيح'],a:0},
+    {t:'"I\'m tired" in Palestinian?',o:['أنا مريض','أنا تعبان','أنا زعلان','أنا جوعان'],a:1},
+    {t:'Maternal uncle (mum\'s side)?',o:['عمي','خالي','أبوي','جدي'],a:1},
+    {t:'What does مَبْسُوط mean?',o:['Tired','Sick','Happy/content','Hungry'],a:2},
+    {ar:'مَعَ السَّلَامَة',t:'This means?',o:['Welcome','How are you?','Go in safety','Thank you'],a:2},
+    {t:'"Tomorrow" in Palestinian (not MSA)?',o:['غداً','بكرة','بُكْرَا','يوم غد'],a:2},
+    {t:'The family (warm/intimate)?',o:['الأسرة','العائلة','الأهل','البيت'],a:2},
+    {t:'What does مْنِيح mean?',o:['Delicious','Good/fine','Big','Happy'],a:1},
+    {ar:'اللّٰه يِسَلِّمَك',t:'When do you say this?',o:['When leaving','Replying to goodbye','When greeting','When thanking'],a:1},
+    {t:'"Yesterday" — Palestinian not MSA?',o:['أمس','البارحة','إمبارح','قبل امبارح'],a:2},
+    {t:'What does بِدِّي mean?',o:['I know','I want','I have','I go'],a:1},
+    {t:'"How are you?" to a woman?',o:['كيفك','كيفكم','كيفِك','كيفو'],a:2},
+    {ar:'الأَهْل',t:'This refers to?',o:['The house','The food','The family/folks','The street'],a:2},
+    {t:'Which is a Palestinian greeting?',o:['صباح الخير only','السلام عليكم only','مرحبا','كل of the above'],a:2},
+    {t:'"I\'m thirsty"?',o:['أنا تعبان','أنا عطشان','أنا جوعان','أنا مريض'],a:1},
+    {t:'What does عَمِّي literally mean?',o:['My grandfather','My father\'s brother','My mother\'s brother','My cousin'],a:1},
+    {t:'"I don\'t know" in Palestinian?',o:['ما بدي','ما فيني','ما بعرف','ما عندي'],a:2},
+    {ar:'بُكْرَا بِنْشُوف',t:'"بكرا بنشوف" means roughly?',o:['We saw yesterday','We\'ll see tomorrow','Let\'s look now','I don\'t know'],a:1},
+    {t:'What does خَالِي mean?',o:['My paternal uncle','My maternal uncle','My grandfather','My cousin'],a:1},
+    {t:'"My brother" in Palestinian?',o:['أخي','أخوي','أخو','أخوه'],a:1},
+    {t:'Which word means "now" in Palestinian?',o:['الآن','هلق','الحين','دلوقتي'],a:1},
+  ],
+  // LEVEL 2 — DAILY LIFE (35 questions, easy → harder)
+  [
+    {t:'What does بيت mean?',o:['Room','Kitchen','House','Garden'],a:2},
+    {ar:'مَطْبَخ',t:'What room?',o:['Bedroom','Bathroom','Living room','Kitchen'],a:3},
+    {t:'"Big" in Arabic?',o:['صغير','كتير','كبير','جديد'],a:2},
+    {t:'What does زاكي mean?',o:['Hot','Delicious','Cold','Beautiful'],a:1},
+    {ar:'قَهْوَة',t:'What is this?',o:['Tea','Juice','Coffee','Water'],a:2},
+    {t:'Welcome someone in?',o:['مع السلامة','تفضل','بدي','امشي'],a:1},
+    {t:'"Small" in Arabic?',o:['كبير','حلو','صغير','جديد'],a:2},
+    {t:'"Good/fine" in Palestinian?',o:['منيح','زاكي','كبير','حلو'],a:0},
+    {ar:'نَام',t:'What does this verb mean?',o:['To eat','To go','To sleep','To come'],a:2},
+    {t:'What does حلو mean?',o:['Big','Sweet/beautiful','Hot','New'],a:1},
+    {ar:'غُرْفَة',t:'What does this mean?',o:['House','Kitchen','Room','Street'],a:2},
+    {t:'Coffee in Palestinian pronunciation?',o:['كافيه','بن','قهوة/أهوة','شاي'],a:2},
+    {t:'"He went" in Palestinian?',o:['بروح','راح','يروح','رح يروح'],a:1},
+    {t:'"He came" in Palestinian?',o:['جاء','أتى','إجا','جاي'],a:2},
+    {t:'What does حَمَّام mean?',o:['Kitchen','Bedroom','Bathroom','Garden'],a:2},
+    {t:'"Come in / go ahead" in Palestinian?',o:['اصبر','تفضل','روح','خلص'],a:1},
+    {t:'"Hot" in Arabic?',o:['بارد','حار','زاكي','كبير'],a:1},
+    {t:'"Cold" in Arabic?',o:['بارد','حار','زاكي','صغير'],a:0},
+    {t:'What does مَطْبَخ mean?',o:['Bedroom','Kitchen','Bathroom','Living room'],a:1},
+    {t:'"To wake up" in Palestinian?',o:['نام','صحى','راح','إجا'],a:1},
+    {ar:'تَفَضَّل',t:'When do you say this?',o:['When leaving','Offering/welcoming someone','When hungry','When saying goodbye'],a:1},
+    {t:'"Delicious" — very Palestinian word?',o:['لذيذ','زاكي','طيب','حلو'],a:1},
+    {t:'What is مي?',o:['Milk','Juice','Tea','Water'],a:3},
+    {t:'"We eat together" in Palestinian?',o:['بناكل مع بعض','بنروح مع بعض','بننام مع بعض','بنشرب مع بعض'],a:0},
+    {t:'"I\'m going out" in Palestinian?',o:['أنا بروح برّة','أنا بيجي','أنا بنام','أنا بآكل'],a:0},
+    {t:'"New" in Arabic?',o:['كبير','قديم','جديد','صغير'],a:2},
+    {ar:'بَارِد',t:'This means?',o:['Hot','Cold','Sweet','Big'],a:1},
+    {t:'What does صَغِير mean?',o:['Big','Old','New','Small'],a:3},
+    {t:'"Sweet" or "beautiful" in colloquial?',o:['زاكي','منيح','حلو','كبير'],a:2},
+    {t:'"Bathroom" in Arabic?',o:['غرفة','مطبخ','حمام','بيت'],a:2},
+    {t:'"House / home" in Arabic?',o:['غرفة','بيت','سوق','شارع'],a:1},
+    {t:'What does سَخَن mean?',o:['Cold','Sweet','Hot','Bitter'],a:2},
+    {t:'"To sleep" — Palestinian verb?',o:['أكل','نام','راح','شرب'],a:1},
+    {ar:'كَبِير',t:'This means?',o:['Small','New','Big','Old'],a:2},
+    {t:'The Palestinian hospitality word for "please go ahead"?',o:['يلا','اصبر','تفضل','خلص'],a:2},
+  ],
+  // LEVEL 3 — VERBS & ACTION (35 questions)
+  [
+    {t:'"I went" (past tense)?',o:['بروح','رحت','راح','بدي أروح'],a:1},
+    {t:'شو بدك؟ means?',o:['Where going?','Who are you?','What do you want?','When coming?'],a:2},
+    {ar:'بِتْحِبّ',t:'This verb means?',o:['You eat','You go','You sleep','You love/like'],a:3},
+    {t:'"Did you eat?"',o:['بتاكل؟','اكلت؟','بدك تاكل؟','راح تاكل؟'],a:1},
+    {t:'What does لازم mean?',o:['Maybe','Never','Must/have to','Want to'],a:2},
+    {t:'What does روح mean?',o:['Come','Stay','Go','Wait'],a:2},
+    {t:'"I can\'t"?',o:['ما بدي','ما بعرف','ما فيني','ما عندي'],a:2},
+    {t:'شو صار؟ means?',o:['What you want?','What happened?','Where go?','Who called?'],a:1},
+    {ar:'مِنِين إِنْتَ؟',t:'Asking?',o:['Name?','Age?','Where from?','Job?'],a:2},
+    {t:'"Give me" in Palestinian?',o:['خذ','عطيني','قول','شوف'],a:1},
+    {ar:'قَاعِد يِحْكي',t:'What is he doing?',o:['Eating','Sleeping','Talking','Going'],a:2},
+    {t:'What does خلص mean?',o:['Start','Continue','Done/finished','Wait'],a:2},
+    {t:'"I came from" in Palestinian?',o:['رحت من','جيت من','بيجي من','بروح من'],a:1},
+    {t:'"I\'ll come tomorrow"?',o:['جيت بكرا','بيجي بكرا','رحت بكرا','بدي بكرا'],a:1},
+    {t:'اتفضل when offering something?',o:['No thanks','Please go ahead','I want','Give me'],a:1},
+    {t:'"I don\'t know" in Palestinian?',o:['ما بدي','ما فيني','ما بعرف','ما عندي'],a:2},
+    {t:'"Wait" in Palestinian?',o:['روح','استنى','اجلس','خلص'],a:1},
+    {t:'"He talked" (past)?',o:['بيحكي','حكى','يحكي','حاكي'],a:1},
+    {ar:'بدّي أروح',t:'This means?',o:['I went','I want to go','I went yesterday','He goes'],a:1},
+    {t:'"Come here" in Palestinian?',o:['روح هون','تعال هون','اجلس هون','خلص هون'],a:1},
+    {t:'What does بعرف mean?',o:['I want','I go','I know','I see'],a:2},
+    {t:'"We go" (present) in Palestinian?',o:['رحنا','منروح','راحوا','رح نروح'],a:1},
+    {ar:'شو عَمِل؟',t:'This is asking?',o:['Where did he go?','What did he do?','When did he come?','Who is he?'],a:1},
+    {t:'"I saw" (past) in Palestinian?',o:['بشوف','شفت','يشوف','شايف'],a:1},
+    {t:'What does فضّل mean in context?',o:['To leave','To prefer/stay','To eat','To sleep'],a:1},
+    {t:'"He called me" in Palestinian?',o:['اتصل فيني','رن علي','كلمني','صوّت علي'],a:0},
+    {ar:'ما رحتش',t:'This means?',o:['I went','I didn\'t go','He didn\'t go','We went'],a:1},
+    {t:'"Tell me" in Palestinian?',o:['اسمعني','حكيلي','شوفلي','اعطيني'],a:1},
+    {t:'What does نسيت mean?',o:['I remembered','I forgot','I learned','I understood'],a:1},
+    {t:'"Let\'s go" in Palestinian?',o:['روح','يلا نروح','امشي','خلص'],a:1},
+    {t:'"I want to sleep"?',o:['بدي آكل','بدي أنام','بدي أروح','بدي أشرب'],a:1},
+    {t:'What does فهمت mean?',o:['I forgot','I remembered','I understood','I heard'],a:2},
+    {ar:'قديش الساعة؟',t:'This is asking?',o:['What is your name?','What time is it?','Where are you?','How much is it?'],a:1},
+    {t:'"I heard" in Palestinian?',o:['شفت','سمعت','حكيت','فهمت'],a:1},
+    {t:'What does شايف mean?',o:['Seeing/can see','Going','Knowing','Wanting'],a:0},
+  ],
+  // LEVEL 4 — EXPRESSION (35 questions)
+  [
+    {t:'"I think that..."?',o:['بعرف إنو','بحس إنو','بفكر إنو','بشوف إنو'],a:2},
+    {ar:'وَاللّٰه مَا بَعْرَف',t:'This conveys?',o:['I know','I honestly don\'t know','I don\'t care','Probably yes'],a:1},
+    {t:'يسلمو after receiving something means?',o:['Please','Goodbye','Thank you/bless you','Congrats'],a:2},
+    {t:'"It doesn\'t matter"?',o:['خلص','ما صار','مش مهم','بكرا'],a:2},
+    {t:'"I miss you" in Palestinian?',o:['بحبك','بفتقرلك','واحشني','اشتقتلك'],a:3},
+    {t:'What does معلش mean?',o:['Of course','No problem/never mind','I agree','Definitely'],a:1},
+    {ar:'بِصَرَاحَة',t:'This means?',o:['By the way','Honestly/frankly','In my opinion','Unfortunately'],a:1},
+    {t:'"I\'m proud of you"?',o:['بحبك','فاخر فيك','تسلم','يعطيك العافية'],a:1},
+    {t:'إن شاء الله used casually often means?',o:['Thank God','God willing/maybe','Oh God','Nothing we can do'],a:1},
+    {ar:'مِن زَمَان',t:'This means?',o:['Very soon','Right now','It\'s been a while','Just recently'],a:2},
+    {t:'يعطيك العافية means?',o:['Get well soon','May God give you strength','Thanks for food','Congrats'],a:1},
+    {t:'"Tell me more"?',o:['اسكت','حكيلي أكتر','بس','خلص'],a:1},
+    {t:'يا حلالي means?',o:['How sad','How annoying','How lovely','How strange'],a:2},
+    {t:'"I swear to God" in Palestinian?',o:['والله','بالله','لله','في الله'],a:0},
+    {ar:'وَاللّٰه صَحّ',t:'This means?',o:['No it\'s wrong','Honestly that\'s true','I don\'t know','What do you mean?'],a:1},
+    {t:'"What a shame / how sad"?',o:['الله يسامح','يا حرام','يا عيب','مش مهم'],a:1},
+    {t:'What does بالعكس mean?',o:['Exactly','On the contrary','Of course','Maybe'],a:1},
+    {t:'"Honestly / frankly"?',o:['بالعكس','يعني','بصراحة','إن شاء الله'],a:2},
+    {ar:'يَعْنِي',t:'This is used as?',o:['Because','Like/I mean (filler)','So','But'],a:1},
+    {t:'"By the way" in Palestinian?',o:['بصراحة','أصلاً','كمان','بالمناسبة'],a:3},
+    {t:'What does زعلان mean?',o:['Happy','Tired','Upset/sad','Hungry'],a:2},
+    {t:'"Of course / obviously"?',o:['يمكن','أكيد/طبعاً','مش مهم','ما بعرف'],a:1},
+    {ar:'خَلِّيها عَ الله',t:'This means roughly?',o:['Hurry up','Leave it to God/don\'t worry','I disagree','That\'s enough'],a:1},
+    {t:'What does مشتاق/مشتاقة mean?',o:['Angry','Tired','Missing someone','Confused'],a:2},
+    {t:'"Good luck" in Palestinian?',o:['الله معك','يعطيك العافية','إن شاء الله','تسلم'],a:0},
+    {t:'What does حرام mean when expressing sympathy?',o:['Forbidden','What a shame/poor thing','God willing','Thank God'],a:1},
+    {ar:'ما بِيِّجي هيك',t:'This means?',o:['That\'s great','That\'s not right/acceptable','Come here','I\'m not coming'],a:1},
+    {t:'"I agree" in Palestinian?',o:['ما بدي','معك حق','ما بعرف','مش مهم'],a:1},
+    {t:'What does أصلاً mean?',o:['Finally','In the first place/anyway','Yesterday','Later'],a:1},
+    {t:'"It\'s okay / never mind"?',o:['خلص','معلش','ما صار','بكرا'],a:1},
+    {t:'What does فَرحان mean?',o:['Sad','Angry','Happy/joyful','Tired'],a:2},
+    {ar:'مَا لَقِيتش',t:'This means?',o:['I found it','I didn\'t find it','He found it','We\'re looking'],a:1},
+    {t:'"You\'re right" in Palestinian?',o:['بصراحة','معك حق','والله','ما بعرف'],a:1},
+    {t:'What does كمان mean?',o:['But','Because','Also/too','Only'],a:2},
+    {t:'"I felt that..."?',o:['فكرت إنو','حسيت إنو','شفت إنو','قلت إنو'],a:1},
+  ],
+  // LEVEL 5 — FLUENCY (35 questions)
+  [
+    {t:'على راسي in usage means?',o:['Refusal','Willing compliance/honour','Surprise','Grief'],a:1},
+    {t:'طول باله means?',o:['Long neck','Patient','Talks too much','Generous'],a:1},
+    {ar:'عَامِل حَالَه',t:'This means?',o:['Working hard','Pretending/acting','Tired','Happy'],a:1},
+    {t:'الدنيا مش آخرتها means?',o:['World is beautiful','Not the end of the world','Life is short','All will be fine'],a:1},
+    {ar:'بَيْن كِل شَوَيّ',t:'This means?',o:['A long time ago','Every once in a while','At the end','Right from the start'],a:1},
+    {t:'يفتح الله said to someone struggling?',o:['God punishes','May God open doors/help','God is watching','May God guide'],a:1},
+    {ar:'مَا بَيْسَوَّى',t:'This means?',o:['Very valuable','Not worth it','Too expensive','Too complicated'],a:1},
+    {t:'منشوف said casually?',o:["I don\'t know","We\'ll figure it out/see","It\'s done",'Tomorrow'],a:1},
+    {ar:'إِجَا عَ بَالِي',t:'This means?',o:['He came home','It came to mind','He made me angry','He surprised me'],a:1},
+    {t:'الله يرحمو means?',o:['May God guide him','May God have mercy (deceased)','May God protect him','May God reward him'],a:1},
+    {t:'"As if" sarcastically in Palestinian?',o:['طبعاً','يعني','كأنو','بالعكس'],a:2},
+    {ar:'مَا حَدَا أَحْسَن مِنَّك',t:'This means?',o:['Nobody is worse','Nobody is better','You\'re average','I know nobody like you'],a:1},
+    {t:'"None of your business" politely?',o:['اسكت','مش شغلتك','روح','ما بعرف'],a:1},
+    {t:'يا زلمة colloquially means?',o:['Oh woman','Hey man/dude','Oh God','How strange'],a:1},
+    {t:'على راسي literally + figuratively?',o:['On my head/with pleasure','Over my head/confused','In my head/thinking','Behind my head/unaware'],a:0},
+    {ar:'بَيْتِنَا بَيْتَك',t:'This Palestinian expression means?',o:['Your house is better','Our house is your house/you\'re welcome','My house is small','Where is your house?'],a:1},
+    {t:'What does ما كان لازم mean?',o:['It was necessary','You shouldn\'t have','It\'s possible','It happened'],a:1},
+    {t:'يسلمو الأيادي means?',o:['Goodbye','Bless your hands/great work','How are your hands?','Shake hands'],a:1},
+    {ar:'طَوَّلْتَ الغِيبَة',t:'Said to someone returning, means?',o:['You left too fast','You were gone too long','You came back','Where were you going?'],a:1},
+    {t:'What does مِزبوط mean?',o:['Broken','Correct/right/exact','Strange','Big'],a:1},
+    {t:'Allah yistor means?',o:['God forgive','May God protect','God is great','God willing'],a:1},
+    {ar:'مِن عِيني',t:'This expression means?',o:['In my eye/annoying me','With pleasure/gladly','I can\'t see','From my perspective'],a:1},
+    {t:'What does عَلَى مَهْلَك mean?',o:['Hurry up','Take your time/slowly','You\'re welcome','Come here'],a:1},
+    {t:'"Knock on wood" equivalent in Palestinian?',o:['إن شاء الله','ما شاء الله','الله يحمي','بإذن الله'],a:1},
+    {t:'What does هَيْدا هَيْدا mean?',o:['This and that','Slowly slowly/easy now','Here and there','Yes yes'],a:1},
+    {ar:'وَجَعْتَ قَلْبِي',t:'Literally "you hurt my heart" — used when?',o:['When physically hurt','When emotionally touched/moved','When angry','When confused'],a:1},
+    {t:'شو مالَك means?',o:['What do you have?','What\'s wrong with you?','What did you buy?','Where did you go?'],a:1},
+    {t:'What does اِنْبَسَط mean?',o:['To be upset','To be happy/pleased','To be tired','To be confused'],a:1},
+    {ar:'حَالَتي تَمَام',t:'This means?',o:['My situation is bad','I\'m perfectly fine','I\'m a little tired','Things are complicated'],a:1},
+    {t:'يا عيني عليك expresses?',o:['Anger','Affection/you poor thing','Surprise','Disagreement'],a:1},
+    {t:'What does بِالصِّحَّة mean after a haircut or new clothes?',o:['You look sick','Wear it in good health','Good morning','How much did it cost?'],a:1},
+    {ar:'مِنِين جَبْتَ هَيْدَا',t:'"Where did you get this?" — implies?',o:['Genuine curiosity','Admiration/impressed','Criticism','Confusion'],a:1},
+    {t:'What does أَبُو النَّوم mean colloquially?',o:['Father of sleep/very sleepy','Wide awake','Good morning','Take a nap'],a:0},
+    {t:'"God bless this gathering" said when?',o:['When leaving','When arriving at a group','When eating','When waking up'],a:1},
+    {t:'What does على قولتهم mean?',o:['As they say/reportedly','Above all','After all','Because of that'],a:0},
+  ]
+];
+
+// ═══════════════════════════
+// STATE
+// ═══════════════════════════
+let profile={name:'',speaker:'',goals:[],goalsExtra:'',dialect:'',dialectOther:''};
+let pScores=P_LEVELS.map(()=>({correct:0,total:0}));
+let tLvl=0,tSetIdx=0,tConsec=0,tQs=[],tQi=0,tSetCorrect=0,tAnswered=false,tCorrectIds=[],tRemainingBank=[];
+let users={
+  marwan:{name:'',streak:1,weakWords:[],unitProgress:{},checkpoints:{},startDate:null,latency:{}},
+  brother:{name:'',streak:0,weakWords:[],unitProgress:{},checkpoints:{},startDate:null,latency:{}}
+};
+let activeUser='marwan';
+let quiz={unitId:null,stage:1,questions:[],qi:0,correct:0,wrongIds:[],consec:0,startTime:0};
+let p2goals=[],p2duration='60',breakChoice='';
+let checkpointConv=[];
+let apiKey='';
+let dynamicUnits={};
+
+// ═══════════════════════════
+// UTILS
+// ═══════════════════════════
+function go(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+  if(id==='p-summary')buildSummary();
+  if(id==='p-course')renderCourse();
+}
+function $(id){return document.getElementById(id)}
+function sh(arr){return[...arr].sort(()=>Math.random()-0.5)}
+function stripH(s){return s.replace(/[\u064B-\u065F\u0670]/g,'')}
+function save(){try{localStorage.setItem('arabic_app_v3',JSON.stringify({users,profile,dynamicUnits}));}catch(e){}}
+function load(){
+  try{
+    const d=JSON.parse(localStorage.getItem('arabic_app_v3')||'{}');
+    if(d.users){
+      if(d.users.marwan)users.marwan={...users.marwan,...d.users.marwan};
+      if(d.users.brother)users.brother={...users.brother,...d.users.brother};
+    }
+    if(d.profile&&d.profile.name)profile={...profile,...d.profile};
+    if(d.dynamicUnits)dynamicUnits={...d.dynamicUnits};
+  }catch(e){}
+  apiKey='proxy'; // calls go through Supabase Edge Function
+}
+function getUP(uid){
+  const u=users[activeUser];
+  if(!u.unitProgress[uid])u.unitProgress[uid]={stage:1,consec:0,attempts:0,mastered:false,masteredAt:null};
+  return u.unitProgress[uid];
+}
+function getAllUnits(){
+  const base=[...STATIC_UNITS];
+  Object.keys(dynamicUnits).forEach(k=>{if(!base.find(u=>u.id===k))base.push(dynamicUnits[k]);});
+  return base;
+}
+function checkOffline(){
+  const badge=$('offline-badge');
+  if(badge)badge.style.display=navigator.onLine?'none':'flex';
+}
+
+// ═══════════════════════════
+// CLAUDE API
+// ═══════════════════════════
+async function callClaude(sys,user,maxT=1000){
+  try{
+    const res=await fetch(API_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:API_MODEL,max_tokens:maxT,system:sys,messages:[{role:'user',content:user}]})
+    });
+    if(!res.ok)return null;
+    const d=await res.json();
+    return d.content?.[0]?.text||null;
+  }catch(e){return null;}
+}
+
+async function generateUnit(title,unitId,unitNum){
+  const goalsText=profile.goals.map(g=>GOAL_L[g]).join(', ');
+  const weakWords=users[activeUser].weakWords;
+  const sys=`You build vocabulary units for a Palestinian Arabic learning app.
+User: ${SPEAKER_L[profile.speaker]||'heritage speaker'}. Goals: ${goalsText}${profile.goalsExtra?' — '+profile.goalsExtra:''}.
+Dialect: Palestinian Arabic (Levantine).
+Weak words to reinforce: ${weakWords.length?weakWords.join(', '):'none'}.
+Generate 12-16 phrases for the unit "${title}".
+Return ONLY a JSON array, no markdown. Each item: {"id":"${unitId}_p_N","ar":"Arabic with full harakaat","ro":"romanization using 3 for ع and 7 for ح","en":"English meaning","note":"cultural or usage note","msa":true or false}
+msa:true = shared with Modern Standard Arabic. msa:false = Palestinian dialect specific.
+For heritage speakers: use culturally resonant Palestinian contexts. Use full harakaat on all Arabic.`;
+  const result=await callClaude(sys,`Generate unit: ${title}`);
+  if(!result)return null;
+  try{
+    const clean=result.replace(/```json|```/g,'').trim();
+    const phrases=JSON.parse(clean);
+    return{id:unitId,title,icon:'📚',words:phrases.length,phrases,dynamic:true};
+  }catch(e){return null;}
+}
+
+async function generateContextLine(unit,conquered){
+  const goalsText=profile.goals.map(g=>GOAL_L[g]).join(', ');
+  const sys=`Write ONE warm, specific achievement sentence (max 14 words) for a Palestinian Arabic learner who just mastered a vocabulary unit.
+Be concrete — name a specific real-world situation they can now handle.
+Reference Palestinian culture, family or food where natural.
+Return ONLY the sentence, no quotes.`;
+  const result=await callClaude(sys,`Unit: ${unit.title}. Goals: ${goalsText}. Words: ${unit.words}. Conquered weak words: ${conquered}`);
+  return result||(unit.title==='Greetings & family'?'You can now greet any Palestinian family member and ask how they\'re doing.':`You now know enough ${unit.title.toLowerCase()} vocabulary for real conversations.`);
+}
+
+async function generateMilestones(scores){
+  const goalsText=profile.goals.map(g=>GOAL_L[g]).join(', ');
+  const scoreStr=P_LEVELS.map((l,i)=>l.short+':'+Math.round((scores[i].correct/Math.max(scores[i].total,1))*100)+'%').join(', ');
+  const sys=`Generate a personalised 90-day Arabic learning milestone plan.
+Return ONLY a JSON array of 5-6 milestones. Each: {"day":"Day X–Y","title":"short title","desc":"one sentence","type":"active|future|goal"}
+First: type:active. Last: type:goal. Rest: type:future.
+Tailor to user's goals and placement performance. Be specific.`;
+  const result=await callClaude(sys,`Scores: ${scoreStr}. Speaker: ${SPEAKER_L[profile.speaker]}. Goals: ${goalsText}.`);
+  if(!result)return null;
+  try{const clean=result.replace(/```json|```/g,'').trim();return JSON.parse(clean);}catch(e){return null;}
+}
+
+async function checkpointTurn(day,history,userMsg){
+  const goalsText=profile.goals.map(g=>GOAL_L[g]).join(', ');
+  const sys=`You are conducting a Day ${day} Arabic checkpoint conversation for a language learning app.
+User goals: ${goalsText}. Speaker: ${SPEAKER_L[profile.speaker]||'heritage speaker'}.
+RULES: Respond ONLY in Palestinian Arabic. 1–3 sentences max. Stay warm and encouraging.
+If user seems stuck, simplify your next question — still in Arabic.
+Never switch to English during conversation.
+${day===30?'Day 30: structured, predictable — greetings, family, daily life topics.':''}
+${day===60?'Day 60: slightly less structured, introduce a mild unexpected element.':''}
+${day===90?'Day 90: open conversation, follow the user\'s lead.':''}`;
+  const msgs=history.map(m=>({role:m.role,content:m.content}));
+  if(userMsg)msgs.push({role:'user',content:userMsg});
+  try{
+    const res=await fetch(API_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:API_MODEL,max_tokens:200,system:sys,messages:msgs.length?msgs:[{role:'user',content:'Start the conversation with a warm Palestinian greeting.'}]})
+    });
+    if(!res.ok)return null;
+    const d=await res.json();return d.content?.[0]?.text||null;
+  }catch(e){return null;}
+}
+
+async function generateDebrief(day,conv){
+  const goalsText=profile.goals.map(g=>GOAL_L[g]).join(', ');
+  const convText=conv.map(m=>`${m.role}: ${m.content}`).join('\n');
+  const sys=`Debrief a Palestinian Arabic checkpoint conversation. Be warm and specific.
+Return JSON: {"worked":["specific phrase or moment 1","specific thing 2"],"improve":["pattern 1","pattern 2"],"band":"emerging|developing|conversational|fluent","next":"one sentence on what moves them to next band"${day>=60?',"speed":"brief note on response speed"':''}}
+Max 2 items per array. Reference actual phrases from the conversation.`;
+  const result=await callClaude(sys,`Day ${day} checkpoint. Goals: ${goalsText}.\nConversation:\n${convText}`);
+  if(!result)return{worked:['You completed the checkpoint — that takes courage.'],improve:['Keep practising daily phrases'],band:'developing',next:'Daily practice with real conversations will build fluency'};
+  try{const clean=result.replace(/```json|```/g,'').trim();return JSON.parse(clean);}catch(e){return{worked:['Good effort on the checkpoint'],improve:['Keep practising'],band:'developing',next:'Daily practice will build fluency'};}
+}
+
+// ═══════════════════════════
+// ONBOARDING
+// ═══════════════════════════
+function onName(){profile.name=$('inp-name').value.trim();$('btn-name').disabled=profile.name.length<1;}
+function pick1(g,el,val){
+  document.querySelectorAll('#c-'+g+' .ch').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');profile[g]=val;$('btn-'+g).disabled=false;
+  if(g==='dialect'){const w=$('other-wrap');if(val==='other'){w.classList.add('vis');$('inp-other').focus();$('btn-dialect').disabled=true;}else w.classList.remove('vis');}
+}
+function pickM(g,el,val){
+  el.classList.toggle('sel');
+  const arr=g==='goals'?profile.goals:p2goals;
+  const i=arr.indexOf(val);
+  if(i>-1)arr.splice(i,1);else arr.push(val);
+  if(g==='goals')$('btn-goals').disabled=arr.length===0;
+  if(g==='p2goals')$('btn-p2').disabled=arr.length===0;
+}
+function onOther(){profile.dialectOther=$('inp-other').value.trim();$('btn-dialect').disabled=profile.dialectOther.length<1;}
+function onDialectContinue(){profile.goalsExtra=($('goals-extra').value||'').trim();go('p-summary');}
+function buildSummary(){
+  const gr=GREETINGS[profile.speaker]||GREETINGS.new;
+  $('sum-title').textContent='Welcome, '+profile.name+'.';
+  $('sum-arabic').textContent=gr.ar;
+  $('sum-desc').textContent=gr.msg;
+  const dl=profile.dialect==='other'?(profile.dialectOther||'Custom dialect'):(DIALECT_L[profile.dialect]||'');
+  $('sum-card').innerHTML=`<div class="sum-row"><span class="sum-k">Name</span><span class="sum-v">${profile.name}</span></div><div class="sum-row"><span class="sum-k">Background</span><span class="sum-v">${SPEAKER_L[profile.speaker]||''}</span></div><div class="sum-row"><span class="sum-k">Goals</span><span class="sum-v">${profile.goals.map(g=>GOAL_L[g]).join(', ')||'—'}</span></div><div class="sum-row"><span class="sum-k">Dialect</span><span class="sum-v">${dl}</span></div>`;
+  $('beginner-bridge').style.display=profile.speaker==='new'?'block':'none';
+  $('placement-bridge').style.display=profile.speaker==='new'?'none':'block';
+}
+function goToGeneration(){go('p-generating');runGen(true);}
+
+// ═══════════════════════════
+// PLACEMENT TEST
+// ═══════════════════════════
+function startPlacement(){
+  pScores=P_LEVELS.map(()=>({correct:0,total:0}));
+  tCorrectIds=[];tRemainingBank=[];
+  go('p-test');loadLevel(0);
+}
+function loadLevel(l){
+  tLvl=l;tSetIdx=0;tConsec=0;
+  // Build fresh remaining bank for this level — shuffle but preserve all questions
+  tRemainingBank=sh([...BANKS[tLvl]]);
+  tCorrectIds=[];
+  loadSet();
+}
+function loadSet(){
+  // Filter out correctly answered questions
+  const available=tRemainingBank.filter(q=>!tCorrectIds.includes(q.t));
+  if(available.length===0){
+    // Bank exhausted — go to output section for this level
+    startOutputSection(tLvl);
+    return;
+  }
+  // Take up to 8 from available pool (already shuffled in loadLevel)
+  tQs=available.slice(0,8);
+  tQi=0;tSetCorrect=0;renderPips();showQ();
+}
+function renderPips(){$('pips').innerHTML=P_LEVELS.map((_,i)=>`<div class="pip${i<tLvl?' done':i===tLvl?' active':''}"></div>`).join('');}
+function showQ(){
+  const q=tQs[tQi];tAnswered=false;
+  $('lname').textContent=P_LEVELS[tLvl].name;
+  $('set-sub').textContent='Set '+(tSetIdx+1)+(pScores[tLvl].total>0?' · '+Math.round((pScores[tLvl].correct/pScores[tLvl].total)*100)+'%':'');
+  $('qctr').textContent=(tQi+1)+' / 8';
+  $('qtext').textContent=q.t;
+  const ar=$('qarabic');if(q.ar){ar.textContent=q.ar;ar.style.display='block';}else ar.style.display='none';
+  $('feedback').className='feedback';$('btn-tnext').style.display='none';
+  $('opts').innerHTML=q.o.map((o,i)=>`<button class="opt" onclick="pickT(${i})">${o}</button>`).join('');
+}
+function pickT(i){
+  if(tAnswered)return;tAnswered=true;
+  const q=tQs[tQi];const ok=i===q.a;
+  document.querySelectorAll('.opt')[i].classList.add(ok?'correct':'wrong');
+  if(!ok)document.querySelectorAll('.opt')[q.a].classList.add('correct');
+  if(ok){
+    tSetCorrect++;
+    // Mark as correctly answered — won't appear again this session
+    if(!tCorrectIds.includes(q.t))tCorrectIds.push(q.t);
+  }
+  pScores[tLvl].total++;pScores[tLvl].correct+=ok?1:0;
+  const fb=$('feedback');fb.className='feedback '+(ok?'correct':'wrong');
+  fb.textContent=ok?'Correct!':'Not quite — '+q.o[q.a];
+  $('btn-tnext').style.display='block';
+}
+function nextQ(){if(tQi===7)endSet();else{tQi++;showQ();}}
+function endSet(){
+  const pct=Math.round((tSetCorrect/8)*100);const passed=pct>=75,perfect=tSetCorrect===8,isLast=tLvl===4;
+  if(perfect)tConsec++;else tConsec=0;tSetIdx++;
+  go('p-set');
+  $('sr-score').textContent=tSetCorrect+'/8';$('sr-sub2').textContent=pct+'%';
+  const v=$('sr-v');
+  if(perfect){v.textContent='perfect set';v.className='verdict v-perfect';}
+  else if(passed){v.textContent='passed';v.className='verdict v-pass';}
+  else{v.textContent='moving on';v.className='verdict v-fail';}
+  $('sr-msg').textContent=perfect?'Another set to confirm mastery.':passed?'Good. One more set.':isLast?'Test complete!':'Moving on to next level.';
+  $('sr-btn').textContent=isLast?'see my results →':passed&&tConsec<3?'next set →':'next level →';
+}
+function afterSet(){
+  const pct=Math.round((pScores[tLvl].correct/Math.max(pScores[tLvl].total,1))*100);
+  const isLast=tLvl===4;
+  if(isLast){startOutputSection(tLvl);return;}
+  // Check if bank is exhausted for this level
+  const remaining=tRemainingBank.filter(q=>!tCorrectIds.includes(q.t));
+  if(remaining.length===0){
+    // All questions used up — go to output section
+    startOutputSection(tLvl);
+    return;
+  }
+  if(pct>=75&&tConsec<3){go('p-test');loadSet();}
+  else{if(tLvl<4){startOutputSection(tLvl);}else startOutputSection(tLvl);}
+}
+
+// ═══════════════════════════
+// PLACEMENT OUTPUT SECTION
+// ═══════════════════════════
+const OUTPUT_SCENARIOS=[
+  {level:0,scenario:"You run into your aunt at a family gathering. Greet her, ask how she's doing, and say something about how the family is."},
+  {level:1,scenario:"You're at home and your friend calls. Tell them what you're doing, mention something about the weather, and ask if they want to come over."},
+  {level:2,scenario:"You're at a market in Ramallah. Ask the vendor if they have olive oil, how much it costs, and say whether you think it's expensive or cheap."},
+  {level:3,scenario:"A family friend asks what you've been up to lately. Tell them about something you did recently, how you felt about it, and what you're planning next."},
+  {level:4,scenario:"Someone asks your opinion on learning Arabic as a heritage speaker. Share your thoughts — what's difficult, what feels natural, and why it matters to you."},
+];
+
+let currentOutputLevel=0;
+
+function startOutputSection(level){
+  currentOutputLevel=level;
+  go('p-output');
+  // Update pips to show current position
+  $('output-pips').innerHTML=P_LEVELS.map((_,i)=>`<div class="pip${i<level?' done':i===level?' active':''}"></div>`).join('');
+  $('output-level-title').textContent=P_LEVELS[level].name+' — production check';
+  const scenario=OUTPUT_SCENARIOS[level]||OUTPUT_SCENARIOS[0];
+  $('output-scenario').textContent=scenario.scenario;
+  $('output-response').value='';
+  $('btn-output-submit').disabled=false;
+  $('btn-output-submit').textContent='submit →';
+}
+
+async function submitOutput(){
+  const response=$('output-response').value.trim();
+  if(!response){$('output-response').style.borderColor='var(--red)';return;}
+  $('btn-output-submit').innerHTML='<span class="spinner"></span>evaluating...';
+  $('btn-output-submit').disabled=true;
+
+  // Evaluate with Claude if API available, otherwise just proceed
+  let score=50; // default neutral score
+  if(true){ // API calls routed through Supabase Edge Function
+    const sys=`You evaluate Arabic language production for a placement test. The user is learning Palestinian Arabic.
+Respond with ONLY a JSON object: {"score":0-100,"feedback":"one warm encouraging sentence","level":"beginner|basic|intermediate|advanced"}
+Score based on: vocabulary range, grammatical accuracy, naturalness, whether they attempted Arabic script.
+Be generous — reward effort and any correct Arabic. A response in English with a few Arabic words scores 20-40. Mixed Arabic/English scores 40-60. Mostly Arabic scores 60-80. Fluent natural Arabic scores 80-100.`;
+    const scenario=OUTPUT_SCENARIOS[currentOutputLevel];
+    const result=await callClaude(sys,`Scenario: ${scenario.scenario}
+User response: ${response}`);
+    if(result){try{const d=JSON.parse(result.replace(/```json|```/g,'').trim());score=d.score||50;pScores[currentOutputLevel].outputScore=score;pScores[currentOutputLevel].outputFeedback=d.feedback;}catch(e){}}
+  }
+
+  // Store output score
+  pScores[currentOutputLevel].outputScore=score;
+  pScores[currentOutputLevel].outputResponse=response;
+
+  // Advance to next level or show results
+  const isLast=currentOutputLevel===4;
+  if(isLast){
+    showResults();
+  } else {
+    go('p-test');
+    loadLevel(currentOutputLevel+1);
+  }
+}
+
+// ═══════════════════════════
+// RESULTS + MILESTONES
+// ═══════════════════════════
+async function showResults(){
+  go('p-results');
+  const s=P_LEVELS.map((_,i)=>Math.round((pScores[i].correct/Math.max(pScores[i].total,1))*100));
+  const ov=Math.round(s.reduce((a,b)=>a+b,0)/5);
+  $('res-title').textContent=profile.name+"'s results";
+  $('res-sub').textContent='Overall: '+ov+'%';
+  $('score-rows').innerHTML=P_LEVELS.map((l,i)=>`<div class="srow"><div class="sl">${l.short}</div><div class="sbar"><div class="sbar-fill" style="width:${s[i]}%"></div></div><div class="spct">${s[i]}%</div></div>`).join('');
+  const proposal=await generateMilestones(pScores);
+  const ms=proposal||MILESTONES;
+  $('milestone-proposal').innerHTML=ms.map(m=>{
+    const cls=m.type==='active'?'mp-a':m.type==='goal'?'mp-g':'mp-f';
+    const icon=m.type==='active'?'→':m.type==='goal'?'★':'·';
+    return`<div class="mp-ms"><div class="mp-dot ${cls}">${icon}</div><div><div class="mp-day">${m.day}</div><div class="mp-title">${m.title}</div><div class="mp-desc">${m.desc}</div></div></div>`;
+  }).join('');
+  $('milestone-feedback').addEventListener('input',()=>{$('btn-redo').style.display=$('milestone-feedback').value.trim()?'block':'none';});
+  try{localStorage.setItem('arabic_pscores',JSON.stringify(s));}catch(e){}
+}
+
+async function redoMilestones(){
+  const feedback=$('milestone-feedback').value.trim();
+  if(!feedback)return;
+  $('milestone-proposal').innerHTML='<div style="font-size:12px;color:var(--text3);text-align:center;padding:12px">Regenerating...</div>';
+  const goalsText=profile.goals.map(g=>GOAL_L[g]).join(', ');
+  const sys=`Adjust this Arabic learning milestone plan based on user feedback. Return ONLY a JSON array of 5-6 milestones: {"day":"Day X–Y","title":"short title","desc":"one sentence","type":"active|future|goal"}`;
+  const result=await callClaude(sys,`Speaker: ${SPEAKER_L[profile.speaker]}. Goals: ${goalsText}. User feedback: ${feedback}`);
+  if(result){try{const clean=result.replace(/```json|```/g,'').trim();const ms=JSON.parse(clean);$('milestone-proposal').innerHTML=ms.map(m=>{const cls=m.type==='active'?'mp-a':m.type==='goal'?'mp-g':'mp-f';const icon=m.type==='active'?'→':m.type==='goal'?'★':'·';return`<div class="mp-ms"><div class="mp-dot ${cls}">${icon}</div><div><div class="mp-day">${m.day}</div><div class="mp-title">${m.title}</div><div class="mp-desc">${m.desc}</div></div></div>`;}).join('');}catch(e){}}
+}
+
+// ═══════════════════════════
+// COURSE GENERATION
+// ═══════════════════════════
+async function buildCourse(){
+  // CRITICAL: save profile immediately before generation starts
+  // so progress is never lost if generation fails or user closes app
+  users[activeUser].name=profile.name;
+  users[activeUser].startDate=users[activeUser].startDate||Date.now();
+  save();
+  if(sb&&currentUser){
+    try{await sb.from('profiles').upsert({id:currentUser.id,name:profile.name,speaker_type:profile.speaker,goals:profile.goals,goals_extra:profile.goalsExtra,dialect:profile.dialect,dialect_other:profile.dialectOther});}catch(e){}
+  }
+  go('p-generating');
+  await runGen(false);
+}
+
+async function runGen(isBeginner){
+  const bar=$('gen-fill'),label=$('gen-label');
+  const anim=(pct,txt,ms)=>new Promise(r=>{setTimeout(()=>{if(bar)bar.style.width=pct+'%';if(label)label.textContent=txt;r();},ms);});
+  // Wrap entire generation in a timeout failsafe — max 20 seconds
+  // If anything hangs, we still land in the course
+  const failsafe=setTimeout(()=>{
+    console.warn('Generation timeout — proceeding to course');
+    launchCourse();
+  },20000);
+  try{
+    await anim(15,'Analysing your profile...',400);
+    await anim(35,'Selecting vocabulary for Unit 1...',1400);
+    if(true){ // API calls routed through Supabase Edge Function
+      await anim(55,'Generating personalised content...',1000);
+      // Wrap API calls in their own try/catch so failures don't stall
+      try{const u4=await generateUnit('Getting around','u4',4);if(u4)dynamicUnits['u4']=u4;}catch(e){console.warn('u4 gen failed',e);}
+      await anim(75,'Generating Unit 5...',300);
+      try{const u5=await generateUnit('Verbs & tenses','u5',5);if(u5)dynamicUnits['u5']=u5;}catch(e){console.warn('u5 gen failed',e);}
+    } else {
+      await anim(55,'Loading unit content...',1000);
+      await anim(75,'Almost ready...',800);
+    }
+    await anim(90,'Setting up your course...',400);
+    await anim(100,'Ready!',500);
+    await new Promise(r=>setTimeout(r,600));
+  }catch(e){console.warn('Generation error',e);}
+  clearTimeout(failsafe);
+  launchCourse();
+}
+function launchCourse(){
+  if(!users[activeUser].startDate)users[activeUser].startDate=Date.now();
+  save();
+  go('p-course');
+}
+
+// ═══════════════════════════
+// PHRASE OF THE DAY
+// ═══════════════════════════
+function renderPhraseOfDay(){
+  const card=$('potd-card');if(!card)return;
+  const allUnits=getAllUnits();
+  const allPhrases=allUnits.flatMap(u=>u.phrases);
+  if(!allPhrases.length){card.style.display='none';return;}
+  // Use date as seed so phrase changes daily but is consistent across sessions
+  const today=new Date();
+  const seed=today.getFullYear()*10000+(today.getMonth()+1)*100+today.getDate();
+  const idx=seed%allPhrases.length;
+  const phrase=allPhrases[idx];
+  if(!phrase){card.style.display='none';return;}
+  const up=users[activeUser].unitProgress;
+  const u=allUnits.find(un=>un.phrases.find(p=>p.id===phrase.id));
+  const unitUp=u?getUP(u.id):{stage:1};
+  // Show harakaat based on current phase
+  const displayAr=unitUp.stage>=2?stripH(phrase.ar):phrase.ar;
+  $('potd-arabic').textContent=displayAr;
+  $('potd-roman').textContent=unitUp.stage<=1?phrase.ro:'';
+  $('potd-english').textContent=phrase.en;
+  $('potd-note').textContent=phrase.note||'';
+  if(phrase.msa!==undefined){
+    $('potd-note').textContent=(phrase.note?phrase.note+' · ':'')+(phrase.msa?'Shared with MSA':'Palestinian dialect');
+  }
+  card.style.display='block';
+}
+
+// ═══════════════════════════
+// MAIN COURSE RENDER
+// ═══════════════════════════
+function renderCourse(){
+  updateUserPill();
+  renderPhraseOfDay();
+  renderUnits();
+  renderStats();
+  
+  checkOffline();
+  checkEnrichmentMode();
+  renderCheckpointTab();
+  renderDownloadTab();
+}
+function toggleUser(){
+  activeUser=activeUser==='marwan'?'brother':'marwan';
+  if(!users[activeUser].name)users[activeUser].name=activeUser==='brother'?'Brother':'Marwan';
+  renderCourse();
+}
+function updateUserPill(){
+  const u=users[activeUser];
+  const init=(u.name||activeUser).charAt(0).toUpperCase();
+  $('user-av').textContent=init;
+  $('user-name-lbl').textContent=u.name||activeUser;
+  $('user-av').style.background=activeUser==='marwan'?'var(--green-l)':'var(--purple-l)';
+  $('user-av').style.color=activeUser==='marwan'?'var(--green-d)':'var(--purple-d)';
+}
+function renderStats(){
+  const u=users[activeUser];let mastered=0,unitsDone=0;
+  getAllUnits().forEach(unit=>{const up=u.unitProgress[unit.id];if(up&&up.mastered){mastered+=unit.words;unitsDone++;}});
+  $('s-words').textContent=mastered;$('s-units').textContent=unitsDone;$('s-streak').textContent=u.streak||0;
+}
+function isUnlocked(idx,allUnits){if(idx===0)return true;const prev=allUnits[idx-1];const up=users[activeUser].unitProgress[prev.id];return up&&up.mastered;}
+function checkEnrichmentMode(){
+  const allUnits=getAllUnits();
+  const u=users[activeUser];
+  const allMastered=allUnits.every(unit=>u.unitProgress[unit.id]&&u.unitProgress[unit.id].mastered);
+  $('enrichment-banner').style.display=allMastered?'flex':'none';
+  if(allMastered){$('enrichment-prompts').style.display='block';loadEnrichmentPrompt();}
+  else{$('enrichment-prompts').style.display='none';}
+}
+async function loadEnrichmentPrompt(){
+  // API calls go through Supabase Edge Function — always available
+  $('enrichment-content').innerHTML='<div style="font-size:12px;color:var(--text3);text-align:center;padding:12px">Loading today\'s practice...</div>';
+  const goalsText=profile.goals.map(g=>GOAL_L[g]).join(', ');
+  const u=users[activeUser];
+  const weakPhrases=u.weakWords.slice(0,5).map(id=>{const allPhrases=getAllUnits().flatMap(un=>un.phrases);const p=allPhrases.find(ph=>ph.id===id);return p?p.en:null;}).filter(Boolean);
+  const sys=`Generate a short enrichment exercise for a Palestinian Arabic learner (all units complete).
+Return JSON: {"type":"reading or writing","arabic":"2-3 sentence Arabic text with harakaat OR empty string for writing prompt","translation":"English translation OR empty string","prompt":"English writing/speaking prompt OR empty string","instruction":"one line instruction"}
+For reading type: give 2-3 sentences slightly above their level in Palestinian Arabic.
+For writing type: give a specific, warm prompt e.g. "Describe your morning routine" or "Write a message to a family member".`;
+  const result=await callClaude(sys,`Goals: ${goalsText}. Weak words: ${weakPhrases.join(', ')||'none'}.`);
+  if(result){
+    try{
+      const clean=result.replace(/```json|```/g,'').trim();
+      const ep=JSON.parse(clean);
+      $('enrichment-content').innerHTML=`<div class="enrichment-prompt"><div class="ep-label">${ep.instruction||'Today\'s practice'}</div>${ep.arabic?`<div class="ep-text">${ep.arabic}</div><div class="ep-translation">${ep.translation||''}</div>`:`<div class="ep-text" style="direction:ltr;text-align:left;color:var(--text2)">${ep.prompt||''}</div>`}<textarea class="field" style="margin-top:10px;margin-bottom:0" rows="3" placeholder="Write your response here in Arabic..."></textarea></div>`;
+    }catch(e){$('enrichment-content').innerHTML=`<div class="enrichment-prompt"><div class="ep-label">Daily practice</div><div class="ep-text" style="direction:ltr;text-align:left;color:var(--text2)">Write 3 sentences in Arabic about something that happened today.</div><textarea class="field" style="margin-top:10px;margin-bottom:0" rows="3" placeholder="اكتب هنا..."></textarea></div>`;}
+  }
+}
+
+function renderUnits(){
+  const allUnits=getAllUnits();
+  $('units-list').innerHTML=allUnits.map((unit,i)=>{
+    const unlocked=isUnlocked(i,allUnits);
+    const up=getUP(unit.id);
+    let badge='';
+    if(!unlocked)badge='<span class="unit-badge ub-locked">locked</span>';
+    else if(up.mastered)badge='<span class="unit-badge ub-mastered">mastered ✓</span>';
+    else badge='<span class="unit-badge ub-active">in progress</span>';
+    const stageLabels=['Introduce','Reinforce','Mastery'];
+    const stageColors=['mq-s1-fill','mq-s2-fill','mq-s3-fill'];
+    const stagePct=up.mastered?100:up.stage===1?8:up.stage===2?40:Math.round(50+(up.consec/2)*50);
+    const u=users[activeUser];
+    const phrases=unlocked?unit.phrases.map(p=>{
+      const isWeak=u.weakWords.includes(p.id);
+      const displayAr=up.stage>=2?stripH(p.ar):p.ar;
+      return`<div class="lesson-item" onclick="showPhrase('${p.id}','${unit.id}')">
+        <div style="font-size:20px;direction:rtl;min-width:56px;text-align:right;color:var(--text)">${displayAr}</div>
+        <div class="l-info"><div class="l-title">${p.en}</div><div class="l-sub" style="direction:ltr">${up.stage<=1?p.ro:''}</div></div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px">
+          ${isWeak?'<span class="l-badge lb-weak">review</span>':''}
+          ${p.msa!==undefined?`<span style="font-size:9px;padding:1px 5px;border-radius:10px;background:${p.msa?'var(--blue-l)':'var(--green-l)'};color:${p.msa?'var(--blue-d)':'var(--green-d)'}">${p.msa?'MSA':'dialect'}</span>`:''}
+        </div>
+      </div>`;
+    }).join(''):'';
+    let stageBar='';
+    if(unlocked&&!up.mastered){
+      stageBar=`<div style="padding:10px 14px;border-top:1px solid var(--border)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+          <div style="font-size:11px;font-weight:500;color:var(--text2)">Stage ${up.stage}: ${stageLabels[up.stage-1]}</div>
+          ${up.stage===3?`<div class="consec-dots">${[0,1].map(d=>`<div class="consec-dot${up.consec>d?' filled':''}"></div>`).join('')}</div>`:''}
+        </div>
+        <div class="mq-prog-track"><div class="mq-prog-fill ${stageColors[up.stage-1]}" style="width:${stagePct}%"></div></div>
+      </div>`;
+    }
+    return`<div class="unit-section">
+      <div class="unit-hd"><div class="unit-lbl">${unit.icon} ${unit.title}${unit.dynamic?' <span style="font-size:9px;color:var(--green-m);font-weight:500">AI</span>':''}</div>${badge}</div>
+      <div class="unit-card${!unlocked?' locked':''}">
+        ${unlocked?`<div class="stage-strip">${stageLabels.map((sl,si)=>`<div class="stage-tab${up.stage===si+1?' active':up.stage>si+1?' done':' locked-tab'}">${sl}</div>`).join('')}</div>`:''}
+        ${phrases}
+        ${stageBar}
+        ${unlocked&&!up.mastered?`<div style="padding:10px 14px;border-top:1px solid var(--border)"><button style="width:100%;padding:11px;background:var(--green);color:#fff;border:none;border-radius:40px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer" onclick="startQuiz('${unit.id}')">practise Stage ${up.stage} →</button></div>`:''}
+        ${up.mastered?`<div style="padding:10px 14px;text-align:center;font-size:12px;color:var(--green-m);border-top:1px solid var(--border)">Unit mastered · ${unit.words} words active</div>`:''}
+        ${!unlocked?`<div style="padding:14px;text-align:center;font-size:13px;color:var(--text3)">Complete the previous unit to unlock</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function showPhrase(pid,uid){
+  const unit=getAllUnits().find(u=>u.id===uid);
+  const p=unit.phrases.find(ph=>ph.id===pid);
+  const up=getUP(uid);
+  $('modal-title').textContent=p.en;
+  $('modal-body').innerHTML=`<div class="phrase-study">
+    <div class="ps-arabic">${up.stage>=2?stripH(p.ar):p.ar}</div>
+    ${up.stage<=1?`<div class="ps-roman">${p.ro}</div>`:''}
+    <div class="ps-english">${p.en}</div>
+    ${p.note?`<div class="ps-note">${p.note}</div>`:''}
+    ${p.msa!==undefined?`<span class="ps-tag ${p.msa?'ps-tag-msa':'ps-tag-dialect'}">${p.msa?'Shared with MSA':'Palestinian dialect specific'}</span>`:''}
+  </div>
+  <div style="font-size:12px;color:var(--text2);line-height:1.6">Tap a phrase in the lesson to review it anytime.</div>`;
+  $('modal').classList.add('open');
+}
+function closeModal(){$('modal').classList.remove('open');}
+
+// ═══════════════════════════
+// MASTERY QUIZ ENGINE
+// ═══════════════════════════
+function buildQuestions(unit,stage,weakWords){
+  const phrases=unit.phrases;
+  let pool=[...phrases];
+  if(stage>=2&&weakWords.length>0){
+    const weak=phrases.filter(p=>weakWords.includes(p.id));
+    pool=[...weak,...weak,...phrases];
+  }
+  // Stage 3: interleave from previous units
+  if(stage===3){
+    const allUnits=getAllUnits();
+    const unitIdx=allUnits.findIndex(u=>u.id===unit.id);
+    if(unitIdx>0){
+      const prevPhrases=allUnits.slice(0,unitIdx).flatMap(u=>u.phrases);
+      pool=[...pool,...sh(prevPhrases).slice(0,4)];
+    }
+  }
+  pool=sh(pool).slice(0,8);
+  return pool.map(p=>{
+    const others=sh(phrases.filter(ph=>ph.id!==p.id)).slice(0,3).map(ph=>ph.en);
+    const opts=sh([p.en,...others]);
+    const correct=opts.indexOf(p.en);
+    let displayAr=p.ar;
+    if(stage===3)displayAr=stripH(p.ar);
+    else if(stage===2)displayAr=p.ar;
+    return{phraseId:p.id,ar:displayAr,ro:p.ro,en:p.en,note:p.note||'',opts,correct,stage};
+  });
+}
+
+function startQuiz(unitId){
+  const unit=getAllUnits().find(u=>u.id===unitId);
+  const up=getUP(unitId);
+  const weakWords=users[activeUser].weakWords||[];
+  quiz={unitId,stage:up.stage,questions:buildQuestions(unit,up.stage,weakWords),qi:0,correct:0,wrongIds:[],consec:up.consec,startTime:Date.now()};
+  renderQuizQ();
+  go('p-quiz');
+}
+
+function renderQuizQ(){
+  const q=quiz.questions[quiz.qi];
+  const si=[{label:'Stage 1 — Introduce',desc:'Full support. 75% to advance.',cls:'mq-s1',icon:'📖'},{label:'Stage 2 — Reinforce',desc:'Harakaat on, romanization hidden. 75% to advance.',cls:'mq-s2',icon:'🔄'},{label:'Stage 3 — Mastery check',desc:'Bare script. 80% on 2 consecutive sets to master.',cls:'mq-s3',icon:'⭐'}][quiz.stage-1];
+  const fc=['mq-s1-fill','mq-s2-fill','mq-s3-fill'][quiz.stage-1];
+  const pct=Math.round((quiz.qi/8)*100);
+  $('quiz-content').innerHTML=`
+    <div class="mq-stage-banner ${si.cls}"><div class="mq-stage-icon">${si.icon}</div><div><div class="mq-stage-title">${si.label}</div><div class="mq-stage-desc">${si.desc}</div></div></div>
+    <div class="mq-progress">
+      <div class="mq-prog-label">Question ${quiz.qi+1} of 8</div>
+      <div class="mq-prog-track"><div class="mq-prog-fill ${fc}" style="width:${pct}%"></div></div>
+      ${quiz.stage===3?`<div class="consec-dots">${[0,1].map(d=>`<div class="consec-dot${quiz.consec>d?' filled':''}"></div>`).join('')}</div>`:''}
+    </div>
+    <div class="qcard">
+      <div class="qtype-lbl">what does this mean?</div>
+      <div style="font-size:32px;direction:rtl;text-align:center;padding:10px 0;line-height:1.5">${q.ar}</div>
+      ${quiz.stage===1?`<div style="font-size:13px;color:var(--text2);text-align:center;font-style:italic;padding-bottom:4px">${q.ro}</div>`:''}
+    </div>
+    <div class="opts" id="qopts">${q.opts.map((o,i)=>`<button class="opt" onclick="pickA(${i})">${o}</button>`).join('')}</div>
+    <div class="feedback" id="qfb"></div>
+    <button class="btn-outline" id="qnxt" style="display:none" onclick="nextA()">next →</button>`;
+}
+
+function pickA(i){
+  const q=quiz.questions[quiz.qi];const ok=i===q.correct;
+  document.querySelectorAll('#qopts .opt')[i].classList.add(ok?'correct':'wrong');
+  if(!ok){document.querySelectorAll('#qopts .opt')[q.correct].classList.add('correct');if(!quiz.wrongIds.includes(q.phraseId))quiz.wrongIds.push(q.phraseId);}
+  else quiz.correct++;
+  const fb=$('qfb');fb.className='feedback '+(ok?'correct':'wrong');
+  fb.textContent=ok?'Correct!':`Not quite — this is: ${q.en}${q.note?' ('+q.note+')':''}`;
+  $('qnxt').style.display='block';
+  document.querySelectorAll('#qopts .opt').forEach(o=>o.style.pointerEvents='none');
+  // Track latency silently from Stage 3 onwards
+  if(quiz.stage===3){const elapsed=(Date.now()-quiz.startTime)/1000;const u=users[activeUser];if(!u.latency)u.latency={};if(!u.latency[quiz.unitId])u.latency[quiz.unitId]=[];u.latency[quiz.unitId].push(elapsed);quiz.startTime=Date.now();}
+}
+
+function nextA(){if(quiz.qi===7)endQuiz();else{quiz.qi++;quiz.startTime=Date.now();renderQuizQ();}}
+
+async function endQuiz(){
+  const pct=Math.round((quiz.correct/8)*100);
+  const up=getUP(quiz.unitId);
+  const unit=getAllUnits().find(u=>u.id===quiz.unitId);
+  const u=users[activeUser];
+  // Update weak words
+  quiz.wrongIds.forEach(id=>{if(!u.weakWords.includes(id))u.weakWords.push(id);});
+  quiz.questions.filter(q=>!quiz.wrongIds.includes(q.phraseId)).forEach(q=>{const idx=u.weakWords.indexOf(q.phraseId);if(idx>-1)u.weakWords.splice(idx,1);});
+  const threshold=quiz.stage===3?80:75;
+  const passed=pct>=threshold;
+  if(quiz.stage<3){
+    if(passed){up.stage=quiz.stage+1;up.consec=0;}
+    save();showQuizResult(pct,passed,false,unit,up);
+  } else {
+    if(passed){up.consec=(up.consec||0)+1;if(up.consec>=2){up.mastered=true;save();await showUnlock(unit);return;}}
+    else{up.consec=0;up.attempts=(up.attempts||0)+1;}
+    save();
+    if(!passed&&up.attempts>=2)showStage3Fail(pct,unit);
+    else showQuizResult(pct,passed,true,unit,up);
+  }
+}
+
+function showQuizResult(pct,passed,isS3,unit,up){
+  const wrongPhrases=unit.phrases.filter(p=>quiz.wrongIds.includes(p.id));
+  const stageL=['Introduce','Reinforce','Mastery check'];
+  $('quiz-content').innerHTML=`
+    <div class="sr-card"><div class="sr-big">${quiz.correct}/8</div><div class="sr-sub">${pct}%</div><span class="verdict ${passed?'v-pass':'v-fail'}">${passed?'passed':'not yet'}</span></div>
+    <div class="sr-msg">${passed?(isS3?`${up.consec}/2 consecutive passes toward mastery`:`Moving to Stage ${up.stage}: ${stageL[up.stage-1]}`):isS3?`Need 80% — ${80-pct}% more needed`:`Need 75% — ${75-pct}% more needed`}</div>
+    ${wrongPhrases.length?`<div style="background:var(--amber-l);border-radius:var(--r);padding:10px 14px;margin-bottom:12px"><div style="font-size:11px;font-weight:500;color:var(--amber-d);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.07em">Review these</div>${wrongPhrases.map(p=>`<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px"><span style="direction:rtl;color:var(--amber-d)">${p.ar}</span><span style="color:var(--amber-d)">${p.en}</span></div>`).join('')}</div>`:''}
+    <button class="btn-primary" onclick="${passed?'continueAfterPass()':'retryStage()'}">${passed?'continue →':'try again →'}</button>
+    <button class="btn-outline" onclick="backToLessons()">back to lessons</button>`;
+}
+
+function showStage3Fail(pct,unit){
+  const wrongPhrases=unit.phrases.filter(p=>quiz.wrongIds.includes(p.id));
+  const up=getUP(quiz.unitId);
+  $('quiz-content').innerHTML=`
+    <div class="fail-card"><div class="fail-score">${quiz.correct}/8</div><div class="fail-label">${pct}% · need 80% · ${up.consec||0}/2 passes</div>
+    ${wrongPhrases.length?`<div class="fail-weak"><div class="fw-title">Words to work on</div>${wrongPhrases.map(p=>`<span class="fw-word">${p.ar}</span>`).join('')}</div>`:''}
+    </div>
+    <div style="font-size:13px;font-weight:500;margin-bottom:10px">What would you like to do?</div>
+    <div class="fail-options">
+      <button class="fail-btn" onclick="askClaudeHelp()"><div class="fail-btn-icon" style="background:var(--blue-l)">💬</div><div><div style="font-size:14px;font-weight:500">Ask Claude for help</div><div style="font-size:12px;color:var(--text2);margin-top:1px">Get memory tricks for your weak words</div></div></button>
+      <button class="fail-btn" onclick="retryStage()"><div class="fail-btn-icon" style="background:var(--green-l)">🔄</div><div><div style="font-size:14px;font-weight:500">Try again</div><div style="font-size:12px;color:var(--text2);margin-top:1px">New set — weak words appear more often</div></div></button>
+      <button class="fail-btn" onclick="backToLessons()"><div class="fail-btn-icon" style="background:var(--amber-l)">⏸</div><div><div style="font-size:14px;font-weight:500">Come back later</div><div style="font-size:12px;color:var(--text2);margin-top:1px">Save progress and return to lesson list</div></div></button>
+    </div>`;
+}
+
+async function askClaudeHelp(){
+  const unit=getAllUnits().find(u=>u.id===quiz.unitId);
+  const wrongPhrases=unit.phrases.filter(p=>quiz.wrongIds.includes(p.id));
+  const words=wrongPhrases.map(p=>p.en).join(', ');
+  $('quiz-content').innerHTML=`<div style="text-align:center;padding:2rem"><div class="gen-icon">💬</div><div style="font-size:14px;color:var(--text2);margin-top:8px">Getting memory tricks from Claude...</div></div>`;
+  const sys=`You are a warm Palestinian Arabic tutor. Give memory tricks and cultural context for these words.
+Keep it friendly, specific and useful. 3-4 sentences max per word. Use English with Arabic examples.`;
+  const result=await callClaude(sys,`I keep forgetting these Arabic words: ${words}. Give me memory tricks, mnemonics or cultural context to help them stick.`,600);
+  $('quiz-content').innerHTML=`<div style="font-family:'Lora',serif;font-size:17px;margin-bottom:12px">Memory tips</div>
+    <div style="font-size:14px;line-height:1.8;color:var(--text)">${result||'Try creating a short story using these words. Say each one out loud 3 times in a sentence.'}</div>
+    <button class="btn-primary" style="margin-top:1.5rem" onclick="retryStage()">try again →</button>
+    <button class="btn-outline" onclick="backToLessons()">back to lessons</button>`;
+}
+
+async function showUnlock(unit){
+  const allUnits=getAllUnits();
+  const nextUnitIdx=allUnits.findIndex(u=>u.id===unit.id)+1;
+  const nextUnit=allUnits[nextUnitIdx];
+  const u=users[activeUser];
+  const conquered=quiz.questions.filter(q=>!quiz.wrongIds.includes(q.phraseId)).length;
+  const contextLine=await generateContextLine(unit,conquered);
+  $('quiz-content').innerHTML=`
+    <div class="unlock-card">
+      <div class="unlock-icon">🎉</div>
+      <div class="unlock-title">${unit.title} mastered!</div>
+      <div class="unit-stats">
+        <div class="us-stat"><div class="us-n">${unit.words}</div><div class="us-l">words active</div></div>
+        <div class="us-stat"><div class="us-n">${quiz.wrongIds.length===0?'all':'most'}</div><div class="us-l">words nailed</div></div>
+        <div class="us-stat"><div class="us-n">2/2</div><div class="us-l">sets passed</div></div>
+      </div>
+      <div class="unlock-context">${contextLine}</div>
+      ${nextUnit?`<div style="font-size:12px;color:var(--green-m);margin-top:8px"><strong>${nextUnit.title}</strong> is now unlocked.</div>`:''}
+    </div>
+    ${unit.phrases.slice(0,5).map(p=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px"><span style="direction:rtl;color:var(--text)">${stripH(p.ar)}</span><span style="color:var(--text2)">${p.en}</span></div>`).join('')}
+    <button class="btn-primary" style="margin-top:1.25rem" onclick="backToLessons()">${nextUnit?'continue to '+nextUnit.title+' →':'back to lessons'}</button>`;
+  renderStats();
+}
+
+function continueAfterPass(){const up=getUP(quiz.unitId);startQuiz(quiz.unitId);}
+function retryStage(){startQuiz(quiz.unitId);}
+function backToLessons(){go('p-course');}
+
+// ═══════════════════════════
+// CHECKPOINTS
+// ═══════════════════════════
+function renderCheckpointTab(){
+  const u=users[activeUser];
+  const startDate=u.startDate||Date.now();
+  const daysSinceStart=Math.floor((Date.now()-startDate)/(1000*60*60*24));
+  const checks=[{day:30,title:'Day-30 Checkpoint',desc:'2-minute conversation'},{day:60,title:'Day-60 Checkpoint',desc:'4-minute conversation'},{day:90,title:'Day-90 Checkpoint',desc:'5–7 minute open conversation'}];
+  $('checkpoint-list').innerHTML=checks.map(cp=>{
+    const available=daysSinceStart>=cp.day-5||Object.keys(u.unitProgress).filter(k=>u.unitProgress[k].mastered).length>=STATIC_UNITS.length;
+    const completed=u.checkpoints&&u.checkpoints['day'+cp.day];
+    return`<div class="checkpoint-banner" style="${completed?'background:var(--green-l)':''}">
+      <div class="cb-icon">${completed?'✓':'💬'}</div>
+      <div style="flex:1">
+        <div class="cb-title">${cp.title}</div>
+        <div class="cb-sub">${cp.desc}${completed?' — completed':available?' — ready to take':' — unlocks at Day '+(cp.day-5)}</div>
+      </div>
+      ${available&&!completed?`<button onclick="startCheckpoint(${cp.day})" style="padding:6px 12px;background:var(--green);color:#fff;border:none;border-radius:20px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif">start</button>`:''}
+    </div>`;
+  }).join('');
+  // Show debrief history
+  if(u.checkpoints&&Object.keys(u.checkpoints).length>0){
+    $('conversation-history').innerHTML=`<div style="font-size:10px;font-weight:500;letter-spacing:0.08em;color:var(--text3);text-transform:uppercase;margin-bottom:8px">Past debriefs</div>`+
+    Object.keys(u.checkpoints).map(k=>{
+      const c=u.checkpoints[k];
+      return`<div class="prog-card"><div style="font-size:13px;font-weight:500;margin-bottom:6px">${c.day}-day checkpoint</div><div class="fluency-band">${c.band||'developing'}</div><div style="font-size:12px;color:var(--text2);margin-top:6px;line-height:1.6">${(c.worked||[]).map(w=>'✓ '+w).join('<br>')}</div></div>`;
+    }).join('');
+  }
+}
+
+async function startCheckpoint(day){
+  checkpointConv=[];go('p-checkpoint');
+  $('checkpoint-content').innerHTML=`<div class="checkpoint-banner"><div class="cb-icon">💬</div><div><div class="cb-title">Day ${day} Checkpoint</div><div class="cb-sub">Conversation in Palestinian Arabic. Just respond naturally.</div></div></div>
+    <div class="chat-wrap" id="chat-wrap"></div>
+    <div class="chat-input-row"><input class="chat-input" id="chat-in" type="text" placeholder="Type in Arabic or English..." onkeydown="if(event.key==='Enter')sendMsg(${day})"/><button class="chat-send" onclick="sendMsg(${day})">send</button></div>
+    <button class="btn-ghost" onclick="endCheckpoint(${day})" style="margin-top:4px">end conversation & get debrief</button>`;
+  // Get opening line from Claude
+  const opening=await checkpointTurn(day,[],null);
+  if(opening){
+    checkpointConv.push({role:'assistant',content:opening});
+    $('chat-wrap').innerHTML+=`<div class="chat-msg chat-claude">${opening}</div>`;
+  } else {
+    const fallback='مرحباً! كيفك اليوم؟';
+    checkpointConv.push({role:'assistant',content:fallback});
+    $('chat-wrap').innerHTML+=`<div class="chat-msg chat-claude">${fallback}</div>`;
+  }
+}
+
+async function sendMsg(day){
+  const input=$('chat-in');const msg=input.value.trim();if(!msg)return;
+  input.value='';
+  checkpointConv.push({role:'user',content:msg});
+  $('chat-wrap').innerHTML+=`<div class="chat-msg chat-user">${msg}</div>`;
+  $('chat-wrap').scrollTop=$('chat-wrap').scrollHeight;
+  const reply=await checkpointTurn(day,checkpointConv.slice(0,-1),msg);
+  if(reply){
+    checkpointConv.push({role:'assistant',content:reply});
+    $('chat-wrap').innerHTML+=`<div class="chat-msg chat-claude">${reply}</div>`;
+    $('chat-wrap').scrollTop=$('chat-wrap').scrollHeight;
+  }
+}
+
+async function endCheckpoint(day){
+  $('checkpoint-content').innerHTML=`<div class="gen-wrap"><div class="gen-icon">⭐</div><div class="step-title" style="margin-bottom:8px">Generating your debrief</div><div class="step-sub" style="max-width:260px;margin:0 auto">Analysing your conversation...</div></div>`;
+  const debrief=await generateDebrief(day,checkpointConv);
+  users[activeUser].checkpoints['day'+day]={day,band:debrief.band,worked:debrief.worked,improve:debrief.improve,next:debrief.next,date:Date.now()};
+  save();
+  $('checkpoint-content').innerHTML=`<div style="font-family:'Lora',serif;font-size:20px;margin-bottom:1rem">Day ${day} debrief</div>
+    <div class="debrief-section"><div class="ds-label">What worked well</div>${(debrief.worked||[]).map(w=>`<div style="display:flex;gap:8px;margin-bottom:6px;font-size:13px"><span style="color:var(--green)">✓</span><span>${w}</span></div>`).join('')}</div>
+    <div class="debrief-section"><div class="ds-label">To work on</div>${(debrief.improve||[]).map(w=>`<div style="display:flex;gap:8px;margin-bottom:6px;font-size:13px"><span style="color:var(--amber)">→</span><span>${w}</span></div>`).join('')}</div>
+    <div class="debrief-section"><div class="ds-label">Fluency band</div><div class="fluency-band">${debrief.band||'developing'}</div><div style="font-size:12px;color:var(--text2);margin-top:6px">${debrief.next||''}</div>${debrief.speed?`<div style="font-size:12px;color:var(--text3);margin-top:6px">Speed: ${debrief.speed}</div>`:''}</div>
+    <button class="btn-primary" onclick="go('p-course')">back to lessons</button>`;
+}
+
+// ═══════════════════════════
+// DOWNLOADS TAB
+// ═══════════════════════════
+function renderDownloadTab(){
+  const allUnits=getAllUnits();
+  const u=users[activeUser];
+  $('download-ahead-list').innerHTML=allUnits.map((unit,i)=>{
+    const unlocked=isUnlocked(i,allUnits);
+    const cached=dynamicUnits[unit.id]||!unit.dynamic;
+    if(unlocked&&cached)return`<div class="download-item"><span class="dl-name">${unit.icon} ${unit.title}</span><span class="dl-cached">✓ ready offline</span></div>`;
+    if(!unlocked&&!cached)return`<div class="download-item"><span class="dl-name">${unit.icon} ${unit.title}</span><button class="dl-btn" onclick="downloadUnit('${unit.id}','${unit.title}',${i})">download</button></div>`;
+    return'';
+  }).filter(Boolean).join('')||'<div style="font-size:13px;color:var(--text3)">All available units are cached.</div>';
+}
+
+async function downloadUnit(unitId,title,idx){
+  const btn=event.target;btn.textContent='⟳';btn.disabled=true;
+  const unit=await generateUnit(title,unitId,idx+1);
+  if(unit){dynamicUnits[unitId]=unit;save();renderDownloadTab();renderUnits();}
+  else{btn.textContent='retry';btn.disabled=false;}
+}
+
+// ═══════════════════════════
+// PROGRESS TAB
+// ═══════════════════════════
+function renderProgress(){
+  const u=users[activeUser];const allUnits=getAllUnits();
+  let mastered=0,total=0;
+  allUnits.forEach(unit=>{total+=unit.words;const up=u.unitProgress[unit.id];if(up&&up.mastered)mastered+=unit.words;});
+  const pct=total>0?Math.round((mastered/total)*100):0;
+  $('prog-bar').style.width=pct+'%';
+  $('prog-pct').textContent=pct+'% of vocabulary mastered';
+  if(pct>=80){$('prog-level').textContent='Conversational';$('prog-desc').textContent='Can hold short conversations on familiar topics';}
+  else if(pct>=40){$('prog-level').textContent='Intermediate';$('prog-desc').textContent='Growing vocabulary and grammar confidence';}
+  else{$('prog-level').textContent='Heritage Beginner-Intermediate';$('prog-desc').textContent='Strong receptive knowledge, rebuilding active vocabulary';}
+  $('unit-mastery-list').innerHTML=allUnits.map(unit=>{
+    const up=u.unitProgress[unit.id]||{stage:1,consec:0,mastered:false};
+    const pctU=up.mastered?100:Math.round(((up.stage-1)/3)*100+(up.stage===3?(up.consec/2)*50:0));
+    const col=up.mastered?'var(--green)':up.stage>1?'var(--amber)':'var(--bg3)';
+    return`<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="font-weight:500">${unit.icon} ${unit.title}</span><span style="color:var(--text3)">${up.mastered?'mastered':up.stage===3?'stage 3':up.stage===2?'stage 2':'stage 1'}</span></div><div class="prog-track"><div style="height:100%;border-radius:20px;background:${col};width:${pctU}%;transition:width 0.5s"></div></div></div>`;
+  }).join('');
+  if(u.weakWords&&u.weakWords.length>0){
+    $('weak-card').style.display='block';
+    const allPhrases=allUnits.flatMap(u=>u.phrases);
+    $('weak-list').innerHTML=u.weakWords.slice(0,12).map(id=>{const p=allPhrases.find(ph=>ph.id===id);return p?`<span class="weak-tag">${stripH(p.ar)}</span>`:''}).join('');
+  } else $('weak-card').style.display='none';
+  const days=['M','T','W','T','F','S','S'];
+  const doneCount=Object.values(u.unitProgress||{}).filter(up=>up.mastered).length;
+  $('week-grid').innerHTML=days.map((d,i)=>{const done=i<Math.min(doneCount,7);return`<div class="week-day"><div class="wday-lbl">${d}</div><div class="wday-dot${done?' done':''}"></div></div>`;}).join('');
+  $('ms-list').innerHTML=MILESTONES.map(m=>{const cls=m.type==='active'?'ms-active':m.type==='goal'?'ms-goal':'ms-future';const icon=m.type==='active'?'→':m.type==='goal'?'★':'·';return`<div class="ms-row"><div class="ms-dot ${cls}">${icon}</div><div><div class="ms-day">${m.day}</div><div class="ms-title">${m.title}</div><div class="ms-desc">${m.desc}</div></div></div>`;}).join('');
+}
+
+function showTab(name,btn){
+  ['lessons','progress','checkpoints','settings'].forEach(t=>$('tab-'+t).style.display='none');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  $('tab-'+name).style.display='block';btn.classList.add('active');
+  if(name==='progress')renderProgress();
+  if(name==='checkpoints'){renderCheckpointTab();}
+  if(name==='settings'){renderDownloadTab();}
+}
+
+// ═══════════════════════════
+// BREAK + PHASE 2
+// ═══════════════════════════
+function pickBreak(el,val){
+  document.querySelectorAll('.break-opt').forEach(o=>o.classList.remove('sel'));
+  el.classList.add('sel');breakChoice=val;$('btn-break').disabled=false;
+}
+function confirmBreak(){
+  const msgs={'days':'See you in a few days. يلا بعدين 🌤','weeks':'Take your time. We\'ll be here. 📅','month':'Whenever you\'re ready. بنحكي بعدين 🌙'};
+  alert(msgs[breakChoice]||'Your progress is saved. Come back whenever you\'re ready.');
+  go('p-course');
+}
+function pickDur(el,val){
+  document.querySelectorAll('#dur-btns .ch').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');p2duration=val;
+  $('dur-hint').textContent=DUR_HINTS[val]||'';
+}
+async function buildPhase2(){
+  go('p-generating');
+  const bar=$('gen-fill'),label=$('gen-label');
+  const anim=(pct,txt,ms)=>new Promise(r=>{setTimeout(()=>{bar.style.width=pct+'%';label.textContent=txt;r();},ms);});
+  await anim(20,'Planning Phase 2 curriculum...',500);
+  await anim(50,'Generating new units...',1500);
+  if(true){ // API calls routed through Supabase Edge Function
+    const p2GoalsText=p2goals.join(', ');
+    const u6=await generateUnit('Emotions & opinions',`u6`,6);
+    if(u6)dynamicUnits['u6']=u6;
+  }
+  await anim(80,'Setting up milestones...',800);
+  await anim(100,'Phase 2 ready!',600);
+  setTimeout(()=>{save();go('p-course');},800);
+}
+
+// ═══════════════════════════
+// INTRO ANIMATION
+// ═══════════════════════════
+(function(){
+  load();
+  // If returning user with saved profile, skip to course
+  if(profile.name&&users.marwan.unitProgress&&Object.keys(users.marwan.unitProgress).length>0){
+    go('p-course');return;
+  }
+  const splash=$('splash'),seq=$('intro-seq');
+  const steps=[{id:'il-1',delay:0},{id:'il-div',delay:600},{id:'il-2',delay:1100},{id:'il-3',delay:2000},{id:'il-4',delay:2900},{id:'il-btn',delay:3700}];
+  setTimeout(()=>{
+    splash.style.transition='opacity 0.7s ease';splash.style.opacity='0';
+    setTimeout(()=>{
+      splash.style.display='none';seq.classList.add('visible');
+      steps.forEach(s=>{setTimeout(()=>{const el=$(s.id);if(el)el.classList.add('shown');},s.delay);});
+    },700);
+  },2800);
+  window.addEventListener('online',checkOffline);
+  window.addEventListener('offline',checkOffline);
+})();
+
+// PWA manifest injection
+(function(){
+  const manifest={name:"Marwan's Arabic Learning App",short_name:"Arabic",start_url:".",display:"standalone",background_color:"#faf9f6",theme_color:"#1a6b50",icons:[{src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%231a6b50'/><text y='.9em' font-size='70' x='10'>م</text></svg>",sizes:"512x512",type:"image/svg+xml"}]};
+  const blob=new Blob([JSON.stringify(manifest)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const link=document.getElementById('manifest-link');
+  if(link)link.href=url;
+})();
+
+
+// ═══════════════════════════
+// SUPABASE CONFIG
+// ═══════════════════════════
+const SUPABASE_URL = 'https://xkhulybdrxdzakarivvi.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_NtOLOeDOCn3w2faTU4m8Ow_4iUhcVkM';
+let sb = null;
+let currentUser = null;
+
+function initSupabase() {
+  try {
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+        storage: window.localStorage,
+        storageKey: 'arabic_app_auth',
+        flowType: 'implicit'
+      }
+    });
+    return true;
+  } catch(e) {
+    console.warn('Supabase init failed:', e);
+    return false;
+  }
+}
+
+// ═══════════════════════════
+// AUTH UI
+// ═══════════════════════════
+let authMode = 'magic'; // 'magic' or 'password'
+let authEmail = '';
+
+function onAuthEmail() {
+  authEmail = document.getElementById('auth-email').value.trim();
+  document.getElementById('btn-auth-continue').disabled = !authEmail.includes('@');
+}
+
+async function authContinue() {
+  authEmail = document.getElementById('auth-email').value.trim();
+  if (!authEmail) return;
+  showAuthMsg('');
+  const btn = document.getElementById('btn-auth-continue');
+  btn.innerHTML = '<span class="spinner"></span>sending...';
+  btn.disabled = true;
+  try {
+    const { error } = await sb.auth.signInWithOtp({
+      email: authEmail,
+      options: { emailRedirectTo: window.location.href }
+    });
+    if (error) throw error;
+    document.getElementById('auth-email-step').style.display = 'none';
+    document.getElementById('auth-magic-sent').style.display = 'block';
+    document.getElementById('magic-email-display').textContent = authEmail;
+  } catch(e) {
+    btn.textContent = 'continue →';
+    btn.disabled = false;
+    showAuthMsg('Something went wrong — please try again.', 'error');
+  }
+}
+
+function togglePasswordMode() {
+  if (authMode === 'magic') {
+    authMode = 'password';
+    authEmail = document.getElementById('auth-email').value.trim();
+    document.getElementById('auth-email-display').textContent = authEmail || 'Enter your email above first';
+    document.getElementById('auth-email-step').style.display = 'none';
+    document.getElementById('auth-password-step').style.display = 'block';
+  } else {
+    authMode = 'magic';
+    document.getElementById('auth-email-step').style.display = 'block';
+    document.getElementById('auth-password-step').style.display = 'none';
+  }
+}
+
+async function authPassword() {
+  authEmail = document.getElementById('auth-email').value.trim();
+  const password = document.getElementById('auth-password').value;
+  if (!authEmail || !password) return;
+  showAuthMsg('');
+  try {
+    // Try sign in first
+    let { data, error } = await sb.auth.signInWithPassword({ email: authEmail, password });
+    if (error && error.message.includes('Invalid login')) {
+      // New user — sign up
+      const res = await sb.auth.signUp({ email: authEmail, password });
+      if (res.error) throw res.error;
+      data = res.data;
+    } else if (error) throw error;
+    if (data?.user) await onAuthSuccess(data.user);
+  } catch(e) {
+    showAuthMsg(e.message || 'Sign in failed — please try again.', 'error');
+  }
+}
+
+
+function showAuthMsg(msg, type = 'success') {
+  const el = document.getElementById('auth-msg');
+  if (!el) return;
+  el.textContent = msg;
+  el.className = 'auth-msg' + (msg ? ' ' + type : '');
+}
+
+function resetAuthForm() {
+  document.getElementById('auth-email').value = '';
+  document.getElementById('auth-email-step').style.display = 'block';
+  document.getElementById('auth-magic-sent').style.display = 'none';
+  document.getElementById('btn-auth-continue').disabled = true;
+}
+
+// ═══════════════════════════
+// AUTH SUCCESS + PROFILE SYNC
+// ═══════════════════════════
+async function onAuthSuccess(user) {
+  currentUser = user;
+  // Load profile from Supabase
+  const { data: profileData } = await sb.from('profiles').select('*').eq('id', user.id).single();
+  if (profileData && profileData.name) {
+    // Returning user — restore profile
+    profile.name = profileData.name;
+    profile.speaker = profileData.speaker_type || '';
+    profile.goals = profileData.goals || [];
+    profile.goalsExtra = profileData.goals_extra || '';
+    profile.dialect = profileData.dialect || '';
+    profile.dialectOther = profileData.dialect_other || '';
+    users.marwan.name = profileData.name;
+    // Load progress from Supabase
+    await loadProgressFromSupabase(user.id);
+    go('p-course');
+  } else {
+    // New user — go through onboarding
+    go('p-name');
+  }
+}
+
+async function loadProgressFromSupabase(userId) {
+  try {
+    // Unit progress
+    const { data: progressData } = await sb.from('unit_progress').select('*').eq('user_id', userId);
+    if (progressData) {
+      users.marwan.unitProgress = {};
+      progressData.forEach(row => {
+        users.marwan.unitProgress[row.unit_id] = {
+          stage: row.stage, consec: row.consec, attempts: row.attempts,
+          mastered: row.mastered, masteredAt: row.mastered_at
+        };
+      });
+    }
+    // Weak words
+    const { data: weakData } = await sb.from('weak_words').select('phrase_id').eq('user_id', userId);
+    if (weakData) users.marwan.weakWords = weakData.map(r => r.phrase_id);
+    // Dynamic units
+    const { data: unitData } = await sb.from('dynamic_units').select('*').eq('user_id', userId);
+    if (unitData) unitData.forEach(row => { dynamicUnits[row.unit_id] = row.content; });
+    // Checkpoints
+    const { data: cpData } = await sb.from('checkpoints').select('*').eq('user_id', userId);
+    if (cpData) {
+      users.marwan.checkpoints = {};
+      cpData.forEach(row => { users.marwan.checkpoints['day'+row.day] = { day: row.day, band: row.band, worked: row.worked, improve: row.improve, next: row.next_step }; });
+    }
+  } catch(e) { console.warn('Progress load failed:', e); }
+}
+
+async function saveToSupabase() {
+  if (!sb || !currentUser) { save(); return; } // fallback to localStorage
+  const userId = currentUser.id;
+  try {
+    // Save profile
+    await sb.from('profiles').upsert({
+      id: userId, name: profile.name, speaker_type: profile.speaker,
+      goals: profile.goals, goals_extra: profile.goalsExtra,
+      dialect: profile.dialect, dialect_other: profile.dialectOther
+    });
+    // Save unit progress
+    const progressRows = Object.entries(users.marwan.unitProgress).map(([unitId, up]) => ({
+      user_id: userId, unit_id: unitId, stage: up.stage, consec: up.consec,
+      attempts: up.attempts, mastered: up.mastered, mastered_at: up.masteredAt,
+      updated_at: new Date().toISOString()
+    }));
+    if (progressRows.length) await sb.from('unit_progress').upsert(progressRows, { onConflict: 'user_id,unit_id' });
+    // Save weak words (delete and reinsert)
+    await sb.from('weak_words').delete().eq('user_id', userId);
+    if (users.marwan.weakWords.length) {
+      await sb.from('weak_words').insert(users.marwan.weakWords.map(pid => ({ user_id: userId, phrase_id: pid })));
+    }
+    // Save dynamic units
+    const dynRows = Object.entries(dynamicUnits).map(([unitId, content]) => ({ user_id: userId, unit_id: unitId, content }));
+    if (dynRows.length) await sb.from('dynamic_units').upsert(dynRows, { onConflict: 'user_id,unit_id' });
+  } catch(e) {
+    console.warn('Supabase save failed, falling back to localStorage:', e);
+    save();
+  }
+}
+
+async function saveCheckpointToSupabase(day, debrief) {
+  if (!sb || !currentUser) return;
+  try {
+    await sb.from('checkpoints').insert({
+      user_id: currentUser.id, day, band: debrief.band,
+      worked: debrief.worked, improve: debrief.improve,
+      next_step: debrief.next, speed_note: debrief.speed || ''
+    });
+  } catch(e) { console.warn('Checkpoint save failed:', e); }
+}
+
+async function signOut() {
+  if (sb) await sb.auth.signOut();
+  currentUser = null;
+  profile = { name:'', speaker:'', goals:[], goalsExtra:'', dialect:'', dialectOther:'' };
+  users.marwan = { name:'', streak:0, weakWords:[], unitProgress:{}, checkpoints:{}, startDate:null, latency:{} };
+  dynamicUnits = {};
+  go('p-login');
+}
+
+// ═══════════════════════════
+// OVERRIDE SAVE TO USE SUPABASE
+// ═══════════════════════════
+// Patch the save function to also sync to Supabase
+const _localSave = save;
+function save() {
+  _localSave();
+  if (sb && currentUser) saveToSupabase();
+}
+
+// Patch endCheckpoint to also save to Supabase
+const _origEndCheckpoint = endCheckpoint;
+async function endCheckpoint(day) {
+  await _origEndCheckpoint(day);
+  const debrief = users.marwan.checkpoints['day'+day];
+  if (debrief) await saveCheckpointToSupabase(day, debrief);
+}
+
+// ═══════════════════════════
+// INIT — CHECK AUTH STATE
+// ═══════════════════════════
+(async function initAuth() {
+  const sbReady = initSupabase();
+  if (!sbReady) {
+    // Supabase failed — fall back to localStorage flow
+    load();
+    if (profile.name && Object.keys(users.marwan.unitProgress||{}).length > 0) go('p-course');
+    return;
+  }
+
+  // Listen for auth state changes (handles magic link redirect)
+  sb.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'SIGNED_IN' && session?.user) {
+      await onAuthSuccess(session.user);
+    }
+  });
+
+  // Check if already logged in
+  const { data: { session } } = await sb.auth.getSession();
+  if (session?.user) {
+    await onAuthSuccess(session.user);
+  } else {
+    // No session — check for returning guest with saved progress
+    try {
+      const local = JSON.parse(localStorage.getItem('arabic_app_v3') || '{}');
+      if (local.profile && local.profile.name) {
+        load();
+        // If guest has a profile AND has started the course, go straight in
+        if(local.users&&local.users.marwan&&Object.keys(local.users.marwan.unitProgress||{}).length>0){
+          isGuest=true;
+          go('p-course');
+          return;
+        }
+      }
+    } catch(e) {}
+    // No saved progress — intro animation will call showLoginAfterIntro()
+  }
+})();
+
+function showLoginAfterIntro() {
+  go('p-login');
+}
+
+// USER MENU
+function showUserMenu() {
+  const u = currentUser;
+  const email = u ? u.email : 'Not signed in';
+  const name = profile.name || users.marwan.name || 'You';
+  document.getElementById('modal-title').textContent = name;
+  document.getElementById('modal-body').innerHTML = `
+    <div style="font-size:13px;color:var(--text2);margin-bottom:1rem">${email}</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:1.25rem">Progress is synced to your account across all devices.</div>
+    <button onclick="signOut();closeModal()" style="width:100%;padding:11px;border:1px solid var(--red);border-radius:var(--r);background:transparent;color:var(--red);font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer">sign out</button>`;
+  document.getElementById('modal').classList.add('open');
+}
+</script>
+</body></html>
+<script>
+// ═══════════════════════════
+// GUEST MODE
+// ═══════════════════════════
+let isGuest = false;
+
+function continueAsGuest() {
+  isGuest = true;
+  load(); // load any existing localStorage data
+  // Check if returning guest with saved progress
+  if (profile.name && Object.keys(users.marwan.unitProgress || {}).length > 0) {
+    go('p-course');
+  } else {
+    go('p-name');
+  }
+}
+
+// Show sync banner after first unit mastered (called from showUnlock)
+function maybeShowSyncPrompt() {
+  if (!isGuest) return; // already has account
+  if (currentUser) return; // already signed in
+  const masteredCount = Object.values(users.marwan.unitProgress || {}).filter(u => u.mastered).length;
+  if (masteredCount >= 1) {
+    showSyncBanner();
+  }
+}
+
+function showSyncBanner() {
+  const existing = document.getElementById('sync-banner');
+  if (existing) return; // already showing
+  const banner = document.createElement('div');
+  banner.id = 'sync-banner';
+  banner.className = 'sync-banner';
+  banner.innerHTML = `
+    <div class="sync-banner-icon">☁️</div>
+    <div>
+      <div class="sync-banner-title">Save your progress across devices</div>
+      <div class="sync-banner-sub">You've mastered your first unit. Create a free account to access your progress on any device — phone, tablet, desktop.</div>
+      <button class="sync-banner-btn" onclick="startSyncSignup()">create account →</button>
+      <button onclick="dismissSyncBanner()" style="font-size:11px;color:var(--text3);background:none;border:none;cursor:pointer;margin-left:8px">not now</button>
+    </div>`;
+  // Insert at top of lessons tab
+  const lessonsList = document.getElementById('units-list');
+  if (lessonsList) lessonsList.parentNode.insertBefore(banner, lessonsList);
+}
+
+function dismissSyncBanner() {
+  const b = document.getElementById('sync-banner');
+  if (b) b.remove();
+  // Don't show again this session
+  isGuest = false;
+}
+
+function startSyncSignup() {
+  // Show a mini sign-up modal that uploads progress on success
+  document.getElementById('modal-title').textContent = 'Save your progress';
+  document.getElementById('modal-body').innerHTML = `
+    <div style="font-size:13px;color:var(--text2);margin-bottom:1rem;line-height:1.6">Enter your email and we'll send you a magic link. Once signed in, all your progress syncs automatically.</div>
+    <div class="auth-msg" id="sync-msg"></div>
+    <input class="field" id="sync-email" type="email" placeholder="your@email.com" style="margin-bottom:10px"/>
+    <button class="btn-primary" onclick="submitSyncSignup()" style="padding:11px">send magic link →</button>
+    <div style="font-size:11px;color:var(--text3);margin-top:10px;line-height:1.6;text-align:center">Your progress will be waiting for you once you click the link.</div>`;
+  document.getElementById('modal').classList.add('open');
+}
+
+async function submitSyncSignup() {
+  const email = document.getElementById('sync-email').value.trim();
+  if (!email || !email.includes('@')) return;
+  const btn = event.target;
+  btn.innerHTML = '<span class="spinner"></span>sending...';
+  btn.disabled = true;
+  // Store progress snapshot to upload after auth
+  try { localStorage.setItem('arabic_pending_sync', 'true'); } catch(e) {}
+  try {
+    const { error } = await sb.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: window.location.href }
+    });
+    if (error) throw error;
+    document.getElementById('modal-body').innerHTML = `
+      <div style="text-align:center;padding:1rem 0">
+        <div style="font-size:32px;margin-bottom:12px">📬</div>
+        <div style="font-family:'Lora',serif;font-size:18px;margin-bottom:8px">Check your email</div>
+        <div style="font-size:13px;color:var(--text2);line-height:1.7">We sent a link to <strong>${email}</strong><br>Click it to save your progress.</div>
+      </div>`;
+  } catch(e) {
+    btn.textContent = 'send magic link →';
+    btn.disabled = false;
+    const msg = document.getElementById('sync-msg');
+    if (msg) { msg.textContent = 'Something went wrong — please try again.'; msg.className = 'auth-msg error'; }
+  }
+}
+
+// When auth succeeds for a guest who just signed up, upload their local progress
+async function uploadGuestProgress(userId) {
+  const pendingSync = localStorage.getItem('arabic_pending_sync');
+  if (!pendingSync) return;
+  localStorage.removeItem('arabic_pending_sync');
+  // Upload everything from local state
+  await saveToSupabase();
+  // Show confirmation
+  const banner = document.getElementById('sync-banner');
+  if (banner) {
+    banner.innerHTML = `<div class="sync-banner-icon">✓</div><div><div class="sync-banner-title" style="color:var(--green-d)">Progress saved to your account</div><div class="sync-banner-sub" style="color:var(--green-m)">You can now access this course on any device.</div></div>`;
+    banner.style.background = 'var(--green-l)';
+    banner.style.borderColor = 'rgba(26,107,80,0.2)';
+    setTimeout(() => { if (banner) banner.remove(); }, 4000);
+  }
+  closeModal();
+}
+
+// Patch onAuthSuccess to handle guest upload
+const _origOnAuthSuccess = onAuthSuccess;
+async function onAuthSuccess(user) {
+  const wasPendingSync = localStorage.getItem('arabic_pending_sync');
+  await _origOnAuthSuccess(user);
+  if (wasPendingSync) await uploadGuestProgress(user.id);
+  isGuest = false;
+}
+
+// Patch showUnlock to trigger sync prompt
+const _origShowUnlock = showUnlock;
+async function showUnlock(unit) {
+  await _origShowUnlock(unit);
+  setTimeout(maybeShowSyncPrompt, 1500); // show after celebration settles
+}
+</script>
