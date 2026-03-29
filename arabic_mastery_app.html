@@ -272,7 +272,7 @@ textarea.field{resize:none;line-height:1.6;font-size:14px}
 .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite;vertical-align:middle;margin-right:5px}
 /* AYA SPLASH */
 #p-aya-splash{min-height:100vh;align-items:center;justify-content:center;background:var(--bg);position:relative;overflow:hidden}
-.aya-jp{font-family:'Lora',serif;font-size:16px;color:var(--text2);letter-spacing:0.05em;opacity:0;transform:translateY(8px);transition:opacity 0.8s ease,transform 0.8s ease;text-align:center;max-width:340px;margin:0 auto}
+.aya-jp{font-family:'Lora',serif;font-size:56px;color:var(--green);line-height:1.2;opacity:0;transform:translateY(8px);transition:opacity 0.8s ease,transform 0.8s ease;text-align:center;max-width:380px;margin:0 auto}
 .aya-jp.shown{opacity:1;transform:translateY(0)}
 .aya-letter-wrap{text-align:center;max-width:380px;margin:0 auto;padding:0 1.5rem}
 .aya-arabic-big{font-size:64px;color:var(--green);line-height:1;opacity:0;transform:translateY(8px);transition:opacity 0.8s ease,transform 0.8s ease;direction:rtl}
@@ -358,6 +358,10 @@ textarea.field{resize:none;line-height:1.6;font-size:14px}
 .time-custom.vis{display:block}
 .time-input{width:100%;padding:10px 14px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px}
 .time-input:focus{outline:none;border-color:var(--green)}
+
+
+.test-exit-btn{position:fixed;top:12px;left:12px;z-index:50;background:transparent;border:none;color:var(--text3);font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;padding:8px;display:flex;align-items:center;gap:4px}
+.test-exit-btn:hover{color:var(--text2)}
 
 </style>
 </head>
@@ -487,7 +491,9 @@ textarea.field{resize:none;line-height:1.6;font-size:14px}
 </div></div>
 
 <!-- PLACEMENT TEST -->
-<div id="p-test" class="page"><div class="wrap">
+<div id="p-test" class="page">
+  <button class="test-exit-btn" onclick="exitPlacement()" title="Save and exit">✕ save &amp; exit</button>
+  <div class="wrap" id="test-content">
   <div class="pips" id="pips"></div>
   <div class="test-meta"><div><div class="lvl-name" id="lname"></div><div class="set-sub" id="set-sub"></div></div><div class="q-ctr" id="qctr"></div></div>
   <div class="qcard"><div class="qtype-lbl">multiple choice</div><div class="qtext" id="qtext"></div><div class="qarabic" id="qarabic" style="display:none"></div></div>
@@ -519,7 +525,9 @@ textarea.field{resize:none;line-height:1.6;font-size:14px}
 </div></div>
 
 <!-- PLACEMENT OUTPUT SECTION -->
-<div id="p-output" class="page"><div class="wrap">
+<div id="p-output" class="page">
+  <button class="test-exit-btn" onclick="exitPlacement()" title="Save and exit">✕ save &amp; exit</button>
+  <div class="wrap">
   <div class="pips" id="output-pips"></div>
   <div style="background:var(--purple-l);border-radius:var(--rl);padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:10px">
     <div style="font-size:20px">✍️</div>
@@ -604,7 +612,10 @@ textarea.field{resize:none;line-height:1.6;font-size:14px}
 </div>
 
 <!-- QUIZ SCREEN -->
-<div id="p-quiz" class="page"><div class="wrap"><div id="quiz-content"></div></div></div>
+<div id="p-quiz" class="page">
+  <button class="test-exit-btn" onclick="exitQuiz()" title="Save and exit">✕ save &amp; exit</button>
+  <div class="wrap"><div id="quiz-content"></div></div>
+</div>
 
 <!-- CHECKPOINT SCREEN -->
 <div id="p-checkpoint" class="page"><div class="wrap"><div id="checkpoint-content"></div></div></div>
@@ -672,8 +683,8 @@ textarea.field{resize:none;line-height:1.6;font-size:14px}
 <!-- AYA FIRST VISIT SPLASH -->
 <div id="p-aya-splash" class="page">
   <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1.5rem;text-align:center;position:relative">
-    <div class="aya-jp" id="aya-jp-line" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) translateY(8px)">
-      アラビア語コース、あなたのために作りました
+    <div id="aya-jp-screen" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);z-index:5;opacity:1;transition:opacity 0.8s ease">
+      <div class="aya-jp" id="aya-jp-line">アラビア語コース、あなたのために作りました</div>
     </div>
     <div class="aya-letter-wrap" style="width:100%">
       <div class="aya-arabic-big" id="aya-arabic-big">تَفَضَّلِي</div>
@@ -711,14 +722,35 @@ textarea.field{resize:none;line-height:1.6;font-size:14px}
 <!-- AYA PHONICS -->
 <div id="p-aya-phonics" class="page">
   <div class="wrap">
-    <div class="step-tag">Before we begin</div>
-    <div class="step-title" style="margin-bottom:6px">Five sounds to know</div>
-    <div class="step-sub">Arabic has a few consonants that don't exist in Japanese or English. Here they are — one at a time. Take your time with each.</div>
+    <div class="step-tag" id="phonics-tag">Before we begin</div>
+    <div class="step-title" style="margin-bottom:6px" id="phonics-title">Reading Arabic romanization</div>
+    <div class="step-sub" id="phonics-sub">A quick guide to the shorthand we use throughout this course.</div>
     <div id="aya-phonics-content"></div>
   </div>
 </div>
 
-<!-- AYA COURSE COMPLETE -->
+<!-- AYA SCRIPT NOTE PAGE -->
+<div id="p-aya-script-note" class="page">
+  <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem 1.5rem">
+    <div style="text-align:center;max-width:340px;margin:0 auto">
+      <div style="font-size:48px;direction:rtl;color:var(--green);margin-bottom:20px">أَنْتِ رَائِعَة</div>
+      <div class="marwan-note" style="margin-bottom:1.5rem">
+        <div class="marwan-note-text">You're reading Arabic. It may look impossible right now. It isn't. You're proving that. I love you</div>
+        <div class="marwan-note-from">— Marwan</div>
+      </div>
+      <button class="btn-primary" onclick="dismissScriptNotePage()">I'm ready →</button>
+    </div>
+  </div>
+</div>
+
+<!-- AYA CULTURAL CARD PAGE -->
+<div id="p-aya-cultural" class="page">
+  <div class="wrap" style="padding-top:2rem">
+    <div id="aya-cultural-content"></div>
+  </div>
+</div>
+
+<!-- AYA CULTURAL CARD PAGE -->
 <div id="p-aya-complete" class="page">
   <div class="aya-complete-wrap">
     <div class="aya-complete-arabic" id="aya-comp-ar">نور عيوني</div>
@@ -1071,6 +1103,48 @@ const BANKS=[
 let profile={name:'',speaker:'',goals:[],goalsExtra:'',dialect:'',dialectOther:''};
 let pScores=P_LEVELS.map(()=>({correct:0,total:0}));
 let tLvl=0,tSetNum=0,tQs=[],tQi=0,tSetCorrect=0,tAnswered=false,tOutputCount=0,tOutputIdx=0,tOutputResponses=[];
+const PLACEMENT_SAVE_KEY='arabic_placement_state';
+
+function savePlacementState(){
+  try{
+    localStorage.setItem(PLACEMENT_SAVE_KEY,JSON.stringify({
+      tLvl,tSetNum,tQi,tSetCorrect,tAnswered,tOutputCount,tOutputIdx,
+      tOutputResponses,pScores,savedAt:Date.now()
+    }));
+  }catch(e){}
+}
+
+function clearPlacementState(){
+  try{localStorage.removeItem(PLACEMENT_SAVE_KEY);}catch(e){}
+}
+
+function loadPlacementState(){
+  try{
+    const d=localStorage.getItem(PLACEMENT_SAVE_KEY);
+    if(!d)return null;
+    const s=JSON.parse(d);
+    // Expire after 7 days
+    if(Date.now()-s.savedAt>7*24*60*60*1000){clearPlacementState();return null;}
+    return s;
+  }catch(e){return null;}
+}
+
+function exitPlacement(){
+  savePlacementState();
+  if(profile.name){go('p-course');}
+  else{go('p-login');}
+}
+
+function exitQuiz(){
+  // Save whatever progress we have mid-quiz
+  if(quiz.unitId){
+    const up=getUP(quiz.unitId);
+    // Save wrong answers as weak words
+    quiz.wrongIds.forEach(id=>{if(!users[activeUser].weakWords.includes(id))users[activeUser].weakWords.push(id);});
+    save();
+  }
+  go('p-course');
+}
 let users={
   marwan:{name:'',streak:1,weakWords:[],unitProgress:{},checkpoints:{},startDate:null,latency:{}},
   brother:{name:'',streak:0,weakWords:[],unitProgress:{},checkpoints:{},startDate:null,latency:{}}
@@ -1270,8 +1344,47 @@ function goToGeneration(){go('p-generating');runGen(true);}
 // PLACEMENT TEST
 // ═══════════════════════════
 function startPlacement(){
+  const saved = loadPlacementState();
+  if(saved){
+    // Show resume prompt
+    go('p-test');
+    $('test-content').innerHTML = `
+      <div style="text-align:center;padding:2rem 0">
+        <div style="font-size:32px;margin-bottom:12px">↩</div>
+        <div style="font-family:'Lora',serif;font-size:20px;margin-bottom:8px">Resume your test?</div>
+        <div style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:1.5rem">You left the placement test at Level ${P_LEVELS[saved.tLvl]?.name||saved.tLvl+1}, Set ${saved.tSetNum+1}. Pick up where you left off?</div>
+        <button class="btn-primary" onclick="resumePlacement()" style="margin-bottom:8px">resume →</button>
+        <button class="btn-ghost" onclick="freshPlacement()">start over</button>
+      </div>`;
+    return;
+  }
+  freshPlacement();
+}
+
+function freshPlacement(){
+  clearPlacementState();
   pScores=P_LEVELS.map(()=>({correct:0,total:0,setScores:[],failedAt:null}));
-  go('p-test');loadLevel(0);
+  go('p-test');
+  loadLevel(0);
+}
+
+function resumePlacement(){
+  const saved = loadPlacementState();
+  if(!saved){freshPlacement();return;}
+  // Restore state
+  tLvl=saved.tLvl;tSetNum=saved.tSetNum;
+  tOutputCount=saved.tOutputCount||0;tOutputIdx=saved.tOutputIdx||0;
+  tOutputResponses=saved.tOutputResponses||[];
+  pScores=saved.pScores||P_LEVELS.map(()=>({correct:0,total:0,setScores:[],failedAt:null}));
+  // Resume at the right place
+  if(tOutputCount>0 && tOutputIdx>0){
+    // Was in output section
+    go('p-test');
+    showOutputTask();
+  } else {
+    go('p-test');
+    loadSet();
+  }
 }
 
 function loadLevel(l){
@@ -1315,6 +1428,7 @@ function pickT(i){
   const fb=$('feedback');fb.className='feedback '+(ok?'correct':'wrong');
   fb.textContent=ok?'Correct!':'Not quite — '+q.o[q.a];
   $('btn-tnext').style.display='block';
+  savePlacementState(); // save after every answer
 }
 
 function nextQ(){if(tQi===tQs.length-1)endSet();else{tQi++;showQ();}}
@@ -1653,6 +1767,7 @@ function deriveUnitTitle(unitNum,ctx){
 // COURSE GENERATION
 // ═══════════════════════════
 async function buildCourse(){
+  clearPlacementState(); // test complete — clear saved state
   // CRITICAL: save profile immediately before generation starts
   // so progress is never lost if generation fails or user closes app
   users[activeUser].name=profile.name;
@@ -2621,6 +2736,18 @@ const AYA_MILESTONES = [
   {day:'June 5', title:'Walk in. You are ready.', desc:'This was always the goal. يلا.', type:'goal'},
 ];
 
+const AYA_ROMANIZATION_SCREEN = {
+  title: 'Reading the romanization',
+  intro: 'Throughout this course, Arabic sounds are written using a system that uses a few numbers as letters. Once you know them, you can read any romanized Arabic.',
+  items: [
+    {symbol:'7', letter:'ح', name:'Haa', desc:'A breathy H from deep in the throat — as in 7abibi (حبيبي)'},
+    {symbol:'3', letter:'ع', name:'Ayn', desc:'A constricted throat vowel — as in 3ayle (عيلة, family)'},
+    {symbol:'kh', letter:'خ', name:'Kha', desc:'A rasping sound — as in khubz (خبز, bread)'},
+    {symbol:'gh', letter:'غ', name:'Ghayn', desc:'A soft gargle — as in ghali (غالي, precious)'},
+    {symbol:"2", letter:'ء', name:'Hamza', desc:"A glottal stop — the pause in 'uh-oh' — as in 2ahlan (أهلاً)"},
+  ]
+};
+
 const AYA_PHONICS = [
   {
     letter:'ح',
@@ -2854,23 +2981,29 @@ function runAyaSplashAnimation() {
   let t = 0;
   const delay = (ms) => { t += ms; return t; };
 
-  // Screen 1: Japanese line
+  // Screen 1: Japanese line — fades in, stays 5 seconds, fades out
   setTimeout(() => {
     const jpEl = document.getElementById('aya-jp-line');
     if (jpEl) jpEl.classList.add('shown');
   }, delay(500));
 
-  // Fade out Japanese, begin Arabic
+  // Fade out entire Japanese screen after 5 seconds
   setTimeout(() => {
-    const jpEl = document.getElementById('aya-jp-line');
-    if (jpEl) { jpEl.style.opacity = '0'; jpEl.style.transition = 'opacity 0.8s ease'; }
-  }, delay(2500));
+    const jpScreen = document.getElementById('aya-jp-screen');
+    if (jpScreen) jpScreen.style.opacity = '0';
+  }, delay(5000));
 
-  // Arabic تفضلي
+  // Remove Japanese screen from layout after fade
+  setTimeout(() => {
+    const jpScreen = document.getElementById('aya-jp-screen');
+    if (jpScreen) jpScreen.style.display = 'none';
+  }, delay(800));
+
+  // Arabic تفضلي — begins after Japanese fades
   setTimeout(() => {
     const arEl = document.getElementById('aya-arabic-big');
     if (arEl) arEl.classList.add('shown');
-  }, delay(1000));
+  }, delay(200));
 
   // Romanization
   setTimeout(() => {
@@ -2937,15 +3070,8 @@ async function beginAyaCourse() {
     go('p-course');
     setTimeout(maybeShowPushPrompt, 2000);
   } else {
-    // Show push prompt before phonics on very first visit
-    go('p-course');
-    setTimeout(async () => {
-      await maybeShowPushPrompt();
-      // If prompt was shown, it will navigate to course; otherwise show phonics
-      if (Notification.permission !== 'default' || (ayaConfig && ayaConfig.push_enabled)) {
-        showAyaPhonics(0);
-      }
-    }, 1500);
+    // New user — show push prompt page first, then phonics
+    showAyaPushPromptThenPhonics();
   }
 }
 
@@ -3026,14 +3152,40 @@ function showAyaPhonics(idx) {
 }
 
 function renderAyaPhonics(idx) {
-  const p = AYA_PHONICS[idx];
   const wrap = document.getElementById('aya-phonics-content');
   if (!wrap) return;
+
+  // idx === -1 is the romanization intro screen
+  if (idx === -1) {
+    const r = AYA_ROMANIZATION_SCREEN;
+    wrap.innerHTML = `
+      <div style="font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--green-m);margin-bottom:6px">Before we begin</div>
+      <div style="font-family:'Lora',serif;font-size:20px;font-weight:400;color:var(--text);margin-bottom:8px">${r.title}</div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:1.25rem">${r.intro}</div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:1.5rem">
+        ${r.items.map(item => `
+          <div style="display:flex;align-items:center;gap:14px;padding:12px 14px;background:var(--bg2);border-radius:var(--r)">
+            <div style="font-size:22px;font-weight:600;color:var(--green);min-width:36px;text-align:center;font-family:'DM Sans',sans-serif">${item.symbol}</div>
+            <div style="font-size:24px;direction:rtl;color:var(--green);min-width:32px;text-align:center">${item.letter}</div>
+            <div>
+              <div style="font-size:13px;font-weight:500;color:var(--text)">${item.name}</div>
+              <div style="font-size:12px;color:var(--text2);margin-top:2px;line-height:1.5">${item.desc}</div>
+            </div>
+          </div>`).join('')}
+      </div>
+      <button class="btn-primary" onclick="showAyaPhonics(0)">got it — show me the sounds →</button>
+    `;
+    return;
+  }
+
+  const p = AYA_PHONICS[idx];
+  const totalSounds = AYA_PHONICS.length;
   const pips = AYA_PHONICS.map((_, i) =>
     `<div class="phonics-pip${i < idx ? ' done' : i === idx ? ' active' : ''}"></div>`
   ).join('');
+
   wrap.innerHTML = `
-    <div style="font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--green-m);margin-bottom:10px">Sound ${idx + 1} of 5</div>
+    <div style="font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--green-m);margin-bottom:10px">Sound ${idx + 1} of ${totalSounds}</div>
     <div class="phonics-pips">${pips}</div>
     <div class="phonics-card">
       <div class="phonics-letter">${p.letter}</div>
@@ -3045,10 +3197,27 @@ function renderAyaPhonics(idx) {
         <div class="phonics-ex-ro">${p.example_ro}</div>
         <div class="phonics-ex-en">${p.example_en}</div>
       </div>
+      <button onclick="speakPhonicsExample('${p.name}','${p.example_ar}','${p.example_en}')"
+        style="margin-top:12px;width:100%;padding:10px;background:var(--green-l);border:1px solid rgba(26,107,80,0.2);border-radius:var(--r);font-family:'DM Sans',sans-serif;font-size:13px;color:var(--green-d);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
+        🔊 Hear it — "The letter ${p.name}, as in ${p.example_en}"
+      </button>
     </div>
     <button class="btn-primary" onclick="nextAyaPhonics()">${idx < AYA_PHONICS.length - 1 ? 'next sound →' : 'start Unit 1 →'}</button>
-    ${idx > 0 ? '<button class="btn-ghost" onclick="showAyaPhonics(' + (idx - 1) + ')">← back</button>' : ''}
+    <button class="btn-ghost" onclick="showAyaPhonics(${idx > 0 ? idx - 1 : -1})">← back</button>
   `;
+}
+
+function speakPhonicsExample(letterName, arabicWord, englishMeaning) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const intro = new SpeechSynthesisUtterance('The letter ' + letterName + ', as in');
+  intro.lang = 'en-US';
+  intro.rate = 0.9;
+  const arabic = new SpeechSynthesisUtterance(arabicWord);
+  arabic.lang = 'ar-SA';
+  arabic.rate = 0.7;
+  window.speechSynthesis.speak(intro);
+  window.speechSynthesis.speak(arabic);
 }
 
 function nextAyaPhonics() {
@@ -3086,8 +3255,21 @@ function renderAyaCourse() {
     `;
   }
 
+  // Romanization cheat sheet button (collapses/expands)
+  const cheatSheetHtml = `
+    <div style="margin-bottom:12px">
+      <button onclick="toggleRomCheatSheet()" style="width:100%;padding:9px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);font-family:'DM Sans',sans-serif;font-size:12px;color:var(--text2);cursor:pointer;text-align:left;display:flex;justify-content:space-between;align-items:center">
+        <span>abc → ع &nbsp; romanization guide</span><span id="cheat-toggle">▾</span>
+      </button>
+      <div id="rom-cheat-sheet" style="display:none;background:var(--bg2);border:1px solid var(--border);border-radius:0 0 var(--r) var(--r);padding:10px 14px;font-size:12px;color:var(--text2);line-height:1.8">
+        <div><strong style="color:var(--green-d)">7</strong> = ح &nbsp; breathy H &nbsp;·&nbsp; <strong style="color:var(--green-d)">3</strong> = ع &nbsp; throat vowel</div>
+        <div><strong style="color:var(--green-d)">kh</strong> = خ &nbsp; rasping &nbsp;·&nbsp; <strong style="color:var(--green-d)">gh</strong> = غ &nbsp; soft gargle</div>
+        <div><strong style="color:var(--green-d)">2</strong> = ء &nbsp; glottal stop &nbsp;·&nbsp; <strong style="color:var(--green-d)">9</strong> = ص &nbsp; emphatic s</div>
+      </div>
+    </div>`;
+
   // Render Aya's units
-  unitsEl.innerHTML = AYA_UNITS.filter(u => !u.isCheckpoint).map((unit, i) => {
+  unitsEl.innerHTML = cheatSheetHtml + AYA_UNITS.filter(u => !u.isCheckpoint).map((unit, i) => {
     const up = getUP(unit.id);
     const unlocked = i === 0 || getUP(AYA_UNITS[i - 1].id).mastered;
     let badge = '';
@@ -3135,6 +3317,15 @@ function renderAyaCourse() {
       </div>
     </div>`;
   }).join('');
+}
+
+function toggleRomCheatSheet() {
+  const sheet = document.getElementById('rom-cheat-sheet');
+  const toggle = document.getElementById('cheat-toggle');
+  if (!sheet) return;
+  const isOpen = sheet.style.display !== 'none';
+  sheet.style.display = isOpen ? 'none' : 'block';
+  if (toggle) toggle.textContent = isOpen ? '▾' : '▴';
 }
 
 function showAyaPhrase(pid, uid) {
@@ -3189,19 +3380,16 @@ function renderAyaQuizQ() {
     : { label: 'Stage 2 — Reinforce', desc: 'Harakaat on, romanization hidden. 75% to advance.', cls: 'mq-s2', icon: '🔄', fill: 'mq-s2-fill' };
   const pct = Math.round((quiz.qi / 8) * 100);
 
-  // Check if should show script note (first time in Stage 2)
+  // Check if should show script note (first time in Stage 2) — show as full page
   const shouldShowScriptNote = quiz.stage === 2 && quiz.qi === 0 && !ayaConfig.seen_script_note;
+  if (shouldShowScriptNote) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('p-aya-script-note').classList.add('active');
+    window.scrollTo(0, 0);
+    return;
+  }
 
   document.getElementById('quiz-content').innerHTML = `
-    ${shouldShowScriptNote ? `
-    <div class="script-note-overlay" id="script-note-overlay">
-      <div class="script-note-box">
-        <div class="script-note-arabic">أَنْتِ رَائِعَة</div>
-        <div class="script-note-text">You're reading Arabic. It may look impossible right now. It isn't. You're proving that. I love you</div>
-        <div class="script-note-from">— Marwan</div>
-        <button class="btn-primary" onclick="dismissScriptNote()" style="padding:10px">I'm ready →</button>
-      </div>
-    </div>` : ''}
     <div class="mq-stage-banner ${stageInfo.cls}">
       <div class="mq-stage-icon">${stageInfo.icon}</div>
       <div><div class="mq-stage-title">${stageInfo.label}</div><div class="mq-stage-desc">${stageInfo.desc}</div></div>
@@ -3222,6 +3410,19 @@ function renderAyaQuizQ() {
 
 async function dismissScriptNote() {
   document.getElementById('script-note-overlay')?.remove();
+  await _markScriptNoteSeen();
+}
+
+async function dismissScriptNotePage() {
+  await _markScriptNoteSeen();
+  // Return to quiz — re-render without the note
+  renderAyaQuizQ();
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('p-quiz').classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+async function _markScriptNoteSeen() {
   if (sb && currentUser && ayaConfig) {
     try {
       await sb.from('special_courses').update({
@@ -3298,9 +3499,48 @@ async function showAyaUnlock(unit) {
   const unitIdx = AYA_UNITS.findIndex(u => u.id === unit.id);
   const nextUnit = AYA_UNITS[unitIdx + 1];
   const allMastered = AYA_UNITS.filter(u => !u.isCheckpoint).every(u => getUP(u.id).mastered);
-
-  // Show cultural card if applicable
   const culturalCard = AYA_CULTURAL_CARDS['after_' + unit.id];
+
+  // If there's a cultural card, show it as a full page first
+  if (culturalCard) {
+    showAyaCulturalPage(culturalCard, unit, note, nextUnit, allMastered);
+    return;
+  }
+  showAyaUnlockDirect(unit, note, nextUnit, allMastered);
+}
+
+function showAyaCulturalPage(culturalCard, unit, note, nextUnit, allMastered) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('p-aya-cultural').classList.add('active');
+  window.scrollTo(0, 0);
+
+  document.getElementById('aya-cultural-content').innerHTML = `
+    <div style="text-align:center;margin-bottom:1.5rem">
+      <div style="font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--amber-d);margin-bottom:6px">Cultural note</div>
+      <div style="font-family:'Lora',serif;font-size:22px;font-weight:400;color:var(--text)">🫒 ${culturalCard.title}</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:1.75rem">
+      ${culturalCard.points.map(pt => `
+        <div style="display:flex;gap:12px;background:var(--amber-l);border-radius:var(--r);padding:14px">
+          <div style="width:6px;height:6px;border-radius:50%;background:var(--amber);flex-shrink:0;margin-top:7px"></div>
+          <div style="font-size:14px;color:var(--amber-d);line-height:1.7">${pt}</div>
+        </div>`).join('')}
+    </div>
+    ${note ? `<div class="marwan-note"><div class="marwan-note-text">${note}</div><div class="marwan-note-from">— Marwan</div></div>` : ''}
+    <button class="btn-primary" onclick="showAyaUnlockDirect(
+      AYA_UNITS.find(u=>u.id==='${unit.id}'),
+      null,
+      ${nextUnit ? "AYA_UNITS.find(u=>u.id==='" + nextUnit.id + "')" : 'null'},
+      ${allMastered}
+    )">got it →</button>
+  `;
+}
+
+function showAyaUnlockDirect(unit, note, nextUnit, allMastered) {
+  // Show unit completion in quiz page
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('p-quiz').classList.add('active');
+  window.scrollTo(0, 0);
 
   document.getElementById('quiz-content').innerHTML = `
     <div class="unlock-card">
@@ -3308,20 +3548,15 @@ async function showAyaUnlock(unit) {
       <div class="unlock-title">${unit.title} mastered!</div>
       <div class="unit-stats">
         <div class="us-stat"><div class="us-n">${unit.words}</div><div class="us-l">phrases owned</div></div>
-        <div class="us-stat"><div class="us-n">${quiz.wrongIds.length === 0 ? 'all' : 'most'}</div><div class="us-l">nailed</div></div>
+        <div class="us-stat"><div class="us-n">${(quiz.wrongIds||[]).length === 0 ? 'all' : 'most'}</div><div class="us-l">nailed</div></div>
         <div class="us-stat"><div class="us-n">2/2</div><div class="us-l">sets passed</div></div>
       </div>
     </div>
-    ${culturalCard ? `
-    <div class="cultural-card">
-      <div class="cultural-title">🫒 ${culturalCard.title}</div>
-      ${culturalCard.points.map(pt => `<div class="cultural-point"><div class="cultural-dot"></div><span>${pt}</span></div>`).join('')}
-    </div>` : ''}
     ${note ? `<div class="marwan-note"><div class="marwan-note-text">${note}</div><div class="marwan-note-from">— Marwan</div></div>` : ''}
     ${nextUnit && !nextUnit.isCheckpoint ? `<div style="font-size:12px;color:var(--green-m);text-align:center;margin-bottom:12px"><strong>${nextUnit.title}</strong> is now unlocked.</div>` : ''}
     <button class="btn-primary" onclick="go('p-course')">${nextUnit ? 'continue to ' + nextUnit.title + ' →' : 'back to lessons'}</button>`;
 
-  if (allMastered) setTimeout(showAyaCourseComplete, 4000);
+  if (allMastered) setTimeout(showAyaCourseComplete, 3000);
 }
 
 function showAyaCourseComplete() {
@@ -3376,15 +3611,14 @@ async function confirmPushTime() {
     if (permission !== 'granted') {
       btn.textContent = 'set my reminder →';
       btn.disabled = false;
+      _afterPushPrompt();
       return;
     }
-    // Subscribe to push
     const reg = await navigator.serviceWorker.ready;
     const sub = await reg.pushManager.subscribe({
       userVisibleOnly: true,
       applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
     });
-    // Save to Supabase
     if (sb && currentUser) {
       const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
       await sb.from('push_subscriptions').upsert({
@@ -3396,7 +3630,6 @@ async function confirmPushTime() {
         enabled: true
       }, { onConflict: 'user_id' });
     }
-    // Update Aya config if special course
     if (isAyaCourse && sb && currentUser && ayaConfig) {
       await sb.from('special_courses').update({
         config: { ...ayaConfig, push_time: time, push_enabled: true }
@@ -3404,15 +3637,25 @@ async function confirmPushTime() {
       ayaConfig.push_time = time;
       ayaConfig.push_enabled = true;
     }
-    go('p-course');
+    _afterPushPrompt();
   } catch(e) {
     console.warn('Push subscription failed:', e);
+    _afterPushPrompt();
+  }
+}
+
+function _afterPushPrompt() {
+  if (window._pushPromptCallback) {
+    const cb = window._pushPromptCallback;
+    window._pushPromptCallback = null;
+    cb();
+  } else {
     go('p-course');
   }
 }
 
 function skipPushPrompt() {
-  go('p-course');
+  _afterPushPrompt();
 }
 
 function urlBase64ToUint8Array(base64String) {
@@ -3436,6 +3679,21 @@ async function registerServiceWorker() {
 }
 
 // Check if push notifications already set up, if not show prompt after Aya course launch
+async function showAyaPushPromptThenPhonics() {
+  // Show push prompt as its own page before phonics
+  // After they respond (yes or skip), go to phonics screen -1
+  if (!('Notification' in window) || !('serviceWorker' in navigator) || Notification.permission !== 'default' || (ayaConfig && ayaConfig.push_enabled)) {
+    // Skip push prompt — go straight to phonics
+    showAyaPhonics(-1);
+    return;
+  }
+  // Show the push prompt page with a callback to proceed to phonics
+  window._pushPromptCallback = () => showAyaPhonics(-1);
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('p-push-prompt').classList.add('active');
+  window.scrollTo(0, 0);
+}
+
 async function maybeShowPushPrompt() {
   if (!isAyaCourse) return;
   if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
