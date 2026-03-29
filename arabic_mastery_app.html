@@ -385,28 +385,11 @@ textarea.field{resize:none;line-height:1.6;font-size:14px}
       <div class="auth-sub">Enter your email to continue.<br>New? We'll create your account automatically.</div>
     </div>
     <div class="auth-msg" id="auth-msg"></div>
-    <div id="auth-email-step">
-      <input class="field" id="auth-email" type="email" placeholder="your@email.com" oninput="onAuthEmail()" onkeydown="if(event.key==='Enter')authContinue()"/>
-      <button class="btn-primary" id="btn-auth-continue" onclick="authContinue()" disabled>continue →</button>
-      
-      
-      <div class="auth-small" onclick="togglePasswordMode()">use password instead</div>
-    </div>
-    <div id="auth-password-step" style="display:none">
-      <div style="font-size:13px;color:var(--text2);margin-bottom:10px" id="auth-email-display"></div>
-      <input class="field" id="auth-password" type="password" placeholder="password" onkeydown="if(event.key==='Enter')authPassword()"/>
-      <button class="btn-primary" onclick="authPassword()">sign in →</button>
-      <div class="auth-small" onclick="togglePasswordMode()">← use magic link instead</div>
-    </div>
+    <input class="field" id="auth-email" type="email" placeholder="your@email.com" oninput="onAuthEmail()" onkeydown="if(event.key==='Enter')authContinue()"/>
+    <button class="btn-primary" id="btn-auth-continue" onclick="authContinue()" disabled>continue →</button>
     <div class="auth-divider" style="margin-top:1.25rem"><div class="auth-divider-line"></div><div class="auth-divider-text">or</div><div class="auth-divider-line"></div></div>
     <button onclick="continueAsGuest()" style="width:100%;padding:11px;border:1px solid var(--border2);border-radius:40px;background:transparent;color:var(--text2);font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;margin-bottom:4px">continue without account</button>
-    <div style="font-size:11px;color:var(--text3);line-height:1.6;text-align:center;padding:0 8px">Sign in later to sync progress across devices</div>
-    <div id="auth-magic-sent" style="display:none;text-align:center;padding:1rem 0">
-      <div style="font-size:32px;margin-bottom:12px">📬</div>
-      <div style="font-family:'Lora',serif;font-size:18px;margin-bottom:8px">Check your email</div>
-      <div style="font-size:13px;color:var(--text2);line-height:1.7">We sent a login link to<br><strong id="magic-email-display"></strong><br>Click it to sign in.</div>
-      <div class="auth-small" style="margin-top:16px" onclick="resetAuthForm()">use a different email</div>
-    </div>
+    <div style="font-size:11px;color:var(--text3);line-height:1.6;text-align:center;padding:0 8px">Enter your email to sync progress across devices</div>
   </div>
 </div>
 
@@ -2300,24 +2283,12 @@ function onAuthEmail() {
 async function authContinue() {
   authEmail = document.getElementById('auth-email').value.trim();
   if (!authEmail) return;
-  showAuthMsg('');
   const btn = document.getElementById('btn-auth-continue');
-  btn.innerHTML = '<span class="spinner"></span>sending...';
+  btn.innerHTML = '<span class="spinner"></span>loading...';
   btn.disabled = true;
-  try {
-    const { error } = await sb.auth.signInWithOtp({
-      email: authEmail,
-      options: { emailRedirectTo: window.location.href }
-    });
-    if (error) throw error;
-    document.getElementById('auth-email-step').style.display = 'none';
-    document.getElementById('auth-magic-sent').style.display = 'block';
-    document.getElementById('magic-email-display').textContent = authEmail;
-  } catch(e) {
-    btn.textContent = 'continue →';
-    btn.disabled = false;
-    showAuthMsg('Something went wrong — please try again.', 'error');
-  }
+  // Store email locally — use as identifier, no auth required
+  try { localStorage.setItem('arabic_app_email', authEmail); } catch(e) {}
+  await onAuthSuccess({ email: authEmail, id: null });
 }
 
 function togglePasswordMode() {
@@ -2363,34 +2334,46 @@ function showAuthMsg(msg, type = 'success') {
 }
 
 function resetAuthForm() {
-  document.getElementById('auth-email').value = '';
-  document.getElementById('auth-email-step').style.display = 'block';
-  document.getElementById('auth-magic-sent').style.display = 'none';
-  document.getElementById('btn-auth-continue').disabled = true;
+  const el = document.getElementById('auth-email');
+  if (el) el.value = '';
+  const btn = document.getElementById('btn-auth-continue');
+  if (btn) btn.disabled = true;
 }
 
 // ═══════════════════════════
 // AUTH SUCCESS + PROFILE SYNC
 // ═══════════════════════════
 async function onAuthSuccess(user) {
-  currentUser = user;
+  currentUser = { email: user.email, id: user.id || user.email };
+  const email = user.email;
   // Check for special course first
-  const hasSpecialCourse = await checkAyaCourse(user.email);
+  const hasSpecialCourse = await checkAyaCourse(email);
   if (hasSpecialCourse) {
     await launchAyaCourse();
     return;
   }
-  // Load profile from Supabase
-  const { data: profileData } = await sb.from('profiles').select('*').eq('id', user.id).single();
-  if (profileData && profileData.name) {
-    profile.name = profileData.name;
-    profile.speaker = profileData.speaker_type || '';
-    profile.goals = profileData.goals || [];
-    profile.goalsExtra = profileData.goals_extra || '';
-    profile.dialect = profileData.dialect || '';
-    profile.dialectOther = profileData.dialect_other || '';
-    users.marwan.name = profileData.name;
-    await loadProgressFromSupabase(user.id);
+  // Look up profile by email
+  if (sb && email) {
+    try {
+      const { data: profileData } = await sb.from('profiles').select('*').eq('email', email).single();
+      if (profileData && profileData.name) {
+        profile.name = profileData.name;
+        profile.speaker = profileData.speaker_type || '';
+        profile.goals = profileData.goals || [];
+        profile.goalsExtra = profileData.goals_extra || '';
+        profile.dialect = profileData.dialect || '';
+        profile.dialectOther = profileData.dialect_other || '';
+        users.marwan.name = profileData.name;
+        await loadProgressFromSupabaseByEmail(email);
+        go('p-course');
+        return;
+      }
+    } catch(e) {}
+  }
+  // New user — check localStorage first
+  const local = JSON.parse(localStorage.getItem('arabic_app_v3') || '{}');
+  if (local.profile && local.profile.name) {
+    // Has local progress — go straight to course
     go('p-course');
   } else {
     go('p-name');
@@ -2425,9 +2408,29 @@ async function loadProgressFromSupabase(userId) {
   } catch(e) { console.warn('Progress load failed:', e); }
 }
 
+async function loadProgressFromSupabaseByEmail(email) {
+  try {
+    const { data: progressData } = await sb.from('unit_progress').select('*').eq('email', email);
+    if (progressData && progressData.length) {
+      users.marwan.unitProgress = {};
+      progressData.forEach(row => {
+        users.marwan.unitProgress[row.unit_id] = {
+          stage: row.stage, consec: row.consec, attempts: row.attempts,
+          mastered: row.mastered, masteredAt: row.mastered_at
+        };
+      });
+    }
+    const { data: weakData } = await sb.from('weak_words').select('phrase_id').eq('email', email);
+    if (weakData) users.marwan.weakWords = weakData.map(r => r.phrase_id);
+    const { data: unitData } = await sb.from('dynamic_units').select('*').eq('email', email);
+    if (unitData) unitData.forEach(row => { dynamicUnits[row.unit_id] = row.content; });
+  } catch(e) { console.warn('Progress load failed:', e); }
+}
+
 async function saveToSupabase() {
-  if (!sb || !currentUser) { save(); return; } // fallback to localStorage
-  const userId = currentUser.id;
+  if (!sb || !currentUser || !currentUser.email) { save(); return; }
+  const email = currentUser.email;
+  const userId = currentUser.id || email; // use email as fallback id
   try {
     // Save profile
     await sb.from('profiles').upsert({
@@ -2468,8 +2471,10 @@ async function saveCheckpointToSupabase(day, debrief) {
 }
 
 async function signOut() {
-  if (sb) await sb.auth.signOut();
+  try { localStorage.removeItem('arabic_app_email'); } catch(e) {}
   currentUser = null;
+  isAyaCourse = false;
+  ayaConfig = null;
   profile = { name:'', speaker:'', goals:[], goalsExtra:'', dialect:'', dialectOther:'' };
   users.marwan = { name:'', streak:0, weakWords:[], unitProgress:{}, checkpoints:{}, startDate:null, latency:{} };
   dynamicUnits = {};
@@ -2498,41 +2503,28 @@ async function endCheckpoint(day) {
 // INIT — CHECK AUTH STATE
 // ═══════════════════════════
 (async function initAuth() {
-  const sbReady = initSupabase();
-  if (!sbReady) {
-    // Supabase failed — fall back to localStorage flow
-    load();
-    if (profile.name && Object.keys(users.marwan.unitProgress||{}).length > 0) go('p-course');
-    return;
-  }
-
-  // Listen for auth state changes (handles magic link redirect)
-  sb.auth.onAuthStateChange(async (event, session) => {
-    if (event === 'SIGNED_IN' && session?.user) {
-      await onAuthSuccess(session.user);
+  initSupabase();
+  load();
+  // Check for stored email from previous session
+  try {
+    const storedEmail = localStorage.getItem('arabic_app_email');
+    if (storedEmail) {
+      await onAuthSuccess({ email: storedEmail, id: storedEmail });
+      return;
     }
-  });
-
-  // Check if already logged in
-  const { data: { session } } = await sb.auth.getSession();
-  if (session?.user) {
-    await onAuthSuccess(session.user);
-  } else {
-    // No session — check for returning guest with saved progress
-    try {
-      const local = JSON.parse(localStorage.getItem('arabic_app_v3') || '{}');
-      if (local.profile && local.profile.name) {
-        load();
-        // If guest has a profile AND has started the course, go straight in
-        if(local.users&&local.users.marwan&&Object.keys(local.users.marwan.unitProgress||{}).length>0){
-          isGuest=true;
-          go('p-course');
-          return;
-        }
+  } catch(e) {}
+  // Check for returning user with local progress
+  try {
+    const local = JSON.parse(localStorage.getItem('arabic_app_v3') || '{}');
+    if (local.profile && local.profile.name) {
+      if (local.users && local.users.marwan && Object.keys(local.users.marwan.unitProgress||{}).length > 0) {
+        isGuest = true;
+        go('p-course');
+        return;
       }
-    } catch(e) {}
-    // No saved progress — intro animation will call showLoginAfterIntro()
-  }
+    }
+  } catch(e) {}
+  // No saved state — show intro animation
 })();
 
 function showLoginAfterIntro() {
