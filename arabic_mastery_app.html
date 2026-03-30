@@ -582,7 +582,7 @@ textarea.field{resize:none;line-height:1.6;font-size:14px}
     <button class="ch" onclick="pick1('dialect',this,'other')"><div class="ch-icon">◎</div><div class="ch-body"><div class="ch-title">Other / Mixed</div><div class="ch-desc">Tell us more.</div></div><div class="ch-tick"></div></button>
   </div>
   <div class="other-wrap" id="other-wrap"><input class="field" id="inp-other" placeholder="Which dialect?" oninput="onOther()"/></div>
-  <button class="btn-primary" id="btn-dialect" onclick="onDialectContinue()" disabled>continue →</button>
+  <button class="btn-primary" id="btn-dialect" onclick="go('p-summary')" disabled>continue →</button>
   <button class="btn-ghost" onclick="go('p-goals')">← back</button>
 </div></div>
 
@@ -3565,16 +3565,23 @@ function showAyaEl(id) {
   if (el) el.classList.add('shown');
 }
 
+let _beginningCourse = false;
 async function beginAyaCourse() {
-  await markAyaSplashSeen();
-  await updateAyaSessions();
-  const hasProgress = Object.keys(users.marwan.unitProgress || {}).length > 0;
-  const hasSeenPhonics = ayaConfig && ayaConfig.has_seen_phonics === true;
-  if (hasProgress || hasSeenPhonics) {
-    go('p-home');
-    if(!hasProgress) setTimeout(maybeShowPushPrompt, 2000);
-  } else {
-    showAyaPushPromptThenPhonics();
+  if (_beginningCourse) return;
+  _beginningCourse = true;
+  try {
+    await markAyaSplashSeen();
+    await updateAyaSessions();
+    const hasProgress = Object.keys(users.marwan.unitProgress || {}).length > 0;
+    const hasSeenPhonics = ayaConfig && ayaConfig.has_seen_phonics === true;
+    if (hasProgress || hasSeenPhonics) {
+      go('p-home');
+      if(!hasProgress) setTimeout(maybeShowPushPrompt, 2000);
+    } else {
+      showAyaPushPromptThenPhonics();
+    }
+  } finally {
+    _beginningCourse = false;
   }
 }
 
