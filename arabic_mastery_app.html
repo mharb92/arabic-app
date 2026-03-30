@@ -8,6 +8,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Arabic">
+<link id="manifest-link" rel="manifest">
 <link rel="apple-touch-icon" href="https://mharb92.github.io/arabic-app/icon-192.png">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
@@ -374,11 +375,78 @@ textarea.field{resize:none;line-height:1.6;font-size:14px}
 .test-exit-btn{position:fixed;top:12px;left:12px;z-index:50;background:transparent;border:none;color:var(--text3);font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;padding:8px;display:flex;align-items:center;gap:4px}
 .test-exit-btn:hover{color:var(--text2)}
 
-</style>
-</head>
-<body>
 
-<!-- WELCOME -->
+/* ═══════════════════════════
+   HOME SCREEN
+═══════════════════════════ */
+#p-home{background:var(--bg)}
+.home-wrap{max-width:540px;margin:0 auto;padding:1rem 1.25rem 5rem;width:100%}
+.home-greeting{font-size:13px;color:var(--text2);margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between}
+.home-greeting-ar{font-size:15px;color:var(--green);font-weight:500}
+
+/* Continue lesson card */
+.home-lesson-card{background:var(--green);color:#fff;border-radius:var(--rl);padding:1.25rem;margin-bottom:0.875rem;cursor:pointer;transition:opacity 0.15s}
+.home-lesson-card:hover{opacity:0.92}
+.home-lesson-card.pre-placement{background:var(--bg2);border:1px solid var(--border);cursor:pointer}
+.home-lesson-card.pre-placement .hlc-action{color:var(--green)}
+.hlc-countdown{font-size:11px;font-weight:500;color:rgba(255,255,255,0.75);margin-bottom:8px;display:flex;align-items:center;gap:5px}
+.hlc-unit{font-size:11px;font-weight:500;letter-spacing:0.07em;text-transform:uppercase;color:rgba(255,255,255,0.7);margin-bottom:4px}
+.hlc-title{font-family:'Lora',serif;font-size:19px;font-weight:400;margin-bottom:4px}
+.home-lesson-card.pre-placement .hlc-title{color:var(--text)}
+.hlc-stage{font-size:11px;color:rgba(255,255,255,0.7);margin-bottom:10px}
+.home-lesson-card.pre-placement .hlc-stage{color:var(--text2)}
+.hlc-progress{height:3px;background:rgba(255,255,255,0.25);border-radius:2px;margin-bottom:12px;overflow:hidden}
+.hlc-progress-fill{height:100%;background:#fff;border-radius:2px;transition:width 0.4s ease}
+.home-lesson-card.pre-placement .hlc-progress{background:var(--bg3)}
+.home-lesson-card.pre-placement .hlc-progress-fill{background:var(--green)}
+.hlc-action{font-size:13px;font-weight:500;color:rgba(255,255,255,0.9);display:flex;align-items:center;justify-content:space-between}
+.hlc-session{font-size:11px;color:rgba(255,255,255,0.65);margin-top:4px}
+
+/* Secondary home cards */
+.home-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:1rem 1.25rem;margin-bottom:0.75rem;cursor:pointer;transition:background 0.15s;display:flex;align-items:center;gap:12px}
+.home-card:hover{background:var(--bg3)}
+.home-card-icon{font-size:22px;flex-shrink:0;width:36px;text-align:center}
+.home-card-body{flex:1;min-width:0}
+.home-card-title{font-size:14px;font-weight:500;color:var(--text);margin-bottom:2px}
+.home-card-sub{font-size:12px;color:var(--text2);line-height:1.4}
+.home-card-arrow{font-size:14px;color:var(--text3);flex-shrink:0}
+
+/* POTD on home */
+.home-potd{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:1rem 1.25rem;margin-bottom:0.75rem}
+.home-potd-label{font-size:10px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+.home-potd-ar{font-size:26px;direction:rtl;color:var(--text);line-height:1.4;margin-bottom:3px}
+.home-potd-ro{font-size:12px;color:var(--text2);font-style:italic;margin-bottom:2px}
+.home-potd-en{font-size:13px;font-weight:500;color:var(--text)}
+.home-potd-from{font-size:11px;color:var(--text3);margin-top:4px}
+
+/* Stats strip */
+.home-stats{display:flex;gap:0;margin-top:0.25rem;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:0.75rem}
+.home-stat{flex:1;text-align:center;padding:8px 4px;border-right:1px solid var(--border)}
+.home-stat:last-child{border-right:none}
+.home-stat-n{font-size:18px;font-weight:500;color:var(--green)}
+.home-stat-l{font-size:10px;color:var(--text3);margin-top:1px}
+
+/* Home tab bar */
+.home-nav{position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:1px solid var(--border);display:flex;z-index:40;padding-bottom:env(safe-area-inset-bottom)}
+.home-nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px;background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--text3);font-size:10px;gap:3px;transition:color 0.15s}
+.home-nav-btn.active{color:var(--green)}
+.home-nav-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+
+/* Unit overview page */
+#p-unit-overview{background:var(--bg)}
+.uov-wrap{max-width:540px;margin:0 auto;padding:1rem 1.25rem 5rem;width:100%}
+.uov-back{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text2);margin-bottom:1rem;background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;padding:0}
+
+/* ENRICHMENT PAGE */
+#p-enrichment{background:var(--bg)}
+.enrichment-page-wrap{max-width:540px;margin:0 auto;padding:1.25rem 1.25rem 5rem;width:100%}
+.enrichment-back{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text2);margin-bottom:1rem;background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;padding:0}
+
+</style>
+
+<!-- ═══════════════════════════════════════
+     WELCOME / INTRO
+═══════════════════════════════════════ -->
 <div id="p-welcome" class="page active">
   <div id="splash"><div class="splash-arabic">مرحباً</div><div class="splash-roman">marhaba</div></div>
   <div id="intro-seq">
@@ -391,7 +459,9 @@ textarea.field{resize:none;line-height:1.6;font-size:14px}
   </div>
 </div>
 
-<!-- LOGIN -->
+<!-- ═══════════════════════════════════════
+     LOGIN
+═══════════════════════════════════════ -->
 <div id="p-login" class="page">
   <div class="auth-wrap">
     <div style="margin-bottom:1.5rem;margin-top:2rem">
@@ -408,7 +478,9 @@ textarea.field{resize:none;line-height:1.6;font-size:14px}
   </div>
 </div>
 
-<!-- STEP 1 -->
+<!-- ═══════════════════════════════════════
+     ONBOARDING
+═══════════════════════════════════════ -->
 <div id="p-name" class="page"><div class="wrap">
   <div class="step-dots"><div class="sdot active"></div><div class="sdot"></div><div class="sdot"></div><div class="sdot"></div></div>
   <div class="step-tag">Step 1 of 4</div><div class="step-title">What's your name?</div>
@@ -417,89 +489,236 @@ textarea.field{resize:none;line-height:1.6;font-size:14px}
   <button class="btn-primary" id="btn-name" onclick="go('p-speaker')" disabled>continue →</button>
 </div></div>
 
-<!-- STEP 2 -->
 <div id="p-speaker" class="page"><div class="wrap" style="padding-top:1.25rem">
   <div class="step-dots"><div class="sdot done"></div><div class="sdot active"></div><div class="sdot"></div><div class="sdot"></div></div>
   <div class="step-tag">Step 2 of 4</div><div class="step-title">How would you describe your Arabic?</div>
-  <div class="step-sub">Be honest — this shapes your entire curriculum. There's no wrong answer.</div>
+  <div class="step-sub">This shapes your starting point and how we explain things.</div>
   <div class="choices" id="c-speaker">
     <button class="ch" onclick="pick1('speaker',this,'new')"><div class="ch-icon">✦</div><div class="ch-body"><div class="ch-title">Complete beginner</div><div class="ch-desc">Little to no Arabic. We'll start with the alphabet.</div></div><div class="ch-tick"></div></button>
     <button class="ch" onclick="pick1('speaker',this,'heritage')"><div class="ch-icon">🌿</div><div class="ch-body"><div class="ch-title">Heritage speaker</div><div class="ch-desc">Arabic was spoken around me growing up but I've lost much of it.</div></div><div class="ch-tick"></div></button>
-    <button class="ch" onclick="pick1('speaker',this,'basic')"><div class="ch-icon">◈</div><div class="ch-body"><div class="ch-title">Basic knowledge</div><div class="ch-desc">Some words and phrases but can't hold a conversation.</div></div><div class="ch-tick"></div></button>
-    <button class="ch" onclick="pick1('speaker',this,'intermediate')"><div class="ch-icon">◉</div><div class="ch-body"><div class="ch-title">Intermediate</div><div class="ch-desc">Simple conversations but want to go deeper.</div></div><div class="ch-tick"></div></button>
-    <button class="ch" onclick="pick1('speaker',this,'advanced')"><div class="ch-icon">❋</div><div class="ch-body"><div class="ch-title">Advanced / fluent</div><div class="ch-desc">Speak well but want to refine or expand.</div></div><div class="ch-tick"></div></button>
+    <button class="ch" onclick="pick1('speaker',this,'intermediate')"><div class="ch-icon">◈</div><div class="ch-body"><div class="ch-title">Intermediate</div><div class="ch-desc">I can hold basic conversations but want to go deeper.</div></div><div class="ch-tick"></div></button>
+    <button class="ch" onclick="pick1('speaker',this,'advanced')"><div class="ch-icon">❋</div><div class="ch-body"><div class="ch-title">Advanced</div><div class="ch-desc">Fluent but want to sharpen dialect, vocabulary, or formality.</div></div><div class="ch-tick"></div></button>
   </div>
   <button class="btn-primary" id="btn-speaker" onclick="go('p-goals')" disabled>continue →</button>
   <button class="btn-ghost" onclick="go('p-name')">← back</button>
 </div></div>
 
-<!-- STEP 3 -->
 <div id="p-goals" class="page"><div class="wrap">
   <div class="step-dots"><div class="sdot done"></div><div class="sdot done"></div><div class="sdot active"></div><div class="sdot"></div></div>
-  <div class="step-tag">Step 3 of 4</div><div class="step-title">What do you want to achieve?</div>
-  <div class="step-sub">Select everything that applies — your curriculum will be weighted toward your goals.</div>
-  <div class="multi-hint">Select all that apply</div>
+  <div class="step-tag">Step 3 of 4</div><div class="step-title">What do you want to use Arabic for?</div>
+  <div class="step-sub">Choose all that apply. This shapes your vocabulary and scenarios.</div>
   <div class="choices" id="c-goals">
-    <button class="ch" onclick="pickM('goals',this,'conversation')"><div class="ch-icon">💬</div><div class="ch-body"><div class="ch-title">Everyday conversation</div><div class="ch-desc">Talk comfortably in daily situations.</div></div><div class="ch-sq"></div></button>
-    <button class="ch" onclick="pickM('goals',this,'family')"><div class="ch-icon">🫂</div><div class="ch-body"><div class="ch-title">Connecting with family</div><div class="ch-desc">Speak with relatives, understand gatherings.</div></div><div class="ch-sq"></div></button>
-    <button class="ch" onclick="pickM('goals',this,'travel')"><div class="ch-icon">✈️</div><div class="ch-body"><div class="ch-title">Travel & survival</div><div class="ch-desc">Navigate markets, restaurants, transport.</div></div><div class="ch-sq"></div></button>
-    <button class="ch" onclick="pickM('goals',this,'reading')"><div class="ch-icon">📖</div><div class="ch-body"><div class="ch-title">Reading & writing</div><div class="ch-desc">Read Arabic script, write messages.</div></div><div class="ch-sq"></div></button>
-    <button class="ch" onclick="pickM('goals',this,'professional')"><div class="ch-icon">💼</div><div class="ch-body"><div class="ch-title">Professional or academic</div><div class="ch-desc">Formal Arabic for work or study.</div></div><div class="ch-sq"></div></button>
-    <button class="ch" onclick="pickM('goals',this,'culture')"><div class="ch-icon">🎭</div><div class="ch-body"><div class="ch-title">Culture & identity</div><div class="ch-desc">Heritage, music, poetry, film.</div></div><div class="ch-sq"></div></button>
+    <button class="ch" onclick="pickM('goals',this,'family')"><div class="ch-icon">🫂</div><div class="ch-body"><div class="ch-title">Connecting with family</div><div class="ch-desc">Speak with parents, grandparents, or extended family.</div></div><div class="ch-tick"></div></button>
+    <button class="ch" onclick="pickM('goals',this,'travel')"><div class="ch-icon">✈️</div><div class="ch-body"><div class="ch-title">Travel and daily life</div><div class="ch-desc">Navigate markets, restaurants, taxis, and conversation.</div></div><div class="ch-tick"></div></button>
+    <button class="ch" onclick="pickM('goals',this,'culture')"><div class="ch-icon">🎭</div><div class="ch-body"><div class="ch-title">Culture, music and media</div><div class="ch-desc">Understand songs, films, poetry and cultural references.</div></div><div class="ch-tick"></div></button>
+    <button class="ch" onclick="pickM('goals',this,'professional')"><div class="ch-icon">💼</div><div class="ch-body"><div class="ch-title">Professional Arabic</div><div class="ch-desc">Formal language for work, writing, or media.</div></div><div class="ch-tick"></div></button>
+    <button class="ch" onclick="pickM('goals',this,'conversation')"><div class="ch-icon">💬</div><div class="ch-body"><div class="ch-title">Everyday conversation</div><div class="ch-desc">Fluid natural speech for social situations.</div></div><div class="ch-tick"></div></button>
+    <button class="ch" onclick="pickM('goals',this,'reading')"><div class="ch-icon">📖</div><div class="ch-body"><div class="ch-title">Reading and writing</div><div class="ch-desc">Understand the script and written Arabic.</div></div><div class="ch-tick"></div></button>
   </div>
-  <div style="margin-bottom:1.25rem">
-    <div style="font-size:11px;color:var(--text3);margin-bottom:6px;font-style:italic">Anything else? (optional)</div>
-    <textarea class="field" id="goals-extra" rows="3" placeholder="e.g. I want to read the Quran, visiting Palestine in 6 months, talk to my grandparents..."></textarea>
-  </div>
-  <button class="btn-primary" id="btn-goals" onclick="go('p-dialect')" disabled>continue →</button>
+  <input class="field" id="goals-extra" placeholder="Any specific goals? (optional)" style="margin-top:8px"/>
+  <button class="btn-primary" id="btn-goals" onclick="onDialectContinue()" disabled>continue →</button>
   <button class="btn-ghost" onclick="go('p-speaker')">← back</button>
 </div></div>
 
-<!-- STEP 4 -->
 <div id="p-dialect" class="page"><div class="wrap">
   <div class="step-dots"><div class="sdot done"></div><div class="sdot done"></div><div class="sdot done"></div><div class="sdot active"></div></div>
-  <div class="step-tag">Step 4 of 4</div><div class="step-title">Which Arabic do you want to learn?</div>
-  <div class="step-sub">You can always add more later.</div>
+  <div class="step-tag">Step 4 of 4</div><div class="step-title">Which dialect?</div>
+  <div class="step-sub">Your vocabulary and pronunciation will be tuned to this dialect.</div>
   <div class="choices" id="c-dialect">
-    <button class="ch" onclick="pick1('dialect',this,'msa')"><div class="ch-icon">📜</div><div class="ch-body"><div class="ch-title">Modern Standard Arabic (MSA)</div><div class="ch-desc">Formal written language — news, literature, official settings.</div></div><div class="ch-tick"></div></button>
-    <button class="ch" onclick="pick1('dialect',this,'palestinian')"><div class="ch-icon">🫒</div><div class="ch-body"><div class="ch-title">Levantine — Palestinian dialect</div><div class="ch-desc">Spoken dialect, widely understood across the Levant.</div></div><div class="ch-tick"></div></button>
-    <button class="ch" onclick="pick1('dialect',this,'other')"><div class="ch-icon">🌍</div><div class="ch-body"><div class="ch-title">Another dialect</div><div class="ch-desc">Egyptian, Moroccan, Gulf, Lebanese, Syrian and more.</div><div class="other-wrap" id="other-wrap" onclick="event.stopPropagation()"><input class="other-field" id="inp-other" type="text" placeholder="e.g. Egyptian, Moroccan, Gulf..." oninput="onOther()"/></div></div><div class="ch-tick"></div></button>
+    <button class="ch" onclick="pick1('dialect',this,'palestinian')"><div class="ch-icon">🇵🇸</div><div class="ch-body"><div class="ch-title">Palestinian</div><div class="ch-desc">Levantine dialect — spoken in Palestine, Jordan, Lebanon, Syria.</div></div><div class="ch-tick"></div></button>
+    <button class="ch" onclick="pick1('dialect',this,'egyptian')"><div class="ch-icon">🇪🇬</div><div class="ch-body"><div class="ch-title">Egyptian</div><div class="ch-desc">The most widely understood dialect across the Arab world.</div></div><div class="ch-tick"></div></button>
+    <button class="ch" onclick="pick1('dialect',this,'gulf')"><div class="ch-icon">🏜️</div><div class="ch-body"><div class="ch-title">Gulf</div><div class="ch-desc">Spoken in Saudi Arabia, UAE, Kuwait, Qatar, Bahrain.</div></div><div class="ch-tick"></div></button>
+    <button class="ch" onclick="pick1('dialect',this,'msa')"><div class="ch-icon">📚</div><div class="ch-body"><div class="ch-title">Modern Standard Arabic</div><div class="ch-desc">Formal written Arabic — used in media, education, official contexts.</div></div><div class="ch-tick"></div></button>
+    <button class="ch" onclick="pick1('dialect',this,'other')"><div class="ch-icon">◎</div><div class="ch-body"><div class="ch-title">Other / Mixed</div><div class="ch-desc">Tell us more.</div></div><div class="ch-tick"></div></button>
   </div>
-  <button class="btn-primary" id="btn-dialect" onclick="onDialectContinue()" disabled>see my plan →</button>
+  <div class="other-wrap" id="other-wrap"><input class="field" id="inp-other" placeholder="Which dialect?" oninput="onOther()"/></div>
+  <button class="btn-primary" id="btn-dialect" onclick="go('p-summary')" disabled>continue →</button>
   <button class="btn-ghost" onclick="go('p-goals')">← back</button>
 </div></div>
 
 <!-- SUMMARY -->
 <div id="p-summary" class="page"><div class="wrap">
-  <div class="step-tag" style="text-align:center">You're all set</div>
-  <div class="step-title" style="text-align:center;margin-bottom:4px" id="sum-title"></div>
+  <div class="sum-title" id="sum-title"></div>
   <div class="sum-arabic" id="sum-arabic"></div>
-  <div class="step-sub" style="text-align:center;margin-top:8px;margin-bottom:1.25rem" id="sum-desc"></div>
+  <div class="sum-desc" id="sum-desc"></div>
   <div class="sum-card" id="sum-card"></div>
   <div id="beginner-bridge" style="display:none">
-    <div class="bridge">
-      <div class="bridge-title">Your starting point</div>
-      <div class="bridge-sub">You'll begin with the Arabic alphabet — learning to read and pronounce letters alongside your first words.</div>
-      <div class="lrow"><div class="lnum">1</div><div><div class="ltext">Arabic alphabet</div><div class="lsub">Letters, sounds, groupings by shape</div></div></div>
-      <div class="lrow"><div class="lnum">2</div><div><div class="ltext">First words</div><div class="lsub">English letters alongside Arabic script</div></div></div>
-      <div class="lrow"><div class="lnum">3</div><div><div class="ltext">Basic conversation</div><div class="lsub">Greetings, family, essential phrases</div></div></div>
-    </div>
-    <button class="btn-primary" onclick="goToGeneration()">build my course →</button>
+    <div style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:1.25rem;padding:12px 14px;background:var(--bg2);border-radius:var(--r)">We'll start you with the alphabet and essential phonics before building your first vocabulary units.</div>
+    <button class="btn-primary" onclick="go('p-home')">let's begin →</button>
   </div>
   <div id="placement-bridge" style="display:none">
-    <div class="bridge">
-      <div class="bridge-title">Next: adaptive placement test</div>
-      <div class="bridge-sub">Covers all 5 levels. Builds your personalised curriculum. About 10 minutes.</div>
-      <div class="lrow"><div class="lnum">1</div><div><div class="ltext">Survival basics</div><div class="lsub">Greetings, numbers, family</div></div></div>
-      <div class="lrow"><div class="lnum">2</div><div><div class="ltext">Daily life</div><div class="lsub">Home, food, routine</div></div></div>
-      <div class="lrow"><div class="lnum">3</div><div><div class="ltext">Verbs & action</div><div class="lsub">Tenses, sentences</div></div></div>
-      <div class="lrow"><div class="lnum">4</div><div><div class="ltext">Expression</div><div class="lsub">Opinions, emotions</div></div></div>
-      <div class="lrow"><div class="lnum">5</div><div><div class="ltext">Fluency</div><div class="lsub">Idioms, cultural phrases</div></div></div>
-    </div>
-    <button class="btn-primary" onclick="startPlacement()">start placement test →</button>
+    <div style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:1.25rem;padding:12px 14px;background:var(--bg2);border-radius:var(--r)">Your home screen is ready. Take the placement test whenever you're ready to unlock your personalised lesson.</div>
+    <button class="btn-primary" onclick="finishOnboarding()">go to my home screen →</button>
   </div>
-  <button class="btn-ghost" onclick="go('p-dialect')">← back</button>
 </div></div>
+
+
+<!-- ═══════════════════════════════════════
+     HOME SCREEN (NEW — replaces p-course as landing)
+═══════════════════════════════════════ -->
+<div id="p-home" class="page">
+  <div class="home-wrap">
+    <!-- Greeting -->
+    <div class="home-greeting">
+      <span id="home-greeting-text">مرحباً</span>
+      <div id="user-pill" class="user-pill" onclick="showUserMenu()"><div class="uav" id="user-av"></div><span id="user-name-lbl"></span></div>
+    </div>
+
+    <!-- Continue lesson card -->
+    <div id="home-lesson-card" class="home-lesson-card" onclick="goToLesson()">
+      <div id="hlc-countdown" class="hlc-countdown" style="display:none"></div>
+      <div id="hlc-unit" class="hlc-unit"></div>
+      <div id="hlc-title" class="hlc-title"></div>
+      <div id="hlc-stage" class="hlc-stage"></div>
+      <div class="hlc-progress"><div id="hlc-progress-fill" class="hlc-progress-fill" style="width:0%"></div></div>
+      <div class="hlc-action"><span id="hlc-action-text">continue →</span><span>→</span></div>
+      <div id="hlc-session" class="hlc-session" style="display:none"></div>
+    </div>
+
+    <!-- Phrase of the day -->
+    <div id="home-potd" class="home-potd" style="display:none">
+      <div class="home-potd-label">✦ phrase of the day</div>
+      <div class="home-potd-ar" id="home-potd-ar"></div>
+      <div class="home-potd-ro" id="home-potd-ro"></div>
+      <div class="home-potd-en" id="home-potd-en"></div>
+      <div class="home-potd-from" id="home-potd-from"></div>
+    </div>
+
+    <!-- Today's practice -->
+    <div class="home-card" onclick="go('p-enrichment')">
+      <div class="home-card-icon">⚡</div>
+      <div class="home-card-body">
+        <div class="home-card-title">Today's practice</div>
+        <div class="home-card-sub">A daily writing or reading exercise</div>
+      </div>
+      <div class="home-card-arrow">→</div>
+    </div>
+
+    <!-- Focused study -->
+    <div class="home-card" onclick="go('p-focused-study')">
+      <div class="home-card-icon">🎯</div>
+      <div class="home-card-body">
+        <div class="home-card-title">Focused study</div>
+        <div class="home-card-sub">Study for a specific situation</div>
+      </div>
+      <div class="home-card-arrow">→</div>
+    </div>
+
+    <!-- My vocabulary -->
+    <div class="home-card" onclick="go('p-my-vocab')">
+      <div class="home-card-icon">📖</div>
+      <div class="home-card-body">
+        <div class="home-card-title">My Vocabulary</div>
+        <div class="home-card-sub" id="home-vocab-sub">Your personal word bank</div>
+      </div>
+      <div class="home-card-arrow">→</div>
+    </div>
+
+    <!-- Stats strip -->
+    <div class="home-stats">
+      <div class="home-stat"><div class="home-stat-n" id="hs-sessions">0</div><div class="home-stat-l">sessions</div></div>
+      <div class="home-stat"><div class="home-stat-n" id="hs-words">0</div><div class="home-stat-l">words owned</div></div>
+      <div class="home-stat"><div class="home-stat-n" id="hs-units">0</div><div class="home-stat-l">units done</div></div>
+    </div>
+  </div>
+
+  <!-- Bottom nav -->
+  <nav class="home-nav">
+    <button class="home-nav-btn active" id="nav-home" onclick="showHomeTab('home',this)">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+      Home
+    </button>
+    <button class="home-nav-btn" id="nav-progress" onclick="showHomeTab('progress',this)">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Progress
+    </button>
+    <button class="home-nav-btn" id="nav-settings" onclick="showHomeTab('settings',this)">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      Settings
+    </button>
+  </nav>
+
+  <!-- Home tab panes -->
+  <div id="home-tab-progress" style="display:none;padding:1rem 1.25rem 5rem;max-width:540px;margin:0 auto">
+    <div class="prog-card"><div style="font-size:14px;font-weight:500;margin-bottom:3px" id="prog-level">Beginner</div><div style="font-size:12px;color:var(--text2);margin-bottom:10px" id="prog-desc">Building your foundation</div><div class="prog-track" style="height:7px"><div class="prog-fill" id="prog-bar" style="width:0%"></div></div><div style="font-size:11px;color:var(--text3);margin-top:5px" id="prog-pct">0% of vocabulary mastered</div></div>
+    <div class="prog-card"><div style="font-size:10px;font-weight:500;letter-spacing:0.08em;color:var(--text3);text-transform:uppercase;margin-bottom:8px">Unit mastery</div><div id="unit-mastery-list"></div></div>
+    <div class="prog-card" id="weak-card" style="display:none"><div style="font-size:10px;font-weight:500;letter-spacing:0.08em;color:var(--text3);text-transform:uppercase;margin-bottom:6px">Words to review</div><div style="font-size:12px;color:var(--text2);margin-bottom:8px">These words have appeared in failed sets. They'll come up more often until you nail them.</div><div class="weak-list" id="weak-list"></div></div>
+    <div class="prog-card"><div style="font-size:10px;font-weight:500;letter-spacing:0.08em;color:var(--text3);text-transform:uppercase;margin-bottom:6px">This week</div><div class="week-grid" id="week-grid"></div></div>
+    <div class="prog-card"><div style="font-size:10px;font-weight:500;letter-spacing:0.08em;color:var(--text3);text-transform:uppercase;margin-bottom:10px">Checkpoints</div><div id="checkpoint-list"></div><div id="conversation-history"></div></div>
+    <div class="prog-card"><div style="font-size:10px;font-weight:500;letter-spacing:0.08em;color:var(--text3);text-transform:uppercase;margin-bottom:10px">90-day roadmap</div><div id="ms-list"></div></div>
+  </div>
+
+  <div id="home-tab-settings" style="display:none;padding:1rem 1.25rem 5rem;max-width:540px;margin:0 auto">
+    <div class="prog-card" id="push-settings-card" style="display:none"></div>
+    <div class="prog-card">
+      <div style="font-size:10px;font-weight:500;letter-spacing:0.08em;color:var(--text3);text-transform:uppercase;margin-bottom:8px">Download units in advance</div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:10px">Going offline? Download future units now so you can study without internet.</div>
+      <div id="download-ahead-list"></div>
+    </div>
+    <div class="prog-card">
+      <div style="font-size:10px;font-weight:500;letter-spacing:0.08em;color:var(--text3);text-transform:uppercase;margin-bottom:8px">Account</div>
+      <div id="settings-account-info" style="font-size:13px;color:var(--text2);margin-bottom:10px"></div>
+      <button onclick="signOut()" style="width:100%;padding:11px;border:1px solid var(--red);border-radius:var(--r);background:transparent;color:var(--red);font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer">sign out</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     UNIT OVERVIEW (was p-course lessons tab)
+═══════════════════════════════════════ -->
+<div id="p-unit-overview" class="page">
+  <div class="uov-wrap">
+    <button class="uov-back" onclick="go('p-home')">← home</button>
+    <div id="aya-course-header" style="display:none"></div>
+    <div id="units-list"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     ENRICHMENT PAGE
+═══════════════════════════════════════ -->
+<div id="p-enrichment" class="page">
+  <div style="height:100vh;height:100dvh;display:flex;flex-direction:column;max-width:540px;margin:0 auto;width:100%">
+    <div style="padding:1.25rem 1.25rem 0;flex-shrink:0">
+      <button class="enrichment-back" onclick="go('p-home')">← home</button>
+      <div style="font-family:'Lora',serif;font-size:20px;margin-bottom:4px">Today's practice</div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:1rem">A daily writing or reading exercise</div>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:0 1.25rem 2rem">
+      <div id="enrichment-content-page">
+        <div style="text-align:center;padding:2rem 0">
+          <div style="font-size:13px;color:var(--text2)">Building your exercise...</div>
+          <div class="spinner" style="margin:12px auto;width:20px;height:20px;border:2px solid var(--border2);border-top-color:var(--green);border-radius:50%;animation:spin 0.8s linear infinite"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     FOCUSED STUDY (placeholder — Stage B)
+═══════════════════════════════════════ -->
+<div id="p-focused-study" class="page">
+  <div style="height:100vh;height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;text-align:center">
+    <div style="font-size:32px;margin-bottom:12px">🎯</div>
+    <div style="font-family:'Lora',serif;font-size:20px;margin-bottom:8px">Focused study</div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:1.5rem">Coming in the next build</div>
+    <button class="btn-ghost" onclick="go('p-home')">← back</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     MY VOCABULARY (placeholder — Stage C)
+═══════════════════════════════════════ -->
+<div id="p-my-vocab" class="page">
+  <div style="height:100vh;height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;text-align:center">
+    <div style="font-size:32px;margin-bottom:12px">📖</div>
+    <div style="font-family:'Lora',serif;font-size:20px;margin-bottom:8px">My Vocabulary</div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:1.5rem">Coming in the next build</div>
+    <button class="btn-ghost" onclick="go('p-home')">← back</button>
+  </div>
+</div>
+
 
 <!-- PLACEMENT TEST -->
 <div id="p-test" class="page">
@@ -561,64 +780,6 @@ textarea.field{resize:none;line-height:1.6;font-size:14px}
     <div class="step-sub" style="max-width:280px;margin:0 auto">Generating your first two units based on your profile and goals.</div>
     <div class="gen-track"><div class="gen-fill" id="gen-fill" style="width:0%"></div></div>
     <div style="font-size:12px;color:var(--text3)" id="gen-label">Analysing your results...</div>
-  </div>
-</div>
-
-<!-- MAIN COURSE APP -->
-<div id="p-course" class="page">
-  <div class="app-header">
-    <div class="app-header-inner">
-      <div class="app-logo">مرحباً <span>Arabic</span></div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <div class="offline-badge" id="offline-badge" style="display:none">📥 offline</div>
-        <div class="user-pill" id="user-pill" onclick="showUserMenu()"><div class="uav" id="user-av"></div><span id="user-name-lbl"></span></div>
-      </div>
-    </div>
-    <div class="app-nav">
-      <button class="nav-btn active" onclick="showTab('lessons',this)">Lessons</button>
-      <button class="nav-btn" onclick="showTab('progress',this)">Progress</button>
-      <button class="nav-btn" onclick="showTab('checkpoints',this)">Checkpoints</button>
-      <button class="nav-btn" onclick="showTab('settings',this)">Settings</button>
-    </div>
-  </div>
-  <div id="tab-lessons" class="course-wrap">
-    <div class="stat-grid"><div class="stat"><div class="stat-n" id="s-words">0</div><div class="stat-l">words mastered</div></div><div class="stat"><div class="stat-n" id="s-units">0</div><div class="stat-l">units done</div></div><div class="stat"><div class="stat-n" id="s-streak">0</div><div class="stat-l">day streak</div></div></div>
-    <div id="potd-card" class="potd-card" style="display:none">
-      <div class="potd-label">✦ phrase of the day</div>
-      <div class="potd-arabic" id="potd-arabic"></div>
-      <div class="potd-roman" id="potd-roman"></div>
-      <div class="potd-english" id="potd-english"></div>
-      <div class="potd-note" id="potd-note"></div>
-    </div>
-    <div id="aya-course-header" style="display:none"></div>
-    <div class="enrichment-banner" id="enrichment-banner" style="display:none"><div class="eb-icon">⚡</div><div><div class="eb-title">Enrichment mode active</div><div class="eb-sub">All units complete — daily prompts keep you sharp until your checkpoint.</div></div></div>
-    <div id="units-list"></div>
-    <div id="enrichment-prompts" style="display:none">
-      <div style="font-size:10px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:8px">Today's practice</div>
-      <div id="enrichment-content"></div>
-    </div>
-  </div>
-  <div id="tab-progress" class="course-wrap" style="display:none">
-    <div class="prog-card">
-      <div style="font-size:14px;font-weight:500;margin-bottom:3px" id="prog-level">Beginner</div>
-      <div style="font-size:12px;color:var(--text2);margin-bottom:10px" id="prog-desc">Building your foundation</div>
-      <div class="prog-track" style="height:7px"><div class="prog-fill" id="prog-bar" style="width:0%"></div></div>
-      <div style="font-size:11px;color:var(--text3);margin-top:5px" id="prog-pct">0% of vocabulary mastered</div>
-    </div>
-    <div class="prog-card"><div style="font-size:10px;font-weight:500;letter-spacing:0.08em;color:var(--text3);text-transform:uppercase;margin-bottom:8px">Unit mastery</div><div id="unit-mastery-list"></div></div>
-    <div class="prog-card" id="weak-card" style="display:none"><div style="font-size:10px;font-weight:500;letter-spacing:0.08em;color:var(--text3);text-transform:uppercase;margin-bottom:6px">Words to review</div><div style="font-size:12px;color:var(--text2);margin-bottom:8px">These words have appeared in failed sets. They'll come up more often until you nail them.</div><div class="weak-list" id="weak-list"></div></div>
-    <div class="prog-card"><div style="font-size:10px;font-weight:500;letter-spacing:0.08em;color:var(--text3);text-transform:uppercase;margin-bottom:6px">This week</div><div class="week-grid" id="week-grid"></div></div>
-    <div class="prog-card"><div style="font-size:10px;font-weight:500;letter-spacing:0.08em;color:var(--text3);text-transform:uppercase;margin-bottom:10px">90-day roadmap</div><div id="ms-list"></div></div>
-  </div>
-  <div id="tab-checkpoints" class="course-wrap" style="display:none"><div id="checkpoint-list"></div><div id="conversation-history"></div></div>
-  <div id="tab-settings" class="course-wrap" style="display:none">
-    <div class="prog-card" id="push-settings-card" style="display:none"></div>
-
-    <div class="prog-card">
-      <div style="font-size:10px;font-weight:500;letter-spacing:0.08em;color:var(--text3);text-transform:uppercase;margin-bottom:8px">Download units in advance</div>
-      <div style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:10px">Going offline? Download future units now so you can study without internet.</div>
-      <div id="download-ahead-list"></div>
-    </div>
   </div>
 </div>
 
@@ -732,12 +893,12 @@ textarea.field{resize:none;line-height:1.6;font-size:14px}
 
 <!-- AYA PHONICS -->
 <div id="p-aya-phonics" class="page">
-  <div style="min-height:100vh;display:flex;flex-direction:column;padding:1.25rem 1.25rem 1.5rem;max-width:540px;margin:0 auto;width:100%">
+  <div style="height:100vh;height:100dvh;display:flex;flex-direction:column;padding:1.25rem 1.25rem 1.5rem;max-width:540px;margin:0 auto;width:100%;overflow:hidden;box-sizing:border-box">
     <div style="margin-bottom:0.75rem;flex-shrink:0">
       <div class="step-tag" id="phonics-tag" style="margin-bottom:3px">Before we begin</div>
       <div style="font-family:'Lora',serif;font-size:20px;font-weight:400;color:var(--text)" id="phonics-title">Reading Arabic romanization</div>
     </div>
-    <div id="aya-phonics-content" style="flex:1;display:flex;flex-direction:column;justify-content:space-between;min-height:0"></div>
+    <div id="aya-phonics-content" style="flex:1;display:flex;flex-direction:column;justify-content:space-between;min-height:0;overflow:hidden"></div>
   </div>
 </div>
 
@@ -781,7 +942,7 @@ textarea.field{resize:none;line-height:1.6;font-size:14px}
     <div class="aya-divider" id="aya-comp-div" style="margin:1.5rem auto"></div>
     <div class="aya-line" id="aya-comp-msg" style="font-size:16px;line-height:1.8">I love you more than Arabic has words for. كتير</div>
     <div class="aya-line soft" id="aya-comp-love" style="font-size:15px;margin-top:8px">أحبك — Marwan</div>
-    <button class="btn-cta shown" id="aya-comp-btn" onclick="go('p-course')" style="margin-top:2rem;opacity:0;transform:translateY(8px);transition:opacity 0.7s ease,transform 0.7s ease">back to your course</button>
+    <button class="btn-cta shown" id="aya-comp-btn" onclick="go('p-home')" style="margin-top:2rem;opacity:0;transform:translateY(8px);transition:opacity 0.7s ease,transform 0.7s ease">back to your course</button>
   </div>
 </div>
 
@@ -791,36 +952,34 @@ textarea.field{resize:none;line-height:1.6;font-size:14px}
 
 <!-- PUSH NOTIFICATION PROMPT -->
 <div id="p-push-prompt" class="page">
-  <div style="min-height:100vh;display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,0.3)">
-    <div class="push-prompt" style="width:100%;max-width:540px;padding:1.25rem 1.25rem 1.5rem">
-      <div class="push-prompt-icon" style="font-size:24px;margin-bottom:8px">🔔</div>
-      <div class="push-prompt-title" style="font-size:17px;margin-bottom:6px">Stay on track with a daily reminder</div>
-      <div class="push-prompt-sub" style="font-size:12px;margin-bottom:1rem">Marwan set this up so you never miss a day of practice. When would you like your reminder?</div>
-      <div class="time-opts" id="push-time-opts">
-        <div class="time-opt" onclick="pickPushTime(this,'08:00')">
-          <div class="time-opt-icon">🌅</div>
-          <div><div class="time-opt-label">Morning — 8:00 am</div><div class="time-opt-sub">Start the day with something for us</div></div>
-        </div>
-        <div class="time-opt" onclick="pickPushTime(this,'12:30')">
-          <div class="time-opt-icon">☀️</div>
-          <div><div class="time-opt-label">Midday — 12:30 pm</div></div>
-        </div>
-        <div class="time-opt" onclick="pickPushTime(this,'20:00')">
-          <div class="time-opt-icon">🌙</div>
-          <div><div class="time-opt-label">Evening — 8:00 pm</div><div class="time-opt-sub">Reviewing before sleep helps your brain store new language overnight ✨</div></div>
-        </div>
-        <div class="time-opt" onclick="pickPushTime(this,'custom')">
-          <div class="time-opt-icon">⏰</div>
-          <div><div class="time-opt-label">Custom time</div></div>
-        </div>
+  <div style="height:100vh;height:100dvh;display:flex;flex-direction:column;justify-content:center;padding:1.5rem;max-width:480px;margin:0 auto;width:100%;box-sizing:border-box">
+    <div style="font-size:28px;margin-bottom:10px;text-align:center">🔔</div>
+    <div style="font-family:'Lora',serif;font-size:20px;font-weight:400;text-align:center;margin-bottom:6px">Daily reminder</div>
+    <div style="font-size:13px;color:var(--text2);line-height:1.6;text-align:center;margin-bottom:1.25rem">Marwan set this up so you never miss a day of practice. When would you like yours?</div>
+    <div class="time-opts" id="push-time-opts" style="margin-bottom:0.75rem">
+      <div class="time-opt" onclick="pickPushTime(this,'08:00')">
+        <div class="time-opt-icon">🌅</div>
+        <div><div class="time-opt-label">Morning — 8:00 am</div></div>
       </div>
-      <div class="time-custom" id="push-custom-wrap">
-        <input class="time-input" type="time" id="push-custom-time" value="09:00"/>
+      <div class="time-opt" onclick="pickPushTime(this,'12:30')">
+        <div class="time-opt-icon">☀️</div>
+        <div><div class="time-opt-label">Midday — 12:30 pm</div></div>
       </div>
-      <button class="btn-primary" id="btn-push-confirm" onclick="confirmPushTime()" disabled>set my reminder →</button>
-      <button class="btn-ghost" onclick="skipPushPrompt()">not now</button>
-      <div style="font-size:11px;color:var(--text3);margin-top:8px;line-height:1.6;text-align:center">You can change this anytime in settings</div>
+      <div class="time-opt" onclick="pickPushTime(this,'20:00')">
+        <div class="time-opt-icon">🌙</div>
+        <div><div class="time-opt-label">Evening — 8:00 pm</div><div class="time-opt-sub" style="display:block;font-size:10px">Best for memory — your brain stores language during sleep</div></div>
+      </div>
+      <div class="time-opt" onclick="pickPushTime(this,'custom')">
+        <div class="time-opt-icon">⏰</div>
+        <div><div class="time-opt-label">Custom time</div></div>
+      </div>
     </div>
+    <div class="time-custom" id="push-custom-wrap">
+      <input class="time-input" type="time" id="push-custom-time" value="09:00" style="margin-bottom:0.75rem"/>
+    </div>
+    <button class="btn-primary" id="btn-push-confirm" onclick="confirmPushTime()" disabled>set my reminder →</button>
+    <button class="btn-ghost" onclick="skipPushPrompt()" style="margin-top:6px">not now</button>
+    <div style="font-size:11px;color:var(--text3);margin-top:8px;text-align:center">You can change this anytime in settings</div>
   </div>
 </div>
 
@@ -831,6 +990,7 @@ textarea.field{resize:none;line-height:1.6;font-size:14px}
     <div class="modal-body" id="modal-body"></div>
   </div>
 </div>
+
 
 <script>
 // ═══════════════════════════
@@ -1153,7 +1313,7 @@ function loadPlacementState(){
 
 function exitPlacement(){
   savePlacementState();
-  if(profile.name){go('p-course');}
+  if(profile.name){go('p-home');}
   else{go('p-login');}
 }
 
@@ -1170,9 +1330,9 @@ function exitQuiz(){
   }
   // Navigate back appropriately
   if(isAyaCourse){
-    go('p-course');
+    go('p-home');
   } else if(profile.name){
-    go('p-course');
+    go('p-home');
   } else {
     go('p-login');
   }
@@ -1856,7 +2016,7 @@ async function runGen(isBeginner){
 function launchCourse(){
   if(!users[activeUser].startDate)users[activeUser].startDate=Date.now();
   save();
-  go('p-course');
+  go('p-home');
 }
 
 // ═══════════════════════════
@@ -2187,7 +2347,7 @@ async function showUnlock(unit){
 
 function continueAfterPass(){const up=getUP(quiz.unitId);startQuiz(quiz.unitId);}
 function retryStage(){startQuiz(quiz.unitId);}
-function backToLessons(){go('p-course');}
+function backToLessons(){go('p-home');}
 
 // ═══════════════════════════
 // CHECKPOINTS
@@ -2260,7 +2420,7 @@ async function endCheckpoint(day){
     <div class="debrief-section"><div class="ds-label">What worked well</div>${(debrief.worked||[]).map(w=>`<div style="display:flex;gap:8px;margin-bottom:6px;font-size:13px"><span style="color:var(--green)">✓</span><span>${w}</span></div>`).join('')}</div>
     <div class="debrief-section"><div class="ds-label">To work on</div>${(debrief.improve||[]).map(w=>`<div style="display:flex;gap:8px;margin-bottom:6px;font-size:13px"><span style="color:var(--amber)">→</span><span>${w}</span></div>`).join('')}</div>
     <div class="debrief-section"><div class="ds-label">Fluency band</div><div class="fluency-band">${debrief.band||'developing'}</div><div style="font-size:12px;color:var(--text2);margin-top:6px">${debrief.next||''}</div>${debrief.speed?`<div style="font-size:12px;color:var(--text3);margin-top:6px">Speed: ${debrief.speed}</div>`:''}</div>
-    <button class="btn-primary" onclick="go('p-course')">back to lessons</button>`;
+    <button class="btn-primary" onclick="go('p-home')">back to lessons</button>`;
 }
 
 // ═══════════════════════════
@@ -2334,7 +2494,7 @@ function pickBreak(el,val){
 function confirmBreak(){
   const msgs={'days':'See you in a few days. يلا بعدين 🌤','weeks':'Take your time. We\'ll be here. 📅','month':'Whenever you\'re ready. بنحكي بعدين 🌙'};
   alert(msgs[breakChoice]||'Your progress is saved. Come back whenever you\'re ready.');
-  go('p-course');
+  go('p-home');
 }
 function pickDur(el,val){
   document.querySelectorAll('#dur-btns .ch').forEach(b=>b.classList.remove('sel'));
@@ -2354,7 +2514,7 @@ async function buildPhase2(){
   }
   await anim(80,'Setting up milestones...',800);
   await anim(100,'Phase 2 ready!',600);
-  setTimeout(()=>{save();go('p-course');},800);
+  setTimeout(()=>{save();go('p-home');},800);
 }
 
 // ═══════════════════════════
@@ -2519,7 +2679,7 @@ async function onAuthSuccess(user) {
         profile.dialectOther = profileData.dialect_other || '';
         users.marwan.name = profileData.name;
         await loadProgressFromSupabaseByEmail(email);
-        go('p-course');
+        go('p-home');
         return;
       }
     } catch(e) {}
@@ -2528,7 +2688,7 @@ async function onAuthSuccess(user) {
   const local = JSON.parse(localStorage.getItem('arabic_app_v3') || '{}');
   if (local.profile && local.profile.name) {
     // Has local progress — go straight to course
-    go('p-course');
+    go('p-home');
   } else {
     go('p-name');
   }
@@ -2673,7 +2833,7 @@ async function endCheckpoint(day) {
     if (local.profile && local.profile.name) {
       if (local.users && local.users.marwan && Object.keys(local.users.marwan.unitProgress||{}).length > 0) {
         isGuest = true;
-        go('p-course');
+        go('p-home');
         return;
       }
     }
@@ -3106,7 +3266,7 @@ async function beginAyaCourse() {
   await updateAyaSessions();
   const hasProgress = Object.keys(users.marwan.unitProgress || {}).length > 0;
   if (hasProgress) {
-    go('p-course');
+    go('p-home');
     setTimeout(maybeShowPushPrompt, 2000);
   } else {
     // New user — show push prompt page first, then phonics
@@ -3152,7 +3312,7 @@ function showAyaReturnSplash() {
   // Auto-advance to course after 5s
   setTimeout(async () => {
     await updateAyaSessions();
-    go('p-course');
+    go('p-home');
   }, 5000);
 }
 
@@ -3269,7 +3429,7 @@ function nextAyaPhonics() {
   if (ayaPhonicsIdx < AYA_PHONICS.length - 1) {
     showAyaPhonics(ayaPhonicsIdx + 1);
   } else {
-    go('p-course');
+    go('p-home');
   }
 }
 
@@ -3540,7 +3700,7 @@ function showAyaQuizResult(pct, passed, unit, up) {
     <button class="btn-primary" onclick="${passed ? 'continueAyaAfterPass()' : 'startAyaQuiz(\''+quiz.unitId+'\')'}">
       ${passed ? 'continue →' : 'try again →'}
     </button>
-    <button class="btn-outline" onclick="go('p-course')">back to lessons</button>`;
+    <button class="btn-outline" onclick="go('p-home')">back to lessons</button>`;
 }
 
 function continueAyaAfterPass() { startAyaQuiz(quiz.unitId); }
@@ -3605,7 +3765,7 @@ function showAyaUnlockDirect(unit, note, nextUnit, allMastered) {
     </div>
     ${note ? `<div class="marwan-note"><div class="marwan-note-text">${note}</div><div class="marwan-note-from">— Marwan</div></div>` : ''}
     ${nextUnit && !nextUnit.isCheckpoint ? `<div style="font-size:12px;color:var(--green-m);text-align:center;margin-bottom:12px"><strong>${nextUnit.title}</strong> is now unlocked.</div>` : ''}
-    <button class="btn-primary" onclick="go('p-course')">${nextUnit ? 'continue to ' + nextUnit.title + ' →' : 'back to lessons'}</button>`;
+    <button class="btn-primary" onclick="go('p-home')">${nextUnit ? 'continue to ' + nextUnit.title + ' →' : 'back to lessons'}</button>`;
 
   if (allMastered) setTimeout(showAyaCourseComplete, 3000);
 }
@@ -3701,7 +3861,7 @@ function _afterPushPrompt() {
     window._pushPromptCallback = null;
     cb();
   } else {
-    go('p-course');
+    go('p-home');
   }
 }
 
@@ -3908,6 +4068,253 @@ function speakAyaPhrase(arabicText) {
   utt.lang = 'ar-SA';
   utt.rate = 0.75;
   window.speechSynthesis.speak(utt);
+}
+</script>
+
+<script>
+// ═══════════════════════════════════════════
+// HOME SCREEN — NEW NAVIGATION SYSTEM
+// ═══════════════════════════════════════════
+
+function renderHome() {
+  updateUserPill();
+  renderHomeLessonCard();
+  renderHomePOTD();
+  renderHomeStats();
+  if (isAyaCourse) renderAyaHomeExtras();
+  checkOffline();
+  updateTimezone();
+}
+
+function renderHomeLessonCard() {
+  const card = document.getElementById('home-lesson-card');
+  const placementDone = users.marwan.startDate || Object.keys(users.marwan.unitProgress || {}).length > 0;
+
+  if (!placementDone) {
+    // Pre-placement state
+    card.className = 'home-lesson-card pre-placement';
+    document.getElementById('hlc-unit').textContent = '';
+    document.getElementById('hlc-title').textContent = 'Take the placement test';
+    document.getElementById('hlc-stage').textContent = 'Unlock your personalised lesson';
+    document.getElementById('hlc-progress-fill').style.width = '0%';
+    document.getElementById('hlc-action-text').textContent = 'start placement test →';
+    document.getElementById('hlc-session').style.display = 'none';
+    document.getElementById('hlc-countdown').style.display = 'none';
+    card.onclick = () => go('p-test');
+    return;
+  }
+
+  // Post-placement state
+  card.className = 'home-lesson-card';
+  card.onclick = () => goToLesson();
+
+  const allUnits = getAllUnits();
+  const currentUnit = isAyaCourse
+    ? AYA_UNITS.find(u => !u.isCheckpoint && !getUP(u.id).mastered)
+    : allUnits.find(u => !getUP(u.id).mastered);
+
+  if (currentUnit) {
+    const up = getUP(currentUnit.id);
+    const stageLabels = ['Introduce', 'Reinforce', 'Mastery check'];
+    const stagePct = up.stage === 1 ? 8 : up.stage === 2 ? 40 : 50 + (up.consec / 2) * 50;
+    document.getElementById('hlc-unit').textContent = currentUnit.icon + ' ' + (isAyaCourse ? 'your lesson' : 'current unit');
+    document.getElementById('hlc-title').textContent = currentUnit.title;
+    document.getElementById('hlc-stage').textContent = 'Stage ' + up.stage + ' — ' + (stageLabels[up.stage - 1] || '');
+    document.getElementById('hlc-progress-fill').style.width = stagePct + '%';
+    document.getElementById('hlc-action-text').textContent = isAyaCourse ? 'continue your Arabic →' : 'continue →';
+  } else {
+    document.getElementById('hlc-unit').textContent = '✓ all units';
+    document.getElementById('hlc-title').textContent = 'Course complete';
+    document.getElementById('hlc-stage').textContent = 'Enrichment mode active';
+    document.getElementById('hlc-progress-fill').style.width = '100%';
+    document.getElementById('hlc-action-text').textContent = 'review units →';
+  }
+
+  // Aya countdown
+  if (isAyaCourse && ayaConfig && ayaConfig.visit_date) {
+    const visitDate = new Date(ayaConfig.visit_date);
+    const today = new Date();
+    const daysLeft = Math.ceil((visitDate - today) / (1000 * 60 * 60 * 24));
+    const cdEl = document.getElementById('hlc-countdown');
+    if (daysLeft > 0) {
+      cdEl.style.display = 'flex';
+      cdEl.textContent = '✨ ' + daysLeft + ' days until June 5';
+    } else {
+      cdEl.style.display = 'none';
+    }
+    const sessionEl = document.getElementById('hlc-session');
+    sessionEl.style.display = 'block';
+    sessionEl.textContent = '~12 minutes 🌿';
+  }
+}
+
+function renderHomePOTD() {
+  const card = document.getElementById('home-potd');
+  const allPhrases = isAyaCourse
+    ? AYA_UNITS.flatMap(u => u.phrases || [])
+    : getAllUnits().flatMap(u => u.phrases || []);
+  if (!allPhrases.length) { card.style.display = 'none'; return; }
+  const today = new Date();
+  const seed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+  const p = allPhrases[seed % allPhrases.length];
+  const allUnits = isAyaCourse ? AYA_UNITS : getAllUnits();
+  const unitForPhrase = allUnits.find(u => u.phrases && u.phrases.find(ph => ph.id === p.id));
+  const u = users[activeUser];
+  const anyMastered = Object.values(u.unitProgress || {}).some(up => up && up.stage >= 2);
+  const displayAr = anyMastered ? stripH(p.ar) : p.ar;
+  card.style.display = 'block';
+  document.getElementById('home-potd-ar').textContent = displayAr;
+  document.getElementById('home-potd-ro').textContent = p.ro || '';
+  document.getElementById('home-potd-en').textContent = p.en;
+  document.getElementById('home-potd-from').textContent = unitForPhrase ? 'from ' + unitForPhrase.title : '';
+}
+
+function renderHomeStats() {
+  const u = users[activeUser];
+  const allUnits = isAyaCourse ? AYA_UNITS.filter(un => !un.isCheckpoint) : getAllUnits();
+  let mastered = 0, unitsDone = 0, totalWords = 0;
+  allUnits.forEach(unit => {
+    const up = getUP(unit.id);
+    if (up && up.mastered) { mastered += (unit.words || unit.phrases?.length || 0); unitsDone++; }
+    totalWords += (unit.words || unit.phrases?.length || 0);
+  });
+  const sessions = isAyaCourse ? (ayaConfig?.sessions_completed || 0) : (u.streak || 0);
+  document.getElementById('hs-sessions').textContent = sessions;
+  document.getElementById('hs-words').textContent = mastered;
+  document.getElementById('hs-units').textContent = unitsDone;
+}
+
+function renderAyaHomeExtras() {
+  // Aya-specific home screen — already handled in renderHomeLessonCard
+  // Phonics revisit option
+  const vocabSub = document.getElementById('home-vocab-sub');
+  if (vocabSub) vocabSub.textContent = 'Your personal word bank';
+}
+
+function goToLesson() {
+  const placementDone = users.marwan.startDate || Object.keys(users.marwan.unitProgress || {}).length > 0;
+  if (!placementDone && !isAyaCourse) {
+    go('p-test');
+    return;
+  }
+  go('p-unit-overview');
+  renderUnitOverview();
+}
+
+function renderUnitOverview() {
+  // Aya gets her custom renderer, standard users get renderUnits
+  if (isAyaCourse) {
+    renderAyaCourse();
+  } else {
+    renderUnits();
+    // Populate aya-course-header slot if used
+    const h = document.getElementById('aya-course-header');
+    if (h) h.style.display = 'none';
+  }
+}
+
+function showHomeTab(name, btn) {
+  // Toggle tab panes
+  document.getElementById('home-wrap-main') && (document.getElementById('home-wrap-main').style.display = name === 'home' ? 'block' : 'none');
+  document.getElementById('home-tab-progress').style.display = name === 'progress' ? 'block' : 'none';
+  document.getElementById('home-tab-settings').style.display = name === 'settings' ? 'block' : 'none';
+
+  // Show/hide main home content
+  const homeWrap = document.querySelector('#p-home .home-wrap');
+  if (homeWrap) homeWrap.style.display = name === 'home' ? 'block' : 'none';
+
+  // Update nav buttons
+  document.querySelectorAll('.home-nav-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+
+  if (name === 'progress') renderProgress();
+  if (name === 'settings') {
+    updateApiStatus();
+    renderDownloadTab();
+    if (isAyaCourse) {
+      const c = document.getElementById('push-settings-card');
+      if (c) { c.style.display = 'block'; renderPushSettings(); }
+    }
+    // Update account info
+    const acct = document.getElementById('settings-account-info');
+    if (acct) acct.textContent = currentUser ? currentUser.email : 'Guest mode — no account';
+  }
+}
+
+function finishOnboarding() {
+  // Called from summary page for non-beginner users
+  users[activeUser].name = profile.name;
+  save();
+  if (sb && currentUser) {
+    try { sb.from('profiles').upsert({id: currentUser.id, email: currentUser.email, name: profile.name, speaker_type: profile.speaker, goals: profile.goals, goals_extra: profile.goalsExtra, dialect: profile.dialect, dialect_other: profile.dialectOther}); } catch(e) {}
+  }
+  go('p-home');
+  renderHome();
+}
+
+// Override go() to trigger renderHome when navigating to p-home
+const _originalGo = go;
+function go(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const el = document.getElementById(id);
+  if (el) el.classList.add('active');
+  window.scrollTo(0, 0);
+  if (id === 'p-home') renderHome();
+  if (id === 'p-summary') buildSummary();
+  if (id === 'p-unit-overview') renderUnitOverview();
+  if (id === 'p-enrichment') loadEnrichmentPage();
+}
+
+async function loadEnrichmentPage() {
+  const container = document.getElementById('enrichment-content-page');
+  if (!container) return;
+  container.innerHTML = '<div style="text-align:center;padding:2rem 0"><div style="font-size:13px;color:var(--text2)">Building your exercise...</div><div class="spinner" style="margin:12px auto;width:20px;height:20px;border:2px solid var(--border2);border-top-color:var(--green);border-radius:50%;animation:spin 0.8s linear infinite"></div></div>';
+  // Reuse existing enrichment generation logic
+  const goalsText = profile.goals.map(g => GOAL_L[g]).join(', ');
+  const u = users[activeUser];
+  const weakPhrases = u.weakWords.slice(0, 5).map(id => {
+    const allPhrases = getAllUnits().flatMap(un => un.phrases);
+    const p = allPhrases.find(ph => ph.id === id);
+    return p ? p.en : null;
+  }).filter(Boolean);
+  const sys = `Generate a short enrichment exercise for a Palestinian Arabic learner.
+Return JSON: {"type":"reading or writing","arabic":"2-3 sentence Arabic text with harakaat OR empty string for writing prompt","translation":"English translation OR empty string","prompt":"English writing/speaking prompt OR empty string","instruction":"one line instruction"}
+For reading type: give 2-3 sentences slightly above their level in Palestinian Arabic.
+For writing type: give a specific, warm prompt.`;
+  const result = await callClaude(sys, `Goals: ${goalsText}. Weak words: ${weakPhrases.join(', ') || 'none'}.`);
+  if (result) {
+    try {
+      const clean = result.replace(/```json|```/g, '').trim();
+      const ep = JSON.parse(clean);
+      container.innerHTML = `<div class="enrichment-prompt">
+        <div class="ep-label">${ep.instruction || 'Today\'s practice'}</div>
+        ${ep.arabic ? `<div class="ep-text">${ep.arabic}</div><div class="ep-translation">${ep.translation || ''}</div>` : `<div class="ep-text" style="direction:ltr;text-align:left;color:var(--text2)">${ep.prompt || ''}</div>`}
+        <textarea class="field" style="margin-top:10px;margin-bottom:0" rows="4" placeholder="Write your response here..." oninput="handleOutputRTL(this)"></textarea>
+      </div>`;
+    } catch(e) {
+      container.innerHTML = '<div class="enrichment-prompt"><div class="ep-label">Daily practice</div><div class="ep-text" style="direction:ltr;text-align:left;color:var(--text2)">Write 3 sentences in Arabic about something that happened today.</div><textarea class="field" style="margin-top:10px;margin-bottom:0" rows="4" placeholder="اكتب هنا..." oninput="handleOutputRTL(this)"></textarea></div>';
+    }
+  } else {
+    container.innerHTML = '<div class="enrichment-prompt"><div class="ep-label">Daily practice</div><div class="ep-text" style="direction:ltr;text-align:left;color:var(--text2)">Write 3 sentences in Arabic about something that happened today.</div><textarea class="field" style="margin-top:10px;margin-bottom:0" rows="4" placeholder="اكتب هنا..." oninput="handleOutputRTL(this)"></textarea></div>';
+  }
+}
+
+// Patch launchCourse to go to home screen instead of old p-course
+function launchCourse() {
+  if (!users[activeUser].startDate) users[activeUser].startDate = Date.now();
+  save();
+  go('p-home');
+}
+
+// Patch backToLessons
+function backToLessons() { go('p-home'); }
+
+// Patch renderCourse — now calls renderHome (kept for backwards compat)
+function renderCourse() { renderHome(); }
+
+// Override showUserMenu to use new settings location
+function showUserMenu() {
+  showHomeTab('settings', document.getElementById('nav-settings'));
 }
 </script>
 </body></html>
