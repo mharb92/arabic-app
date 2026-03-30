@@ -2907,6 +2907,19 @@ function resetAuthForm() {
 // ═══════════════════════════
 // AUTH SUCCESS + PROFILE SYNC
 // ═══════════════════════════
+async function checkAyaCourse(email) {
+  if (!sb) return false;
+  try {
+    const { data } = await sb.from('special_courses').select('config').eq('email', email).single();
+    if (data && data.config) {
+      ayaConfig = data.config;
+      isAyaCourse = true;
+      return true;
+    }
+  } catch(e) {}
+  return false;
+}
+
 async function onAuthSuccess(user) {
   currentUser = { email: user.email, id: user.id || user.email };
   const email = user.email;
@@ -3393,18 +3406,6 @@ const AYA_UNITS = [
 // AYA COURSE — CORE LOGIC
 // ═══════════════════════════════════════════
 
-async function checkAyaCourse(email) {
-  if (!sb) return false;
-  try {
-    const { data } = await sb.from('special_courses').select('config').eq('email', email).single();
-    if (data && data.config) {
-      ayaConfig = data.config;
-      isAyaCourse = true;
-      return true;
-    }
-  } catch(e) {}
-  return false;
-}
 
 async function launchAyaCourse() {
   if (currentUser) await loadProgressFromSupabaseByEmail(currentUser.email);
@@ -4610,7 +4611,6 @@ function showHomeTab(name, btn) {
 
   if (name === 'progress') renderProgress();
   if (name === 'settings') {
-    updateApiStatus();
     renderDownloadTab();
     if (isAyaCourse) {
       const c = document.getElementById('push-settings-card');
