@@ -2810,7 +2810,7 @@ async function buildPhase2(){
 // SUPABASE CONFIG
 // ═══════════════════════════
 const SUPABASE_URL = 'https://xkhulybdrxdzakarivvi.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_NtOLOeDOCn3w2faTU4m8Ow_4iUhcVkM';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhraHVseWJkcnhkemFrYXJpdnZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MDA2MDcsImV4cCI6MjA5MDI3NjYwN30.kk2Kk2sdXiXP_foPOWCQBNFeYXDDhYKk4cUS5kY9YNk';
 let sb = null;
 let currentUser = null;
 
@@ -3566,21 +3566,35 @@ function showAyaEl(id) {
 
 let _beginningCourse = false;
 async function beginAyaCourse() {
-  if (_beginningCourse) return;
+  console.log('🔵 beginAyaCourse called');
+  if (_beginningCourse) {
+    console.log('⚠️ Already beginning course, returning');
+    return;
+  }
   _beginningCourse = true;
   try {
+    console.log('📝 Marking splash as seen...');
     await markAyaSplashSeen();
+    console.log('📊 Updating sessions...');
     await updateAyaSessions();
     const hasProgress = Object.keys(users.marwan.unitProgress || {}).length > 0;
     const hasSeenPhonics = ayaConfig && ayaConfig.has_seen_phonics === true;
+    console.log('🔍 hasProgress:', hasProgress, 'hasSeenPhonics:', hasSeenPhonics);
+    console.log('📦 unitProgress:', users.marwan.unitProgress);
+    console.log('⚙️ ayaConfig:', ayaConfig);
     if (hasProgress || hasSeenPhonics) {
+      console.log('✅ Going to home (has progress or seen phonics)');
       go('p-home');
       if(!hasProgress) setTimeout(maybeShowPushPrompt, 2000);
     } else {
+      console.log('🎯 Showing push prompt then phonics');
       showAyaPushPromptThenPhonics();
     }
+  } catch(err) {
+    console.error('❌ Error in beginAyaCourse:', err);
   } finally {
     _beginningCourse = false;
+    console.log('🏁 beginAyaCourse complete');
   }
 }
 
@@ -4436,8 +4450,17 @@ function renderHomeLessonCard() {
   const placementDone = users.marwan.startDate || Object.keys(users.marwan.unitProgress || {}).length > 0;
   // Aya and new learners skip placement gate — go straight to lesson
   const skipPlacementGate = isAyaCourse || profile.speaker === 'new';
+  
+  console.log('🏠 renderHomeLessonCard called');
+  console.log('  placementDone:', placementDone);
+  console.log('  - startDate:', users.marwan.startDate);
+  console.log('  - unitProgress keys:', Object.keys(users.marwan.unitProgress || {}));
+  console.log('  skipPlacementGate:', skipPlacementGate);
+  console.log('  - isAyaCourse:', isAyaCourse);
+  console.log('  - profile.speaker:', profile.speaker);
 
   if (!placementDone && !skipPlacementGate) {
+    console.log('✅ Showing PLACEMENT TEST card');
     card.className = 'home-lesson-card pre-placement';
     document.getElementById('hlc-unit').textContent = '';
     document.getElementById('hlc-title').textContent = 'Take the placement test';
@@ -4449,6 +4472,8 @@ function renderHomeLessonCard() {
     card.onclick = () => go('p-test');
     return;
   }
+  
+  console.log('⚠️ Showing CONTINUE LESSON card (skipping placement)');
 
   // Post-placement state
   card.className = 'home-lesson-card';
@@ -4598,10 +4623,14 @@ function showHomeTab(name, btn) {
 }
 
 function finishOnboarding() {
+  console.log('🎓 finishOnboarding called');
+  console.log('  profile:', profile);
+  console.log('  users.marwan before save:', JSON.stringify(users.marwan));
   // Called from summary page for non-beginner users
   if(!profile.dialect)profile.dialect='palestinian'; // defensive default
   users[activeUser].name = profile.name;
   save();
+  console.log('  users.marwan after save:', JSON.stringify(users.marwan));
   if (sb && currentUser) {
     try { sb.from('profiles').upsert({id: currentUser.id, email: currentUser.email, name: profile.name, speaker_type: profile.speaker, goals: profile.goals, goals_extra: profile.goalsExtra, dialect: profile.dialect, dialect_other: profile.dialectOther}); } catch(e) {}
   }
