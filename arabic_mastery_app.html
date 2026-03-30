@@ -68,7 +68,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .field:focus{outline:none;border-color:var(--green)}.field::placeholder{color:var(--text3)}
 textarea.field{resize:none;line-height:1.6;font-size:14px}
 .choices{display:flex;flex-direction:column;gap:8px;margin-bottom:1.25rem}
-.ch{display:flex;align-items:flex-start;gap:13px;padding:13px 15px;border:1px solid var(--border2);border-radius:var(--r);cursor:pointer;background:var(--bg);text-align:left;transition:all 0.15s;width:100%}
+.ch{display:flex;align-items:flex-start;gap:13px;padding:13px 15px;border:1px solid var(--border2);border-radius:var(--r);cursor:pointer;background:var(--bg);text-align:left;transition:all 0.15s;width:100%;font-size:14px;-webkit-text-size-adjust:none}
 .ch:hover{background:var(--bg2)}.ch.sel{border-color:var(--green);background:var(--green-l)}
 .ch-icon{width:36px;height:36px;border-radius:8px;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
 .ch.sel .ch-icon{background:rgba(26,107,80,0.12)}
@@ -111,9 +111,9 @@ textarea.field{resize:none;line-height:1.6;font-size:14px}
 .lvl-name{font-size:13px;font-weight:500}.set-sub{font-size:11px;color:var(--text3);margin-top:2px}.q-ctr{font-size:12px;color:var(--text3)}
 .qcard{background:var(--bg);border:1px solid var(--border);border-radius:var(--rl);padding:1.75rem 1.5rem;margin-bottom:1.5rem;min-height:140px;display:flex;flex-direction:column;justify-content:center}
 .qtype-lbl{font-size:11px;font-weight:500;letter-spacing:0.08em;color:var(--text3);text-transform:uppercase;margin-bottom:12px}
-.qtext{font-size:19px;color:var(--text);line-height:1.6;text-align:center;font-weight:500}.qarabic{font-size:42px;color:var(--text);direction:rtl;text-align:center;padding:14px 0;line-height:1.4;font-weight:400}
+.qtext{font-size:19px;color:var(--text);line-height:1.5;text-align:center;font-weight:500;margin-bottom:1.25rem}.qarabic{font-size:42px;color:var(--text);direction:rtl;text-align:center;padding:14px 0;line-height:1.4;font-weight:400}
 .opts{display:flex;flex-direction:column;gap:12px;margin-bottom:1.5rem}
-.opt{padding:18px 14px;border:1px solid var(--border2);border-radius:var(--r);cursor:pointer;font-size:17px;color:var(--text);background:var(--bg);text-align:center;font-family:'DM Sans',sans-serif;transition:all 0.1s;width:100%;line-height:1.4}
+.opt{padding:18px 14px;border:1px solid var(--border2);border-radius:var(--r);cursor:pointer;font-size:17px;color:var(--text);background:var(--bg);text-align:center;min-height:52px;display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif;transition:all 0.1s;width:100%;line-height:1.4}
 .opt:hover{background:var(--bg2)}.opt.correct{border-color:var(--green);background:var(--green-l);color:var(--green-d)}.opt.wrong{border-color:var(--red);background:var(--red-l);color:var(--red)}
 .feedback{padding:12px 16px;border-radius:var(--r);margin-bottom:1rem;font-size:15px;display:none;text-align:center}
 .feedback.correct{background:var(--green-l);color:var(--green-d);display:block}.feedback.wrong{background:var(--red-l);color:var(--red);display:block}
@@ -582,7 +582,7 @@ textarea.field{resize:none;line-height:1.6;font-size:14px}
     <button class="ch" onclick="pick1('dialect',this,'other')"><div class="ch-icon">◎</div><div class="ch-body"><div class="ch-title">Other / Mixed</div><div class="ch-desc">Tell us more.</div></div><div class="ch-tick"></div></button>
   </div>
   <div class="other-wrap" id="other-wrap"><input class="field" id="inp-other" placeholder="Which dialect?" oninput="onOther()"/></div>
-  <button class="btn-primary" id="btn-dialect" onclick="go('p-summary')" disabled>continue →</button>
+  <button class="btn-primary" id="btn-dialect" onclick="onDialectContinue()" disabled>continue →</button>
   <button class="btn-ghost" onclick="go('p-goals')">← back</button>
 </div></div>
 
@@ -664,6 +664,26 @@ textarea.field{resize:none;line-height:1.6;font-size:14px}
       <div class="home-card-arrow">→</div>
     </div>
 
+    <!-- Aya: romanization guide card -->
+    <div id="home-rom-guide" style="display:none;margin-bottom:0.75rem">
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden">
+        <button onclick="toggleHomeRomGuide()" style="width:100%;padding:10px 14px;background:none;border:none;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-weight:500">
+          <span>🔤 Sound guide</span><span id="home-rom-toggle">▾</span>
+        </button>
+        <div id="home-rom-content" style="display:none;padding:0 14px 12px">
+          <div style="font-size:12px;color:var(--text2);margin-bottom:8px;line-height:1.5">A few Arabic sounds use numbers in romanization. Here's the key:</div>
+          <div style="display:flex;flex-direction:column;gap:5px">
+            <div style="display:flex;align-items:center;gap:8px;font-size:12px"><span style="font-weight:700;color:var(--green);width:20px">7</span><span style="font-size:16px;direction:rtl">ح</span><span style="color:var(--text2)">breathy H — as in 7abibi</span></div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:12px"><span style="font-weight:700;color:var(--green);width:20px">3</span><span style="font-size:16px;direction:rtl">ع</span><span style="color:var(--text2)">throat vowel — as in 3ayle</span></div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:12px"><span style="font-weight:700;color:var(--green);width:20px">kh</span><span style="font-size:16px;direction:rtl">خ</span><span style="color:var(--text2)">rasping — as in khubz</span></div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:12px"><span style="font-weight:700;color:var(--green);width:20px">gh</span><span style="font-size:16px;direction:rtl">غ</span><span style="color:var(--text2)">soft gargle — as in ghali</span></div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:12px"><span style="font-weight:700;color:var(--green);width:20px">2</span><span style="font-size:16px;direction:rtl">ء</span><span style="color:var(--text2)">glottal stop — as in 2ahlan</span></div>
+          </div>
+          <button onclick="showAyaPhonics(-1)" style="margin-top:10px;width:100%;padding:8px;background:var(--green-l);border:1px solid rgba(26,107,80,0.2);border-radius:var(--r);font-family:'DM Sans',sans-serif;font-size:12px;color:var(--green-d);cursor:pointer">open full sound guide →</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Stats strip -->
     <div class="home-stats">
       <div class="home-stat"><div class="home-stat-n" id="hs-sessions">0</div><div class="home-stat-l">sessions</div></div>
@@ -707,8 +727,8 @@ textarea.field{resize:none;line-height:1.6;font-size:14px}
     </div>
     <div class="prog-card">
       <div style="font-size:10px;font-weight:500;letter-spacing:0.08em;color:var(--text3);text-transform:uppercase;margin-bottom:8px">Account</div>
-      <div id="settings-account-info" style="font-size:13px;color:var(--text2);margin-bottom:10px"></div>
-      <button onclick="signOut()" style="width:100%;padding:11px;border:1px solid var(--red);border-radius:var(--r);background:transparent;color:var(--red);font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer">sign out</button>
+      <div id="settings-account-info" style="font-size:13px;color:var(--text2);margin-bottom:12px"></div>
+      <button onclick="signOut()" style="width:100%;padding:13px;border:1.5px solid var(--red);border-radius:40px;background:transparent;color:var(--red);font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;font-weight:500">sign out →</button>
     </div>
   </div>
 </div>
@@ -801,11 +821,16 @@ textarea.field{resize:none;line-height:1.6;font-size:14px}
   <div style="height:100vh;height:100dvh;display:flex;flex-direction:column;max-width:540px;margin:0 auto;width:100%;box-sizing:border-box">
     <div style="padding:1.25rem 1.25rem 0;flex-shrink:0">
       <button class="uov-back" onclick="go('p-home')">← home</button>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
         <div style="font-family:'Lora',serif;font-size:20px">My Vocabulary</div>
         <button onclick="go('p-vocab-add')" style="padding:7px 14px;background:var(--green);color:#fff;border:none;border-radius:20px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer">+ add words</button>
       </div>
-      <div id="vocab-count-label" style="font-size:12px;color:var(--text2);margin-bottom:1rem">0 words in your bank</div>
+      <!-- Two mode buttons -->
+      <div style="display:flex;gap:8px;margin-bottom:1rem">
+        <button id="btn-vocab-mode-list" onclick="setVocabMode('list',this)" style="flex:1;padding:9px;background:var(--green);color:#fff;border:none;border-radius:var(--r);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer">My Words List</button>
+        <button id="btn-vocab-mode-study" onclick="setVocabMode('study',this)" style="flex:1;padding:9px;background:var(--bg2);color:var(--text);border:1px solid var(--border2);border-radius:var(--r);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer">Study</button>
+      </div>
+      <div id="vocab-count-label" style="font-size:12px;color:var(--text2);margin-bottom:8px">0 words in your bank</div>
       <div id="vocab-opt-in-banner" style="display:none;background:var(--green-l);border:1px solid rgba(26,107,80,0.2);border-radius:var(--r);padding:10px 14px;margin-bottom:1rem;font-size:13px;color:var(--green-d)">
         <div style="font-weight:500;margin-bottom:4px">Join the shared vocabulary pool?</div>
         <div style="font-size:12px;margin-bottom:8px;line-height:1.5">Words you add will be visible to other learners, and you'll get access to words they've added.</div>
@@ -815,11 +840,19 @@ textarea.field{resize:none;line-height:1.6;font-size:14px}
         </div>
       </div>
     </div>
-    <div style="flex:1;overflow-y:auto;padding:0 1.25rem 1rem">
+    <!-- List mode -->
+    <div id="vocab-mode-list" style="flex:1;overflow-y:auto;padding:0 1.25rem 1rem">
       <div id="vocab-word-list"><div style="text-align:center;padding:2rem;font-size:13px;color:var(--text3)">No words yet. Tap "+ add words" to get started.</div></div>
     </div>
-    <div style="padding:1rem 1.25rem;flex-shrink:0;border-top:1px solid var(--border)">
-      <button id="btn-vocab-study" class="btn-primary" onclick="startVocabFlashcards()" style="display:none">study flashcards →</button>
+    <!-- Study mode -->
+    <div id="vocab-mode-study" style="display:none;flex:1;overflow-y:auto;padding:0 1.25rem 1rem">
+      <div style="font-size:12px;color:var(--text2);margin-bottom:1rem;line-height:1.6">Choose which words to study. Words are sorted by mastery — weakest first.</div>
+      <button onclick="startVocabFlashcards('weak')" style="width:100%;padding:14px;background:var(--red-l);border:1px solid rgba(163,45,45,0.2);border-radius:var(--rl);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;color:var(--red);cursor:pointer;margin-bottom:10px;text-align:left;display:flex;justify-content:space-between;align-items:center">
+        <span>🔴 Weak Words <span id="vocab-weak-count" style="font-weight:400;font-size:12px"></span></span><span>→</span>
+      </button>
+      <button onclick="startVocabFlashcards('all')" style="width:100%;padding:14px;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--rl);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;color:var(--text);cursor:pointer;text-align:left;display:flex;justify-content:space-between;align-items:center">
+        <span>📖 All Words <span id="vocab-all-count" style="font-weight:400;font-size:12px"></span></span><span>→</span>
+      </button>
     </div>
   </div>
 </div>
@@ -957,7 +990,7 @@ textarea.field{resize:none;line-height:1.6;font-size:14px}
 
 <!-- QUIZ SCREEN -->
 <div id="p-quiz" class="page">
-  <button class="test-exit-btn" onclick="exitQuiz()" title="Save and exit">✕ save &amp; exit</button>
+  <button class="test-exit-btn" id="quiz-exit-btn" onclick="exitQuiz()" title="Save and exit" style="z-index:100">✕ save &amp; exit</button>
   <div class="wrap"><div id="quiz-content"></div></div>
 </div>
 
@@ -1077,7 +1110,7 @@ textarea.field{resize:none;line-height:1.6;font-size:14px}
 <!-- AYA FLASHCARD PAGE -->
 <div id="p-aya-flashcard" class="page">
   <button class="test-exit-btn" onclick="exitQuiz()">✕ exit</button>
-  <div style="min-height:100vh;display:flex;flex-direction:column;padding:1.25rem;max-width:540px;margin:0 auto;width:100%">
+  <div style="height:100vh;height:100dvh;display:flex;flex-direction:column;padding:1.25rem;max-width:540px;margin:0 auto;width:100%;box-sizing:border-box">
     <div id="aya-fc-header" style="flex-shrink:0;margin-bottom:0.75rem"></div>
     <div id="aya-fc-card" style="flex:1;display:flex;flex-direction:column;justify-content:center;cursor:pointer" onclick="flipAyaCard()"></div>
     <div id="aya-fc-nav" style="flex-shrink:0;margin-top:1rem"></div>
@@ -1086,7 +1119,7 @@ textarea.field{resize:none;line-height:1.6;font-size:14px}
 
 <!-- AYA SCRIPT NOTE PAGE -->
 <div id="p-aya-script-note" class="page">
-  <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem 1.5rem">
+  <div style="height:100vh;height:100dvh;display:flex;align-items:center;justify-content:center;padding:2rem 1.5rem;box-sizing:border-box;overflow:hidden">
     <div style="text-align:center;max-width:340px;margin:0 auto">
       <div style="font-size:48px;direction:rtl;color:var(--green);margin-bottom:20px">أَنْتِ رَائِعَة</div>
       <div class="marwan-note" style="margin-bottom:1.5rem">
@@ -1100,8 +1133,9 @@ textarea.field{resize:none;line-height:1.6;font-size:14px}
 
 <!-- AYA CULTURAL CARD PAGE -->
 <div id="p-aya-cultural" class="page">
-  <div class="wrap" style="padding-top:2rem">
-    <div id="aya-cultural-content"></div>
+  <div style="height:100vh;height:100dvh;display:flex;flex-direction:column;max-width:540px;margin:0 auto;width:100%;box-sizing:border-box">
+    <div style="flex:1;overflow-y:auto;padding:1.25rem">
+    <div id="aya-cultural-content"></div></div>
   </div>
 </div>
 
@@ -1180,6 +1214,43 @@ const GREETINGS={
 };
 const SPEAKER_L={new:'Complete beginner',heritage:'Heritage speaker',basic:'Basic knowledge',intermediate:'Intermediate',advanced:'Advanced / fluent'};
 const GOAL_L={conversation:'Everyday conversation',family:'Connecting with family',travel:'Travel & survival',reading:'Reading & writing',professional:'Professional / academic',culture:'Culture & identity'};
+
+// ─── MASTERY SCORE ───
+// Per-word score 0-100. Stored in weak_words.score + personal_vocab.score
+// Buckets: 0-39=red(weak), 40-74=yellow(developing), 75-100=green(owned)
+const MASTERY = {
+  WEAK_MAX: 39,
+  MID_MAX: 74,
+  scoreChange: { quizRight:+10, quizWrong:-15, fcGot:+8, fcNot:-10, unitMasteredFloor:50 }
+};
+function getMasteryBucket(score){
+  if(score===undefined||score===null)score=50;
+  if(score<=MASTERY.WEAK_MAX)return'red';
+  if(score<=MASTERY.MID_MAX)return'yellow';
+  return'green';
+}
+function getMasteryLabel(score){
+  const b=getMasteryBucket(score);
+  return b==='red'?'needs work':b==='yellow'?'developing':'owned';
+}
+function updateWordScore(phraseId, delta){
+  const u=users[activeUser];
+  if(!u.wordScores)u.wordScores={};
+  const current=u.wordScores[phraseId]??50;
+  u.wordScores[phraseId]=Math.max(0,Math.min(100,current+delta));
+  // Keep weak_words array in sync — word is "weak" if score < 75
+  if(u.wordScores[phraseId]<75){
+    if(!u.weakWords.includes(phraseId))u.weakWords.push(phraseId);
+  } else {
+    const idx=u.weakWords.indexOf(phraseId);
+    if(idx>-1)u.weakWords.splice(idx,1);
+  }
+}
+function getWordScore(phraseId){
+  const u=users[activeUser];
+  if(!u.wordScores)u.wordScores={};
+  return u.wordScores[phraseId]??50;
+}
 const DIALECT_L={msa:'Modern Standard Arabic',palestinian:'Levantine — Palestinian dialect'};
 const DUR_HINTS={'30':'A focused sprint — 2 units, 1 checkpoint.','60':'Good momentum — 3–4 units, 1 checkpoint.','90':'A full second cycle at higher level. 5–6 units, 2 checkpoints.','180':'Six months — ideal if you have a trip or event to prepare for.'};
 
@@ -1510,7 +1581,7 @@ function exitQuiz(){
   }
 }
 let users={
-  marwan:{name:'',streak:1,weakWords:[],unitProgress:{},checkpoints:{},startDate:null,latency:{}},
+  marwan:{name:'',streak:1,weakWords:[],wordScores:{},unitProgress:{},checkpoints:{},startDate:null,latency:{}},
   brother:{name:'',streak:0,weakWords:[],unitProgress:{},checkpoints:{},startDate:null,latency:{}}
 };
 let activeUser='marwan';
@@ -1691,7 +1762,8 @@ function pickM(g,el,val){
   if(g==='p2goals')$('btn-p2').disabled=arr.length===0;
 }
 function onOther(){profile.dialectOther=$('inp-other').value.trim();$('btn-dialect').disabled=profile.dialectOther.length<1;}
-function onDialectContinue(){profile.goalsExtra=($('goals-extra').value||'').trim();go('p-summary');}
+function onGoalsContinue(){profile.goalsExtra=($('goals-extra').value||'').trim();go('p-dialect');}
+function onDialectContinue(){go('p-summary');}
 function buildSummary(){
   const gr=GREETINGS[profile.speaker]||GREETINGS.new;
   $('sum-title').textContent='Welcome, '+profile.name+'.';
@@ -1793,6 +1865,8 @@ function pickT(i){
   fb.textContent=ok?'Correct!':'Not quite — '+q.o[q.a];
   $('btn-tnext').style.display='block';
   savePlacementState(); // save after every answer
+  // Update mastery score if phrase ID available
+  if(q.phraseId)updateWordScore(q.phraseId,ok?MASTERY.scoreChange.quizRight:MASTERY.scoreChange.quizWrong);
 }
 
 function nextQ(){if(tQi===tQs.length-1)endSet();else{tQi++;showQ();}}
@@ -2958,13 +3032,20 @@ async function saveCheckpointToSupabase(day, debrief) {
 
 async function signOut() {
   try { localStorage.removeItem('arabic_app_email'); } catch(e) {}
-  currentUser = null;
-  isAyaCourse = false;
-  ayaConfig = null;
+  currentUser = null; isAyaCourse = false; ayaConfig = null;
   profile = { name:'', speaker:'', goals:[], goalsExtra:'', dialect:'', dialectOther:'' };
-  users.marwan = { name:'', streak:0, weakWords:[], unitProgress:{}, checkpoints:{}, startDate:null, latency:{} };
+  users.marwan = { name:'', streak:0, weakWords:[], wordScores:{}, unitProgress:{}, checkpoints:{}, startDate:null, latency:{} };
   dynamicUnits = {};
+  resetAuthButton();
   go('p-login');
+}
+function resetAuthButton() {
+  const btn = document.getElementById('btn-auth-continue');
+  const inp = document.getElementById('auth-email');
+  if(btn) { btn.disabled = true; btn.textContent = 'continue →'; }
+  if(inp) inp.value = '';
+  const msg = document.getElementById('auth-msg');
+  if(msg) { msg.textContent = ''; msg.className = 'auth-msg'; }
 }
 
 // ═══════════════════════════
@@ -3123,6 +3204,7 @@ const AYA_PHONICS = [
   {
     letter:'ح',
     name:'Ha',
+    numeral:null,
     sound:'A soft, breathy H from deep in the throat',
     description:"Like whispering 'h' while breathing out slowly — not from the back of your mouth but lower, near your chest. There's no equivalent in Japanese or English.",
     example_ar:'حَبِيبِي',
@@ -3132,6 +3214,7 @@ const AYA_PHONICS = [
   {
     letter:'خ',
     name:'Kha',
+    numeral:null,
     sound:'A rasping sound from the back of the throat',
     description:"Like the 'ch' in the Scottish word 'loch' or the German 'Bach'. Not a K and not an H — somewhere between them, rougher. In Japanese, imagine a very rough は.",
     example_ar:'خُبْز',
@@ -3141,6 +3224,7 @@ const AYA_PHONICS = [
   {
     letter:'ع',
     name:'Ayn',
+    numeral:'3',
     sound:'A constricted vowel from deep in the throat',
     description:"This is the hardest sound for English and Japanese speakers. Start with a clear 'a' sound, then gently squeeze your throat — not your mouth, your throat. Like the feeling of a yawn but tighter. It always comes with a vowel.",
     example_ar:'عَائِلَة',
@@ -3150,6 +3234,7 @@ const AYA_PHONICS = [
   {
     letter:'غ',
     name:'Ghayn',
+    numeral:null,
     sound:'A soft gargling sound from the back of the throat',
     description:"Like the French 'r' in Paris, or gargling gently. Your tongue doesn't touch anything — the sound comes from the very back of your throat vibrating softly.",
     example_ar:'غَالِي',
@@ -3159,6 +3244,7 @@ const AYA_PHONICS = [
   {
     letter:'ق',
     name:'Qaf',
+    numeral:null,
     sound:'A K sound from much further back than usual',
     description:"Say 'K' but push the sound as far back in your throat as you can. In Palestinian dialect this is often softened or dropped — you may hear قهوة said as 'ahwe'. Both are correct.",
     example_ar:'قَهْوَة',
@@ -3302,17 +3388,41 @@ async function checkAyaCourse(email) {
 }
 
 async function launchAyaCourse() {
-  // Load Aya's progress from Supabase if logged in
-  if (currentUser) await loadProgressFromSupabase(currentUser.id);
-  // Set Aya's profile
+  if (currentUser) await loadProgressFromSupabaseByEmail(currentUser.email);
   profile.name = ayaConfig.name || 'Aya';
   users.marwan.name = profile.name;
   const hasSeen = ayaConfig.has_seen_splash === true;
   if (hasSeen) {
-    showAyaReturnSplash();
+    showAyaReturnSplashNew();
   } else {
     showAyaFirstSplash();
   }
+}
+
+function showAyaReturnSplashNew() {
+  // "Welcome back, my love" → gold line → يلا
+  // Fades in 1.8s then auto-advances to home
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const page = document.getElementById('p-aya-return');
+  if(page) page.classList.add('active');
+  window.scrollTo(0,0);
+  const wrap = document.getElementById('aya-return-wrap');
+  if(!wrap) { go('p-home'); return; }
+  wrap.innerHTML = `
+    <div style="text-align:center;max-width:320px;margin:0 auto;padding:2rem 1.5rem">
+      <div class="aya-line" id="ret-l1" style="font-size:19px">Welcome back, my love.</div>
+      <div class="aya-divider" id="ret-div" style="margin:1.25rem auto"></div>
+      <div class="aya-arabic-big" id="ret-ar" style="font-size:42px;margin-bottom:6px">يلا</div>
+      <div class="aya-roman" id="ret-ro">yalla</div>
+    </div>`;
+  setTimeout(()=>{ showAyaEl('ret-l1'); }, 200);
+  setTimeout(()=>{ showAyaEl('ret-div'); }, 700);
+  setTimeout(()=>{ showAyaEl('ret-ar'); }, 1000);
+  setTimeout(()=>{ showAyaEl('ret-ro'); }, 1500);
+  setTimeout(async ()=>{
+    await updateAyaSessions();
+    go('p-home');
+  }, 3000);
 }
 
 async function markAyaSplashSeen() {
@@ -3437,11 +3547,11 @@ async function beginAyaCourse() {
   await markAyaSplashSeen();
   await updateAyaSessions();
   const hasProgress = Object.keys(users.marwan.unitProgress || {}).length > 0;
-  if (hasProgress) {
+  const hasSeenPhonics = ayaConfig && ayaConfig.has_seen_phonics === true;
+  if (hasProgress || hasSeenPhonics) {
     go('p-home');
-    setTimeout(maybeShowPushPrompt, 2000);
+    if(!hasProgress) setTimeout(maybeShowPushPrompt, 2000);
   } else {
-    // New user — show push prompt page first, then phonics
     showAyaPushPromptThenPhonics();
   }
 }
@@ -3572,8 +3682,8 @@ function renderAyaPhonics(idx) {
           <div class="phonics-ex-en">${p.example_en}</div>
         </div>
         <button onclick="speakPhonicsExample('${p.name}','${p.example_ar}','${p.example_en}')"
-          style="margin-top:10px;width:100%;padding:9px;background:var(--green-l);border:1px solid rgba(26,107,80,0.2);border-radius:var(--r);font-family:'DM Sans',sans-serif;font-size:13px;color:var(--green-d);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
-          🔊 The letter ${p.name}, as in ${p.example_en}
+          style="margin-top:10px;width:100%;padding:9px;background:var(--green-l);border:1px solid rgba(26,107,80,0.2);border-radius:var(--r);font-family:'DM Sans',sans-serif;font-size:13px;color:var(--green-d);cursor:pointer;text-align:left;line-height:1.5">
+          🔊 The letter ${p.letter}, as in ${p.example_ar}.${p.numeral?' This is portrayed in English text with the number '+p.numeral+'.':''}
         </button>
       </div>
     </div>
@@ -3597,10 +3707,19 @@ function speakPhonicsExample(letterName, arabicWord, englishMeaning) {
   window.speechSynthesis.speak(arabic);
 }
 
-function nextAyaPhonics() {
+async function nextAyaPhonics() {
   if (ayaPhonicsIdx < AYA_PHONICS.length - 1) {
     showAyaPhonics(ayaPhonicsIdx + 1);
   } else {
+    // Mark phonics as seen
+    if (sb && currentUser && ayaConfig && !ayaConfig.has_seen_phonics) {
+      try {
+        await sb.from('special_courses').update({
+          config: { ...ayaConfig, has_seen_phonics: true }
+        }).eq('email', currentUser.email);
+        ayaConfig.has_seen_phonics = true;
+      } catch(e) {}
+    }
     go('p-home');
   }
 }
@@ -3684,6 +3803,7 @@ function renderAyaCourse() {
       <div class="unit-card${!unlocked ? ' locked' : ''}">
         ${unlocked ? `<div class="stage-strip">
           <div class="stage-tab${up.stage === 1 ? ' active' : ' done'}">Introduce</div>
+          <div class="stage-tab" onclick="event.stopPropagation();startAyaFlashcards('${unit.id}')" style="cursor:pointer;color:var(--green-m)">Flashcards</div>
           <div class="stage-tab${up.stage === 2 ? ' active' : up.stage > 2 ? ' done' : ' locked-tab'}">Reinforce</div>
         </div>` : ''}
         ${phrases}
@@ -3919,7 +4039,30 @@ function showAyaCulturalPage(culturalCard, unit, note, nextUnit, allMastered) {
   `;
 }
 
+function autoAddUnitToVocabBank(unit) {
+  // Add unit phrases to personal vocab bank automatically on unlock
+  if(!unit||!unit.phrases||!unit.phrases.length)return;
+  loadVocabBank();
+  let added=0;
+  unit.phrases.forEach(p=>{
+    const exists=vocabBank.find(w=>w.ar===p.ar||(w.id&&w.id===p.id));
+    if(!exists){
+      vocabBank.push({
+        id:p.id||('lesson_'+Date.now()+Math.random()),
+        ar:p.ar, ro:p.ro||'', en:p.en,
+        source:'lesson', confidence:'high',
+        addedBy:currentUser?currentUser.email:'guest',
+        createdAt:new Date().toISOString(), weakScore:0,
+        unitId:unit.id, unitTitle:unit.title
+      });
+      added++;
+    }
+  });
+  if(added>0){saveVocabBank();renderMyVocab&&renderMyVocab();}
+}
+
 function showAyaUnlockDirect(unit, note, nextUnit, allMastered) {
+  autoAddUnitToVocabBank(unit);
   // Show unit completion in quiz page
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('p-quiz').classList.add('active');
@@ -4261,9 +4404,10 @@ function renderHome() {
 function renderHomeLessonCard() {
   const card = document.getElementById('home-lesson-card');
   const placementDone = users.marwan.startDate || Object.keys(users.marwan.unitProgress || {}).length > 0;
+  // Aya and new learners skip placement gate — go straight to lesson
+  const skipPlacementGate = isAyaCourse || profile.speaker === 'new';
 
-  if (!placementDone) {
-    // Pre-placement state
+  if (!placementDone && !skipPlacementGate) {
     card.className = 'home-lesson-card pre-placement';
     document.getElementById('hlc-unit').textContent = '';
     document.getElementById('hlc-title').textContent = 'Take the placement test';
@@ -4357,15 +4501,25 @@ function renderHomeStats() {
 }
 
 function renderAyaHomeExtras() {
-  // Aya-specific home screen — already handled in renderHomeLessonCard
-  // Phonics revisit option
   const vocabSub = document.getElementById('home-vocab-sub');
   if (vocabSub) vocabSub.textContent = 'Your personal word bank';
+  // Show romanization guide card for Aya
+  const romGuide = document.getElementById('home-rom-guide');
+  if (romGuide) romGuide.style.display = 'block';
+}
+function toggleHomeRomGuide() {
+  const content = document.getElementById('home-rom-content');
+  const toggle = document.getElementById('home-rom-toggle');
+  if(!content) return;
+  const open = content.style.display !== 'none';
+  content.style.display = open ? 'none' : 'block';
+  if(toggle) toggle.textContent = open ? '▾' : '▴';
 }
 
 function goToLesson() {
   const placementDone = users.marwan.startDate || Object.keys(users.marwan.unitProgress || {}).length > 0;
-  if (!placementDone && !isAyaCourse) {
+  const skipPlacementGate = isAyaCourse || profile.speaker === 'new';
+  if (!placementDone && !skipPlacementGate) {
     go('p-test');
     return;
   }
@@ -4415,6 +4569,7 @@ function showHomeTab(name, btn) {
 
 function finishOnboarding() {
   // Called from summary page for non-beginner users
+  if(!profile.dialect)profile.dialect='palestinian'; // defensive default
   users[activeUser].name = profile.name;
   save();
   if (sb && currentUser) {
@@ -4449,7 +4604,16 @@ async function loadEnrichmentPage() {
     const p = allPhrases.find(ph => ph.id === id);
     return p ? p.en : null;
   }).filter(Boolean);
-  const sys = `Generate a short enrichment exercise for a Palestinian Arabic learner.
+  // Scale difficulty for beginners and Aya
+  const isBeginner = profile.speaker === 'new' || isAyaCourse;
+  const masteredCount = Object.values(users[activeUser].unitProgress||{}).filter(up=>up&&up.mastered).length;
+  const sys = isBeginner
+    ? `Generate a very simple beginner enrichment exercise for someone learning Palestinian Arabic.
+They are absolute beginners. Keep it extremely simple and encouraging.
+Return JSON: {"type":"writing","arabic":"","translation":"","prompt":"simple English prompt","instruction":"one short encouraging instruction"}
+Good prompts: "What does مرحبا mean? Write it in English letters and what it means.", "Write the word for 'thank you' in English letters (shukran). What does it mean?", "Write one Arabic word you learned today using English letters. What does it mean?", "Translate this: الحمد لله — use English letters to sound it out."
+Vary the prompt. User has mastered ${masteredCount} units so far. Goals: ${goalsText}.`
+    : `Generate a short enrichment exercise for a Palestinian Arabic learner.
 Return JSON: {"type":"reading or writing","arabic":"2-3 sentence Arabic text with harakaat OR empty string for writing prompt","translation":"English translation OR empty string","prompt":"English writing/speaking prompt OR empty string","instruction":"one line instruction"}
 For reading type: give 2-3 sentences slightly above their level in Palestinian Arabic.
 For writing type: give a specific, warm prompt.`;
@@ -4647,6 +4811,20 @@ function fscAnswer(gotIt) {
 }
 
 function showFSComplete() {
+  // Auto-add focused study phrases to vocab bank
+  if(fsCurrentSession&&fsCurrentSession.phrases){
+    loadVocabBank();
+    fsCurrentSession.phrases.forEach(p=>{
+      const exists=vocabBank.find(w=>w.ar===p.ar);
+      if(!exists){
+        vocabBank.push({id:'fs_'+Date.now()+Math.random(),ar:p.ar,ro:p.ro||'',en:p.en,
+          source:'focused_study',confidence:'mid',
+          addedBy:currentUser?currentUser.email:'guest',
+          createdAt:new Date().toISOString(),weakScore:0});
+      }
+    });
+    saveVocabBank();
+  }
   const s = fsCurrentSession;
   document.getElementById('fsc-header').innerHTML = '';
   document.getElementById('fsc-card-wrap').innerHTML = `
@@ -5019,11 +5197,14 @@ If no Arabic/English pairs are visible, return an empty array [].`;
 }
 
 // ─── VOCAB FLASHCARDS ───
-function startVocabFlashcards() {
+function startVocabFlashcards(mode='all') {
   loadVocabBank();
   if (!vocabBank.length) return;
-  // Sort by weakScore descending so weak words appear first
-  const sorted = [...vocabBank].sort((a, b) => (b.weakScore || 0) - (a.weakScore || 0));
+  let pool = [...vocabBank];
+  if(mode==='weak') pool = pool.filter(w => getWordScore(w.id||w.ar) < 75);
+  if(!pool.length){ alert('No words in this category yet!'); return; }
+  // Sort by mastery score ascending (weakest first)
+  const sorted = pool.sort((a,b) => getWordScore(a.id||a.ar) - getWordScore(b.id||b.ar));
   vcFlashcard = { words: sorted, idx: 0, flipped: false };
   go('p-vocab-flashcards');
   renderVocabFC();
@@ -5079,20 +5260,12 @@ function flipVocabCard() {
 function vcAnswer(gotIt) {
   const { words, idx } = vcFlashcard;
   const word = words[idx];
-  // Update weak score
-  const bankWord = vocabBank.find(w => w.id === word.id);
-  if (bankWord) {
-    bankWord.weakScore = Math.max(0, (bankWord.weakScore || 0) + (gotIt ? -1 : 2));
-    saveVocabBank();
-  }
-  // Update global weak words
-  const u = users[activeUser];
-  if (!gotIt) {
-    if (!u.weakWords.includes(word.ar)) u.weakWords.push(word.ar);
-  } else {
-    const i = u.weakWords.indexOf(word.ar);
-    if (i > -1) u.weakWords.splice(i, 1);
-  }
+  const wordKey = word.id || word.ar;
+  // Update mastery score
+  updateWordScore(wordKey, gotIt ? MASTERY.scoreChange.fcGot : MASTERY.scoreChange.fcNot);
+  // Update weak score on bank word too
+  const bankWord = vocabBank.find(w => (w.id||w.ar) === wordKey);
+  if (bankWord) { bankWord.weakScore = Math.max(0,(bankWord.weakScore||0)+(gotIt?-1:2)); saveVocabBank(); }
   save();
 
   vcFlashcard.idx++;
