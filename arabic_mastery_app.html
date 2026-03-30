@@ -3056,9 +3056,8 @@ function resetAuthButton() {
 // OVERRIDE SAVE TO USE SUPABASE
 // ═══════════════════════════
 // Patch the save function to also sync to Supabase
-const _localSave = save;
 function save() {
-  _localSave();
+  try { localStorage.setItem('arabic_app_v3', JSON.stringify({users, profile, dynamicUnits})); } catch(e) {}
   if (sb && currentUser) saveToSupabase();
 }
 
