@@ -442,6 +442,56 @@ textarea.field{resize:none;line-height:1.6;font-size:14px}
 .enrichment-page-wrap{max-width:540px;margin:0 auto;padding:1.25rem 1.25rem 5rem;width:100%}
 .enrichment-back{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text2);margin-bottom:1rem;background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;padding:0}
 
+
+/* ═══════════════════════════
+   FOCUSED STUDY
+═══════════════════════════ */
+.fs-category-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1rem}
+.fs-cat{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 6px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);cursor:pointer;transition:all 0.15s;text-align:center;gap:4px}
+.fs-cat:hover{background:var(--bg3)}
+.fs-cat.sel{background:var(--green-l);border-color:var(--green)}
+.fs-cat-icon{font-size:22px}
+.fs-cat-label{font-size:11px;font-weight:500;color:var(--text2);line-height:1.2}
+.fs-cat.sel .fs-cat-label{color:var(--green-d)}
+.fs-session-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.fs-session-row:last-child{border-bottom:none}
+.fs-session-label{flex:1;font-size:13px;font-weight:500;color:var(--text)}
+.fs-session-meta{font-size:11px;color:var(--text3)}
+.fs-session-arrow{font-size:13px;color:var(--text3)}
+
+/* Focused session flashcard */
+.fsc-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:1.5rem;text-align:center;cursor:pointer;transition:background 0.15s;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.fsc-ar{font-size:32px;direction:rtl;color:var(--text);line-height:1.4;margin-bottom:8px}
+.fsc-ro{font-size:13px;color:var(--text2);font-style:italic;margin-bottom:4px}
+.fsc-hint{font-size:11px;color:var(--text3);margin-top:12px}
+.fsc-en{font-size:22px;font-weight:500;color:var(--green-d);margin-bottom:6px}
+.fsc-note{font-size:12px;color:var(--text2);line-height:1.6;max-width:280px}
+.fsc-actions{display:flex;gap:10px;margin-top:1rem;flex-shrink:0}
+.fsc-got{flex:1;padding:13px;background:var(--green);color:#fff;border:none;border-radius:40px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer}
+.fsc-not{flex:1;padding:13px;background:var(--amber-l);color:var(--amber-d);border:1px solid rgba(196,121,58,0.3);border-radius:40px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer}
+
+
+/* ═══════════════════════════
+   MY VOCABULARY
+═══════════════════════════ */
+.vocab-word-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.vocab-word-row:last-child{border-bottom:none}
+.vocab-ar{font-size:20px;direction:rtl;color:var(--text);min-width:80px;text-align:right}
+.vocab-en{flex:1;font-size:13px;color:var(--text)}
+.vocab-meta{font-size:10px;color:var(--text3);text-align:right}
+.vocab-del{background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;padding:4px;flex-shrink:0}
+.vocab-del:hover{color:var(--red)}
+.conf-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px;flex-shrink:0}
+.conf-high{background:var(--green)}.conf-mid{background:var(--amber)}.conf-low{background:var(--red)}
+.vocab-add-tabs{display:flex;gap:0;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:1rem}
+.vocab-add-tab{flex:1;padding:9px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;background:var(--bg2);border:none;cursor:pointer;color:var(--text2);transition:all 0.15s}
+.vocab-add-tab.active{background:var(--green);color:#fff}
+.vocab-preview-table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:1rem}
+.vocab-preview-table th{text-align:left;padding:6px 8px;background:var(--bg2);color:var(--text3);font-weight:500;font-size:10px;letter-spacing:0.06em;text-transform:uppercase}
+.vocab-preview-table td{padding:7px 8px;border-bottom:1px solid var(--border);vertical-align:middle}
+.vocab-preview-table input{width:100%;border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--text);outline:none}
+.vocab-preview-table tr:hover td{background:var(--bg2)}
+
 </style>
 
 <!-- ═══════════════════════════════════════
@@ -696,26 +746,148 @@ textarea.field{resize:none;line-height:1.6;font-size:14px}
 </div>
 
 <!-- ═══════════════════════════════════════
-     FOCUSED STUDY (placeholder — Stage B)
+     FOCUSED STUDY — ENTRY
 ═══════════════════════════════════════ -->
 <div id="p-focused-study" class="page">
-  <div style="height:100vh;height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;text-align:center">
-    <div style="font-size:32px;margin-bottom:12px">🎯</div>
-    <div style="font-family:'Lora',serif;font-size:20px;margin-bottom:8px">Focused study</div>
-    <div style="font-size:13px;color:var(--text2);margin-bottom:1.5rem">Coming in the next build</div>
-    <button class="btn-ghost" onclick="go('p-home')">← back</button>
+  <div style="height:100vh;height:100dvh;display:flex;flex-direction:column;max-width:540px;margin:0 auto;width:100%;box-sizing:border-box">
+    <div style="padding:1.25rem 1.25rem 0;flex-shrink:0">
+      <button class="uov-back" onclick="go('p-home')">← home</button>
+      <div style="font-family:'Lora',serif;font-size:20px;margin-bottom:4px">Focused study</div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:1rem">Study for a specific situation</div>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:0 1.25rem 2rem">
+      <!-- Category picker -->
+      <div style="font-size:11px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);margin-bottom:8px">choose a context</div>
+      <div class="fs-category-grid" id="fs-cat-grid">
+        <div class="fs-cat" onclick="pickFSCat(this,'restaurant')"><div class="fs-cat-icon">🍽️</div><div class="fs-cat-label">Restaurant</div></div>
+        <div class="fs-cat" onclick="pickFSCat(this,'market')"><div class="fs-cat-icon">🛒</div><div class="fs-cat-label">Market</div></div>
+        <div class="fs-cat" onclick="pickFSCat(this,'family')"><div class="fs-cat-icon">👨‍👩‍👧</div><div class="fs-cat-label">Family gathering</div></div>
+        <div class="fs-cat" onclick="pickFSCat(this,'travel')"><div class="fs-cat-icon">✈️</div><div class="fs-cat-label">Travel</div></div>
+        <div class="fs-cat" onclick="pickFSCat(this,'medical')"><div class="fs-cat-icon">🏥</div><div class="fs-cat-label">Doctor</div></div>
+        <div class="fs-cat" onclick="pickFSCat(this,'cafe')"><div class="fs-cat-icon">☕</div><div class="fs-cat-label">Café</div></div>
+        <div class="fs-cat" onclick="pickFSCat(this,'work')"><div class="fs-cat-icon">💼</div><div class="fs-cat-label">Work</div></div>
+        <div class="fs-cat" onclick="pickFSCat(this,'religious')"><div class="fs-cat-icon">🕌</div><div class="fs-cat-label">Cultural</div></div>
+        <div class="fs-cat" onclick="pickFSCat(this,'transport')"><div class="fs-cat-icon">🚕</div><div class="fs-cat-label">Transport</div></div>
+      </div>
+      <!-- Free text -->
+      <div style="font-size:11px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);margin-bottom:6px">describe your situation (optional)</div>
+      <textarea id="fs-detail" class="field" rows="2" placeholder="e.g. ordering food at a Lebanese restaurant, meeting my partner's family..." style="margin-bottom:1rem;font-size:13px;resize:none"></textarea>
+      <button class="btn-primary" id="btn-fs-generate" onclick="generateFocusedStudy()" disabled>generate session →</button>
+      <!-- Session history -->
+      <div id="fs-history-section" style="display:none;margin-top:1.5rem">
+        <div style="font-size:11px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);margin-bottom:8px">previous sessions</div>
+        <div id="fs-history-list"></div>
+      </div>
+    </div>
   </div>
 </div>
 
 <!-- ═══════════════════════════════════════
-     MY VOCABULARY (placeholder — Stage C)
+     FOCUSED SESSION — FLASHCARD
+═══════════════════════════════════════ -->
+<div id="p-focused-session" class="page">
+  <button class="test-exit-btn" onclick="go('p-focused-study')">✕ exit</button>
+  <div style="height:100vh;height:100dvh;display:flex;flex-direction:column;padding:1.25rem;max-width:540px;margin:0 auto;width:100%;box-sizing:border-box">
+    <div id="fsc-header" style="flex-shrink:0;margin-bottom:0.75rem"></div>
+    <div id="fsc-card-wrap" style="flex:1;display:flex;flex-direction:column;min-height:0" onclick="flipFSCard()"></div>
+    <div id="fsc-nav" style="flex-shrink:0;margin-top:0.75rem"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     MY VOCABULARY — MAIN
 ═══════════════════════════════════════ -->
 <div id="p-my-vocab" class="page">
-  <div style="height:100vh;height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;text-align:center">
-    <div style="font-size:32px;margin-bottom:12px">📖</div>
-    <div style="font-family:'Lora',serif;font-size:20px;margin-bottom:8px">My Vocabulary</div>
-    <div style="font-size:13px;color:var(--text2);margin-bottom:1.5rem">Coming in the next build</div>
-    <button class="btn-ghost" onclick="go('p-home')">← back</button>
+  <div style="height:100vh;height:100dvh;display:flex;flex-direction:column;max-width:540px;margin:0 auto;width:100%;box-sizing:border-box">
+    <div style="padding:1.25rem 1.25rem 0;flex-shrink:0">
+      <button class="uov-back" onclick="go('p-home')">← home</button>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <div style="font-family:'Lora',serif;font-size:20px">My Vocabulary</div>
+        <button onclick="go('p-vocab-add')" style="padding:7px 14px;background:var(--green);color:#fff;border:none;border-radius:20px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer">+ add words</button>
+      </div>
+      <div id="vocab-count-label" style="font-size:12px;color:var(--text2);margin-bottom:1rem">0 words in your bank</div>
+      <div id="vocab-opt-in-banner" style="display:none;background:var(--green-l);border:1px solid rgba(26,107,80,0.2);border-radius:var(--r);padding:10px 14px;margin-bottom:1rem;font-size:13px;color:var(--green-d)">
+        <div style="font-weight:500;margin-bottom:4px">Join the shared vocabulary pool?</div>
+        <div style="font-size:12px;margin-bottom:8px;line-height:1.5">Words you add will be visible to other learners, and you'll get access to words they've added.</div>
+        <div style="display:flex;gap:8px">
+          <button onclick="setVocabOptIn(true)" style="flex:1;padding:7px;background:var(--green);color:#fff;border:none;border-radius:var(--r);font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer">yes, join</button>
+          <button onclick="setVocabOptIn(false)" style="flex:1;padding:7px;background:transparent;border:1px solid var(--border2);border-radius:var(--r);font-family:'DM Sans',sans-serif;font-size:12px;color:var(--text2);cursor:pointer">keep private</button>
+        </div>
+      </div>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:0 1.25rem 1rem">
+      <div id="vocab-word-list"><div style="text-align:center;padding:2rem;font-size:13px;color:var(--text3)">No words yet. Tap "+ add words" to get started.</div></div>
+    </div>
+    <div style="padding:1rem 1.25rem;flex-shrink:0;border-top:1px solid var(--border)">
+      <button id="btn-vocab-study" class="btn-primary" onclick="startVocabFlashcards()" style="display:none">study flashcards →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     VOCAB ADD
+═══════════════════════════════════════ -->
+<div id="p-vocab-add" class="page">
+  <div style="height:100vh;height:100dvh;display:flex;flex-direction:column;max-width:540px;margin:0 auto;width:100%;box-sizing:border-box">
+    <div style="padding:1.25rem 1.25rem 0;flex-shrink:0">
+      <button class="uov-back" onclick="go('p-my-vocab')">← back</button>
+      <div style="font-family:'Lora',serif;font-size:20px;margin-bottom:1rem">Add words</div>
+      <div class="vocab-add-tabs">
+        <button class="vocab-add-tab active" onclick="switchVocabAddTab('manual',this)">Type</button>
+        <button class="vocab-add-tab" onclick="switchVocabAddTab('upload',this)">CSV / Excel</button>
+        <button class="vocab-add-tab" onclick="switchVocabAddTab('photo',this)">Photo</button>
+      </div>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:0 1.25rem 2rem">
+      <!-- Manual tab -->
+      <div id="vocab-tab-manual">
+        <div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.6">Enter the Arabic word and English meaning. We'll add harakaat and correct spelling automatically.</div>
+        <input class="field" id="vocab-ar-input" placeholder="Arabic word (e.g. شكراً)" style="direction:rtl;text-align:right;font-size:16px;margin-bottom:8px" oninput="handleOutputRTL(this)"/>
+        <input class="field" id="vocab-en-input" placeholder="English meaning (e.g. thank you)" style="margin-bottom:12px"/>
+        <button class="btn-primary" onclick="addVocabManual()">add word →</button>
+        <div id="vocab-manual-preview" style="display:none;margin-top:1rem"></div>
+      </div>
+      <!-- Upload tab -->
+      <div id="vocab-tab-upload" style="display:none">
+        <div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.6">Upload a CSV or Excel file with Arabic words and English meanings. We'll detect which column is which.</div>
+        <label style="display:block;padding:20px;border:2px dashed var(--border2);border-radius:var(--r);text-align:center;cursor:pointer;margin-bottom:12px">
+          <div style="font-size:24px;margin-bottom:6px">📄</div>
+          <div style="font-size:13px;font-weight:500;color:var(--text)">Choose CSV or Excel file</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:3px">Columns should include Arabic and English</div>
+          <input type="file" accept=".csv,.xlsx,.xls" onchange="handleVocabFileUpload(this)" style="display:none"/>
+        </label>
+        <div id="vocab-upload-preview" style="display:none"></div>
+      </div>
+      <!-- Photo tab -->
+      <div id="vocab-tab-photo" style="display:none">
+        <div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.6">Take a photo or upload an image of a vocabulary list. Claude will extract the words for you.</div>
+        <div style="display:flex;gap:8px;margin-bottom:12px">
+          <label style="flex:1;padding:14px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);text-align:center;cursor:pointer">
+            <div style="font-size:22px;margin-bottom:4px">📷</div>
+            <div style="font-size:12px;font-weight:500;color:var(--text)">Take photo</div>
+            <input type="file" accept="image/*" capture="environment" onchange="handleVocabPhotoUpload(this)" style="display:none"/>
+          </label>
+          <label style="flex:1;padding:14px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);text-align:center;cursor:pointer">
+            <div style="font-size:22px;margin-bottom:4px">🖼️</div>
+            <div style="font-size:12px;font-weight:500;color:var(--text)">Choose image</div>
+            <input type="file" accept="image/*" onchange="handleVocabPhotoUpload(this)" style="display:none"/>
+          </label>
+        </div>
+        <div id="vocab-photo-preview" style="display:none"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     VOCAB FLASHCARDS
+═══════════════════════════════════════ -->
+<div id="p-vocab-flashcards" class="page">
+  <button class="test-exit-btn" onclick="go('p-my-vocab')">✕ exit</button>
+  <div style="height:100vh;height:100dvh;display:flex;flex-direction:column;padding:1.25rem;max-width:540px;margin:0 auto;width:100%;box-sizing:border-box">
+    <div id="vfc-header" style="flex-shrink:0;margin-bottom:0.75rem"></div>
+    <div id="vfc-card" style="flex:1;display:flex;flex-direction:column;min-height:0;cursor:pointer" onclick="flipVocabCard()"></div>
+    <div id="vfc-nav" style="flex-shrink:0;margin-top:0.75rem"></div>
   </div>
 </div>
 
@@ -4316,5 +4488,661 @@ function renderCourse() { renderHome(); }
 function showUserMenu() {
   showHomeTab('settings', document.getElementById('nav-settings'));
 }
+</script>
+
+<script>
+// ═══════════════════════════════════════════
+// STAGE 4 — FOCUSED STUDY
+// ═══════════════════════════════════════════
+
+let fsSelectedCat = null;
+let fsCurrentSession = null; // {id, label, detail, phrases, idx, flipped}
+let fsSessions = []; // all saved sessions
+
+const FS_CAT_LABELS = {
+  restaurant:'Restaurant', market:'Market / shopping', family:'Family gathering',
+  travel:'Travel / airport', medical:'Doctor / pharmacy', cafe:'Café',
+  work:'Work / professional', religious:'Religious / cultural', transport:'Transport / directions'
+};
+
+function pickFSCat(el, cat) {
+  document.querySelectorAll('.fs-cat').forEach(c => c.classList.remove('sel'));
+  el.classList.add('sel');
+  fsSelectedCat = cat;
+  document.getElementById('btn-fs-generate').disabled = false;
+}
+
+async function generateFocusedStudy() {
+  const detail = document.getElementById('fs-detail').value.trim();
+  const btn = document.getElementById('btn-fs-generate');
+  btn.innerHTML = '<span class="spinner"></span>finding the right words...';
+  btn.disabled = true;
+
+  const phrases = await generateFocusedSession(fsSelectedCat, detail);
+  if (!phrases || !phrases.length) {
+    btn.textContent = 'generate session →';
+    btn.disabled = false;
+    return;
+  }
+
+  // Save session
+  const session = {
+    id: Date.now(),
+    label: FS_CAT_LABELS[fsSelectedCat] || fsSelectedCat,
+    detail: detail || '',
+    phrases,
+    createdAt: new Date().toISOString(),
+    lastReviewed: null
+  };
+  fsSessions.unshift(session);
+  saveFSSessions();
+  if (sb && currentUser) saveFSSessionToSupabase(session);
+
+  // Launch session
+  launchFocusedSession(session);
+
+  btn.textContent = 'generate session →';
+  btn.disabled = false;
+}
+
+async function generateFocusedSession(cat, detail) {
+  const goalsText = profile.goals.map(g => GOAL_L[g]).join(', ');
+  // Use placement level or speaker proxy
+  const levelProxy = {new:1, heritage:2, basic:2, intermediate:3, advanced:4};
+  const level = users.marwan.startDate ? null : (levelProxy[profile.speaker] || 2);
+  const levelStr = level ? `Approximate level: ${['','survival basics','daily life','verbs & action','expression'][level]}.` : '';
+
+  const sys = `Generate 12 Palestinian Arabic vocabulary phrases for a specific real-world context.
+User: ${SPEAKER_L[profile.speaker]||'heritage speaker'}. Goals: ${goalsText}. ${levelStr}
+Context: ${FS_CAT_LABELS[cat]||cat}${detail?' — '+detail:''}.
+Return ONLY a JSON array. Each item: {"ar":"Arabic with harakaat","ro":"romanization (3=ع,7=ح,kh=خ,gh=غ)","en":"English meaning","note":"one short usage tip"}
+Focus on practical phrases for this exact situation. Palestinian dialect. Vary between greetings, requests, responses, and expressions.`;
+
+  const result = await callClaude(sys, `Generate focused vocabulary for: ${FS_CAT_LABELS[cat]||cat}${detail?' — '+detail:''}`, 1200);
+  if (!result) return null;
+  try {
+    const clean = result.replace(/```json|```/g, '').trim();
+    return JSON.parse(clean);
+  } catch(e) { return null; }
+}
+
+function launchFocusedSession(session) {
+  fsCurrentSession = { ...session, idx: 0, flipped: false };
+  go('p-focused-session');
+  renderFSCard();
+}
+
+function renderFSCard() {
+  const s = fsCurrentSession;
+  if (!s) return;
+  const p = s.phrases[s.idx];
+  const total = s.phrases.length;
+  const pips = s.phrases.map((_, i) =>
+    `<div class="fc-pip${i < s.idx ? ' done' : i === s.idx ? ' active' : ''}"></div>`
+  ).join('');
+
+  document.getElementById('fsc-header').innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-size:12px;font-weight:500;color:var(--text)">${s.label}</div>
+        <div style="font-size:11px;color:var(--text3)">${s.idx+1} of ${total}</div>
+      </div>
+      <div class="fc-pips">${pips}</div>
+    </div>`;
+
+  if (!s.flipped) {
+    document.getElementById('fsc-card-wrap').innerHTML = `
+      <div class="fsc-card">
+        <div class="fsc-ar">${p.ar}</div>
+        <div class="fsc-ro">${p.ro}</div>
+        <button onclick="event.stopPropagation();speakAyaPhrase('${p.ar.replace(/'/g,"\\'")}');"
+          style="margin-top:8px;padding:6px 14px;background:var(--green-l);border:1px solid rgba(26,107,80,0.2);border-radius:20px;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--green-d);cursor:pointer">
+          🔊 hear it
+        </button>
+        <div class="fsc-hint">tap to reveal meaning</div>
+      </div>`;
+    document.getElementById('fsc-nav').innerHTML = '';
+  } else {
+    document.getElementById('fsc-card-wrap').innerHTML = `
+      <div class="fsc-card" style="background:var(--green-l);border-color:rgba(26,107,80,0.2)">
+        <div class="fsc-en">${p.en}</div>
+        ${p.note ? `<div class="fsc-note">${p.note}</div>` : ''}
+      </div>`;
+    document.getElementById('fsc-nav').innerHTML = `
+      <div class="fsc-actions">
+        <button class="fsc-not" onclick="fscAnswer(false)">not yet ✗</button>
+        <button class="fsc-got" onclick="fscAnswer(true)">got it ✓</button>
+      </div>`;
+  }
+}
+
+function flipFSCard() {
+  if (fsCurrentSession) {
+    fsCurrentSession.flipped = !fsCurrentSession.flipped;
+    renderFSCard();
+  }
+}
+
+function fscAnswer(gotIt) {
+  const s = fsCurrentSession;
+  const p = s.phrases[s.idx];
+  const u = users[activeUser];
+  // Update global weak words
+  const arabicKey = p.ar;
+  if (!gotIt) {
+    if (!u.weakWords.includes(arabicKey)) u.weakWords.push(arabicKey);
+  } else {
+    const idx = u.weakWords.indexOf(arabicKey);
+    if (idx > -1) u.weakWords.splice(idx, 1);
+  }
+  save();
+
+  s.idx++;
+  s.flipped = false;
+  if (s.idx >= s.phrases.length) {
+    showFSComplete();
+  } else {
+    renderFSCard();
+  }
+}
+
+function showFSComplete() {
+  const s = fsCurrentSession;
+  document.getElementById('fsc-header').innerHTML = '';
+  document.getElementById('fsc-card-wrap').innerHTML = `
+    <div style="text-align:center;padding:1.5rem 0;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center">
+      <div style="font-size:36px;margin-bottom:12px">✨</div>
+      <div style="font-family:'Lora',serif;font-size:20px;margin-bottom:8px">${s.label}</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:1.5rem">${s.phrases.length} phrases reviewed</div>
+    </div>`;
+  document.getElementById('fsc-nav').innerHTML = `
+    <button class="btn-primary" onclick="go('p-focused-study');loadFSHistory()">done →</button>`;
+  // Update last reviewed
+  const session = fsSessions.find(sess => sess.id === s.id);
+  if (session) { session.lastReviewed = new Date().toISOString(); saveFSSessions(); }
+}
+
+function saveFSSessions() {
+  try { localStorage.setItem('arabic_fs_sessions', JSON.stringify(fsSessions)); } catch(e) {}
+}
+
+function loadFSSessions() {
+  try {
+    const d = localStorage.getItem('arabic_fs_sessions');
+    if (d) fsSessions = JSON.parse(d);
+  } catch(e) { fsSessions = []; }
+}
+
+function loadFSHistory() {
+  loadFSSessions();
+  const sec = document.getElementById('fs-history-section');
+  const list = document.getElementById('fs-history-list');
+  if (!fsSessions.length) { if (sec) sec.style.display = 'none'; return; }
+  if (sec) sec.style.display = 'block';
+  list.innerHTML = fsSessions.map((s, i) => {
+    const date = new Date(s.createdAt).toLocaleDateString('en-GB', {day:'numeric',month:'short'});
+    return `<div class="fs-session-row">
+      <div style="flex:1">
+        <div class="fs-session-label">${s.label}${s.detail ? ' — ' + s.detail.slice(0,30) + (s.detail.length>30?'…':'') : ''}</div>
+        <div class="fs-session-meta">${date} · ${s.phrases.length} phrases</div>
+      </div>
+      <button onclick="launchFocusedSession(fsSessions[${i}])" style="padding:6px 12px;background:var(--green-l);border:1px solid rgba(26,107,80,0.2);border-radius:20px;font-family:'DM Sans',sans-serif;font-size:11px;color:var(--green-d);cursor:pointer;margin-right:6px">resume</button>
+      <button onclick="deleteFSSession(${i})" class="vocab-del">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function deleteFSSession(idx) {
+  fsSessions.splice(idx, 1);
+  saveFSSessions();
+  loadFSHistory();
+}
+
+async function saveFSSessionToSupabase(session) {
+  if (!sb || !currentUser) return;
+  try {
+    await sb.from('focused_sessions').upsert({
+      email: currentUser.email,
+      session_id: String(session.id),
+      context_label: session.label,
+      context_detail: session.detail,
+      phrases: session.phrases,
+      created_at: session.createdAt,
+      last_reviewed_at: session.lastReviewed
+    }, { onConflict: 'email,session_id' });
+  } catch(e) {}
+}
+
+// Load FS history when navigating to focused study
+const _origGo = go;
+// Patch already exists — extend it to load FS history
+const __patchedGo = go;
+window.go = function(id) {
+  __patchedGo(id);
+  if (id === 'p-focused-study') loadFSHistory();
+};
+
+// ═══════════════════════════════════════════
+// STAGE 5 — MY VOCABULARY
+// ═══════════════════════════════════════════
+
+let vocabBank = []; // {id, ar, ro, en, source, confidence, addedBy, createdAt, weakScore}
+let vocabOptIn = null; // null=not asked, true=opted in, false=private
+let vcFlashcard = { words:[], idx:0, flipped:false };
+
+const VOCAB_STORAGE_KEY = 'arabic_vocab_bank';
+const VOCAB_OPTIN_KEY = 'arabic_vocab_optin';
+
+function loadVocabBank() {
+  try {
+    const d = localStorage.getItem(VOCAB_STORAGE_KEY);
+    if (d) vocabBank = JSON.parse(d);
+    const opt = localStorage.getItem(VOCAB_OPTIN_KEY);
+    if (opt !== null) vocabOptIn = JSON.parse(opt);
+  } catch(e) { vocabBank = []; }
+}
+
+function saveVocabBank() {
+  try { localStorage.setItem(VOCAB_STORAGE_KEY, JSON.stringify(vocabBank)); } catch(e) {}
+}
+
+function renderMyVocab() {
+  loadVocabBank();
+  const countEl = document.getElementById('vocab-count-label');
+  if (countEl) countEl.textContent = vocabBank.length + ' word' + (vocabBank.length !== 1 ? 's' : '') + ' in your bank';
+  const studyBtn = document.getElementById('btn-vocab-study');
+  if (studyBtn) studyBtn.style.display = vocabBank.length > 0 ? 'block' : 'none';
+  const homeSubEl = document.getElementById('home-vocab-sub');
+  if (homeSubEl) homeSubEl.textContent = vocabBank.length > 0 ? vocabBank.length + ' words in your bank' : 'Your personal word bank';
+
+  // Opt-in banner — show on first visit if not Aya
+  const banner = document.getElementById('vocab-opt-in-banner');
+  if (banner) {
+    banner.style.display = (!isAyaCourse && vocabOptIn === null) ? 'block' : 'none';
+  }
+
+  const list = document.getElementById('vocab-word-list');
+  if (!list) return;
+  if (!vocabBank.length) {
+    list.innerHTML = '<div style="text-align:center;padding:2rem;font-size:13px;color:var(--text3)">No words yet. Tap "+ add words" to get started.</div>';
+    return;
+  }
+  list.innerHTML = vocabBank.map((w, i) => {
+    const confClass = w.confidence === 'high' ? 'conf-high' : w.confidence === 'mid' ? 'conf-mid' : 'conf-low';
+    const addedBy = w.addedBy && w.addedBy !== (currentUser && currentUser.email) ? `<div style="font-size:10px;color:var(--text3)">added by ${w.addedBy.split('@')[0]}</div>` : '';
+    return `<div class="vocab-word-row">
+      <span class="conf-dot ${confClass}"></span>
+      <div class="vocab-ar">${w.ar}</div>
+      <div class="vocab-en">${w.en}${addedBy}</div>
+      <button onclick="speakAyaPhrase('${w.ar.replace(/'/g,"\\'")}');" style="background:none;border:none;cursor:pointer;font-size:15px;padding:4px;color:var(--green-m)">🔊</button>
+      <button class="vocab-del" onclick="deleteVocabWord(${i})">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function setVocabOptIn(val) {
+  vocabOptIn = val;
+  try { localStorage.setItem(VOCAB_OPTIN_KEY, JSON.stringify(val)); } catch(e) {}
+  const banner = document.getElementById('vocab-opt-in-banner');
+  if (banner) banner.style.display = 'none';
+}
+
+function deleteVocabWord(idx) {
+  vocabBank.splice(idx, 1);
+  saveVocabBank();
+  renderMyVocab();
+}
+
+function switchVocabAddTab(tab, btn) {
+  document.querySelectorAll('.vocab-add-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('vocab-tab-manual').style.display = tab === 'manual' ? 'block' : 'none';
+  document.getElementById('vocab-tab-upload').style.display = tab === 'upload' ? 'block' : 'none';
+  document.getElementById('vocab-tab-photo').style.display = tab === 'photo' ? 'block' : 'none';
+}
+
+// ─── MANUAL ADD ───
+async function addVocabManual() {
+  const arRaw = document.getElementById('vocab-ar-input').value.trim();
+  const en = document.getElementById('vocab-en-input').value.trim();
+  if (!arRaw || !en) return;
+  const preview = document.getElementById('vocab-manual-preview');
+  preview.style.display = 'block';
+  preview.innerHTML = '<div style="font-size:12px;color:var(--text2);padding:8px 0">Adding harakaat...</div>';
+
+  const result = await correctVocabWord(arRaw, en);
+  const word = result || { ar: arRaw, ro: '', en, confidence: 'mid' };
+
+  preview.innerHTML = `
+    <div style="background:var(--bg2);border-radius:var(--r);padding:12px 14px;margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+        <span class="conf-dot ${word.confidence==='high'?'conf-high':word.confidence==='mid'?'conf-mid':'conf-low'}"></span>
+        <div style="font-size:22px;direction:rtl;color:var(--text)">${word.ar}</div>
+        <div style="font-size:12px;color:var(--text2);font-style:italic">${word.ro}</div>
+      </div>
+      <div style="font-size:13px;font-weight:500;color:var(--text)">${word.en}</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:3px">Confidence: ${word.confidence}</div>
+    </div>
+    <button class="btn-primary" onclick="confirmAddVocabWord(${JSON.stringify(word).replace(/"/g,'&quot;')})">save word →</button>
+    <button class="btn-ghost" onclick="document.getElementById('vocab-manual-preview').style.display='none'">cancel</button>`;
+}
+
+async function correctVocabWord(ar, en) {
+  const sys = `You are a Palestinian Arabic language expert. Given an Arabic word and English meaning, return corrected Arabic with full harakaat and romanization.
+Return ONLY JSON: {"ar":"Arabic with full harakaat","ro":"romanization using 3=ع,7=ح,kh=خ,gh=غ","en":"${en}","confidence":"high|mid|low","note":"any correction made, or empty string"}
+confidence: high=common word, clear harakaat. mid=reasonable but context-dependent. low=ambiguous or unusual.
+Assume the user knows the correct English meaning. Fix Arabic spelling errors and add harakaat.`;
+  const result = await callClaude(sys, `Arabic: ${ar}, English: ${en}`);
+  if (!result) return null;
+  try {
+    const clean = result.replace(/```json|```/g, '').trim();
+    return JSON.parse(clean);
+  } catch(e) { return null; }
+}
+
+function confirmAddVocabWord(wordObj) {
+  const word = typeof wordObj === 'string' ? JSON.parse(wordObj) : wordObj;
+  word.id = Date.now() + Math.random();
+  word.source = 'manual';
+  word.addedBy = currentUser ? currentUser.email : 'guest';
+  word.createdAt = new Date().toISOString();
+  word.weakScore = 0;
+  vocabBank.push(word);
+  saveVocabBank();
+  document.getElementById('vocab-ar-input').value = '';
+  document.getElementById('vocab-en-input').value = '';
+  document.getElementById('vocab-manual-preview').style.display = 'none';
+  go('p-my-vocab');
+  renderMyVocab();
+}
+
+// ─── CSV/EXCEL UPLOAD ───
+async function handleVocabFileUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const preview = document.getElementById('vocab-upload-preview');
+  preview.style.display = 'block';
+  preview.innerHTML = '<div style="font-size:12px;color:var(--text2);padding:8px 0">Reading file...</div>';
+
+  let rows = [];
+  try {
+    if (file.name.endsWith('.csv')) {
+      const text = await file.text();
+      rows = parseCSV(text);
+    } else {
+      // Excel — use SheetJS if available, else prompt CSV
+      preview.innerHTML = '<div style="font-size:12px;color:var(--amber-d);padding:8px 0">Excel detected. For best results, save as CSV and re-upload, or paste directly into the type tab.</div>';
+      return;
+    }
+  } catch(e) {
+    preview.innerHTML = '<div style="font-size:12px;color:var(--red);padding:8px 0">Could not read file. Try saving as CSV.</div>';
+    return;
+  }
+
+  if (!rows.length) {
+    preview.innerHTML = '<div style="font-size:12px;color:var(--red);padding:8px 0">No word pairs found in file.</div>';
+    return;
+  }
+
+  // Detect Arabic/English columns
+  const pairs = detectArabicEnglishColumns(rows);
+  renderVocabUploadPreview(pairs, preview);
+}
+
+function parseCSV(text) {
+  return text.split('\n').map(line => line.split(',').map(c => c.trim().replace(/^"|"$/g, ''))).filter(r => r.length >= 2 && r.some(c => c));
+}
+
+function detectArabicEnglishColumns(rows) {
+  const arabicRange = /[\u0600-\u06FF]/;
+  const pairs = [];
+  // Check if first row is header
+  const firstRow = rows[0];
+  const startIdx = (firstRow && firstRow.some(c => c.toLowerCase().includes('arabic') || c.toLowerCase().includes('english'))) ? 1 : 0;
+
+  for (let i = startIdx; i < rows.length; i++) {
+    const row = rows[i].filter(c => c);
+    if (row.length < 2) continue;
+    // Find Arabic column
+    const arIdx = row.findIndex(c => arabicRange.test(c));
+    if (arIdx === -1) continue;
+    const enIdx = row.findIndex((c, idx) => idx !== arIdx && c && !arabicRange.test(c));
+    if (enIdx === -1) continue;
+    pairs.push({ ar: row[arIdx], en: row[enIdx], confidence: 'mid' });
+  }
+  return pairs;
+}
+
+function renderVocabUploadPreview(pairs, container) {
+  if (!pairs.length) {
+    container.innerHTML = '<div style="font-size:12px;color:var(--red);padding:8px 0">No Arabic/English pairs detected. Make sure your file has both Arabic and English columns.</div>';
+    return;
+  }
+  window._vocabUploadPairs = pairs;
+  container.innerHTML = `
+    <div style="font-size:12px;color:var(--text2);margin-bottom:8px">${pairs.length} word pairs found. Review and edit before saving.</div>
+    <div style="overflow-x:auto;margin-bottom:10px">
+      <table class="vocab-preview-table">
+        <thead><tr><th></th><th>Arabic</th><th>English</th></tr></thead>
+        <tbody>${pairs.map((p,i) => `
+          <tr>
+            <td><span class="conf-dot conf-mid" id="upload-conf-${i}"></span></td>
+            <td><input value="${p.ar}" onchange="updateUploadPair(${i},'ar',this.value)" style="direction:rtl;text-align:right"/></td>
+            <td><input value="${p.en}" onchange="updateUploadPair(${i},'en',this.value)"/></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+    <button class="btn-primary" onclick="confirmVocabUpload()">save ${pairs.length} words →</button>`;
+}
+
+function updateUploadPair(idx, field, val) {
+  if (window._vocabUploadPairs) window._vocabUploadPairs[idx][field] = val;
+}
+
+function confirmVocabUpload() {
+  const pairs = window._vocabUploadPairs || [];
+  pairs.forEach(p => {
+    vocabBank.push({
+      id: Date.now() + Math.random(),
+      ar: p.ar, ro: p.ro || '', en: p.en,
+      source: 'csv', confidence: p.confidence || 'mid',
+      addedBy: currentUser ? currentUser.email : 'guest',
+      createdAt: new Date().toISOString(), weakScore: 0
+    });
+  });
+  saveVocabBank();
+  window._vocabUploadPairs = null;
+  go('p-my-vocab');
+  renderMyVocab();
+}
+
+// ─── PHOTO UPLOAD (Stage 7 — Claude Vision) ───
+async function handleVocabPhotoUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const preview = document.getElementById('vocab-photo-preview');
+  preview.style.display = 'block';
+  preview.innerHTML = '<div style="font-size:12px;color:var(--text2);padding:8px 0">Reading your vocabulary list...</div>';
+
+  try {
+    // Convert to base64
+    const base64 = await new Promise((res, rej) => {
+      const reader = new FileReader();
+      reader.onload = () => res(reader.result.split(',')[1]);
+      reader.onerror = rej;
+      reader.readAsDataURL(file);
+    });
+
+    const mediaType = file.type || 'image/jpeg';
+    const pairs = await extractVocabFromPhoto(base64, mediaType);
+
+    if (!pairs || !pairs.length) {
+      preview.innerHTML = '<div style="font-size:12px;color:var(--amber-d);padding:8px 0">Could not extract word pairs. Try a clearer photo with good lighting and flat paper.</div>';
+      return;
+    }
+    renderVocabUploadPreview(pairs, preview);
+  } catch(e) {
+    preview.innerHTML = '<div style="font-size:12px;color:var(--red);padding:8px 0">Photo upload failed. Please try again.</div>';
+  }
+}
+
+async function extractVocabFromPhoto(base64, mediaType) {
+  const sys = `You extract Arabic vocabulary pairs from an image of a vocabulary list.
+Return ONLY a JSON array of word pairs found in the image: [{"ar":"Arabic word with harakaat if visible","en":"English meaning","confidence":"high|mid|low"}]
+confidence: high=clearly readable. mid=mostly clear. low=unclear or guessed.
+If no Arabic/English pairs are visible, return an empty array [].`;
+
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: API_MODEL,
+        max_tokens: 1000,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
+            { type: 'text', text: 'Extract all Arabic/English vocabulary pairs from this image.' }
+          ]
+        }],
+        system: sys
+      })
+    });
+    if (!res.ok) return null;
+    const d = await res.json();
+    const text = d.content?.[0]?.text || '';
+    const clean = text.replace(/```json|```/g, '').trim();
+    return JSON.parse(clean);
+  } catch(e) { return null; }
+}
+
+// ─── VOCAB FLASHCARDS ───
+function startVocabFlashcards() {
+  loadVocabBank();
+  if (!vocabBank.length) return;
+  // Sort by weakScore descending so weak words appear first
+  const sorted = [...vocabBank].sort((a, b) => (b.weakScore || 0) - (a.weakScore || 0));
+  vcFlashcard = { words: sorted, idx: 0, flipped: false };
+  go('p-vocab-flashcards');
+  renderVocabFC();
+}
+
+function renderVocabFC() {
+  const { words, idx, flipped } = vcFlashcard;
+  const p = words[idx];
+  const total = words.length;
+  const pips = words.slice(0, Math.min(total, 12)).map((_, i) =>
+    `<div class="fc-pip${i < idx ? ' done' : i === idx ? ' active' : ''}"></div>`
+  ).join('');
+
+  document.getElementById('vfc-header').innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div style="font-size:12px;font-weight:500;color:var(--text)">My Vocabulary</div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <div class="fc-pips">${pips}</div>
+        <div style="font-size:11px;color:var(--text3)">${idx+1}/${total}</div>
+      </div>
+    </div>`;
+
+  if (!flipped) {
+    document.getElementById('vfc-card').innerHTML = `
+      <div class="fsc-card">
+        <div class="fsc-ar">${p.ar}</div>
+        ${p.ro ? `<div class="fsc-ro">${p.ro}</div>` : ''}
+        <button onclick="event.stopPropagation();speakAyaPhrase('${p.ar.replace(/'/g,"\\'")}');"
+          style="margin-top:8px;padding:6px 14px;background:var(--green-l);border:1px solid rgba(26,107,80,0.2);border-radius:20px;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--green-d);cursor:pointer">
+          🔊 hear it
+        </button>
+        <div class="fsc-hint">tap to reveal meaning</div>
+      </div>`;
+    document.getElementById('vfc-nav').innerHTML = '';
+  } else {
+    document.getElementById('vfc-card').innerHTML = `
+      <div class="fsc-card" style="background:var(--green-l);border-color:rgba(26,107,80,0.2)">
+        <div class="fsc-en">${p.en}</div>
+      </div>`;
+    document.getElementById('vfc-nav').innerHTML = `
+      <div class="fsc-actions">
+        <button class="fsc-not" onclick="vcAnswer(false)">not yet ✗</button>
+        <button class="fsc-got" onclick="vcAnswer(true)">got it ✓</button>
+      </div>`;
+  }
+}
+
+function flipVocabCard() {
+  vcFlashcard.flipped = !vcFlashcard.flipped;
+  renderVocabFC();
+}
+
+function vcAnswer(gotIt) {
+  const { words, idx } = vcFlashcard;
+  const word = words[idx];
+  // Update weak score
+  const bankWord = vocabBank.find(w => w.id === word.id);
+  if (bankWord) {
+    bankWord.weakScore = Math.max(0, (bankWord.weakScore || 0) + (gotIt ? -1 : 2));
+    saveVocabBank();
+  }
+  // Update global weak words
+  const u = users[activeUser];
+  if (!gotIt) {
+    if (!u.weakWords.includes(word.ar)) u.weakWords.push(word.ar);
+  } else {
+    const i = u.weakWords.indexOf(word.ar);
+    if (i > -1) u.weakWords.splice(i, 1);
+  }
+  save();
+
+  vcFlashcard.idx++;
+  vcFlashcard.flipped = false;
+  if (vcFlashcard.idx >= words.length) {
+    document.getElementById('vfc-card').innerHTML = `
+      <div style="text-align:center;padding:2rem;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center">
+        <div style="font-size:36px;margin-bottom:12px">✨</div>
+        <div style="font-family:'Lora',serif;font-size:20px;margin-bottom:8px">Session complete</div>
+        <div style="font-size:13px;color:var(--text2)">${words.length} words reviewed</div>
+      </div>`;
+    document.getElementById('vfc-nav').innerHTML = '<button class="btn-primary" onclick="go(\'p-my-vocab\');renderMyVocab()">done →</button>';
+    document.getElementById('vfc-header').innerHTML = '';
+  } else {
+    renderVocabFC();
+  }
+}
+
+// ─── STAGE 6 — SHARED VOCAB (hook in renderMyVocab already handles opt-in) ───
+// Shared pool loading from Supabase when opted in
+async function loadSharedVocabFromSupabase() {
+  if (!sb || !currentUser || isAyaCourse || vocabOptIn !== true) return;
+  try {
+    const { data } = await sb.from('personal_vocab')
+      .select('*')
+      .eq('is_shared', true)
+      .neq('email', currentUser.email)
+      .limit(200);
+    if (data) {
+      data.forEach(row => {
+        const exists = vocabBank.find(w => w.ar === row.arabic);
+        if (!exists) {
+          vocabBank.push({
+            id: 'shared_' + row.id,
+            ar: row.arabic, ro: row.romanization || '', en: row.english,
+            source: 'shared', confidence: row.confidence || 'mid',
+            addedBy: row.email, createdAt: row.created_at, weakScore: 0
+          });
+        }
+      });
+      saveVocabBank();
+    }
+  } catch(e) {}
+}
+
+// Wire up renderMyVocab to go() override
+window.go = function(id) {
+  __patchedGo(id);
+  if (id === 'p-focused-study') loadFSHistory();
+  if (id === 'p-my-vocab') { loadVocabBank(); loadSharedVocabFromSupabase().then(() => renderMyVocab()); }
+};
 </script>
 </body></html>
