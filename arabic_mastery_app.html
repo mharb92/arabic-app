@@ -270,6 +270,17 @@ textarea.field{resize:none;line-height:1.6;font-size:14px}
 .sync-banner-sub{font-size:11px;color:var(--blue-d);margin-top:2px;line-height:1.5;opacity:0.85}
 .sync-banner-btn{font-size:12px;padding:4px 10px;border:1px solid var(--blue-d);border-radius:20px;background:transparent;color:var(--blue-d);cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:6px;display:inline-block}
 .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite;vertical-align:middle;margin-right:5px}
+/* AYA FLASHCARD */
+.fc-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:1.5rem;text-align:center;min-height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative}
+.fc-arabic{font-size:36px;direction:rtl;color:var(--text);line-height:1.4;margin-bottom:8px}
+.fc-roman{font-size:14px;color:var(--text2);font-style:italic;letter-spacing:0.05em;margin-bottom:4px}
+.fc-tap-hint{font-size:11px;color:var(--text3);margin-top:12px}
+.fc-english{font-size:22px;font-weight:500;color:var(--green-d);margin-bottom:6px}
+.fc-note{font-size:12px;color:var(--text2);line-height:1.6;max-width:280px;margin:0 auto}
+.fc-pips{display:flex;gap:4px;justify-content:center;margin-bottom:8px}
+.fc-pip{width:6px;height:6px;border-radius:50%;background:var(--bg3)}
+.fc-pip.done{background:var(--green)}.fc-pip.active{background:var(--green-m)}
+
 /* AYA SPLASH */
 #p-aya-splash{min-height:100vh;align-items:center;justify-content:center;background:var(--bg);position:relative;overflow:hidden}
 .aya-jp{font-family:'Lora',serif;font-size:56px;color:var(--green);line-height:1.2;opacity:0;transform:translateY(8px);transition:opacity 0.8s ease,transform 0.8s ease;text-align:center;max-width:380px;margin:0 auto}
@@ -348,12 +359,12 @@ textarea.field{resize:none;line-height:1.6;font-size:14px}
 .push-prompt-icon{font-size:32px;margin-bottom:12px}
 .push-prompt-title{font-family:'Lora',serif;font-size:18px;font-weight:400;margin-bottom:8px}
 .push-prompt-sub{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:1.25rem}
-.time-opts{display:flex;flex-direction:column;gap:8px;margin-bottom:1.25rem;text-align:left}
-.time-opt{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--border2);border-radius:var(--r);cursor:pointer;background:var(--bg);transition:all 0.15s}
+.time-opts{display:flex;flex-direction:column;gap:6px;margin-bottom:0.75rem;text-align:left}
+.time-opt{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border2);border-radius:var(--r);cursor:pointer;background:var(--bg);transition:all 0.15s}
 .time-opt:hover{background:var(--bg2)}.time-opt.sel{border-color:var(--green);background:var(--green-l)}
 .time-opt-icon{font-size:18px;flex-shrink:0}
-.time-opt-label{font-size:14px;font-weight:500}
-.time-opt-sub{font-size:11px;color:var(--text2);margin-top:1px}
+.time-opt-label{font-size:13px;font-weight:500}
+.time-opt-sub{font-size:11px;color:var(--text2);margin-top:0px;display:none}
 .time-custom{display:none;margin-bottom:1rem}
 .time-custom.vis{display:block}
 .time-input{width:100%;padding:10px 14px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px}
@@ -721,11 +732,22 @@ textarea.field{resize:none;line-height:1.6;font-size:14px}
 
 <!-- AYA PHONICS -->
 <div id="p-aya-phonics" class="page">
-  <div class="wrap">
-    <div class="step-tag" id="phonics-tag">Before we begin</div>
-    <div class="step-title" style="margin-bottom:6px" id="phonics-title">Reading Arabic romanization</div>
-    <div class="step-sub" id="phonics-sub">A quick guide to the shorthand we use throughout this course.</div>
-    <div id="aya-phonics-content"></div>
+  <div style="min-height:100vh;display:flex;flex-direction:column;padding:1.25rem 1.25rem 1.5rem;max-width:540px;margin:0 auto;width:100%">
+    <div style="margin-bottom:0.75rem;flex-shrink:0">
+      <div class="step-tag" id="phonics-tag" style="margin-bottom:3px">Before we begin</div>
+      <div style="font-family:'Lora',serif;font-size:20px;font-weight:400;color:var(--text)" id="phonics-title">Reading Arabic romanization</div>
+    </div>
+    <div id="aya-phonics-content" style="flex:1;display:flex;flex-direction:column;justify-content:space-between;min-height:0"></div>
+  </div>
+</div>
+
+<!-- AYA FLASHCARD PAGE -->
+<div id="p-aya-flashcard" class="page">
+  <button class="test-exit-btn" onclick="exitQuiz()">✕ exit</button>
+  <div style="min-height:100vh;display:flex;flex-direction:column;padding:1.25rem;max-width:540px;margin:0 auto;width:100%">
+    <div id="aya-fc-header" style="flex-shrink:0;margin-bottom:0.75rem"></div>
+    <div id="aya-fc-card" style="flex:1;display:flex;flex-direction:column;justify-content:center;cursor:pointer" onclick="flipAyaCard()"></div>
+    <div id="aya-fc-nav" style="flex-shrink:0;margin-top:1rem"></div>
   </div>
 </div>
 
@@ -770,10 +792,10 @@ textarea.field{resize:none;line-height:1.6;font-size:14px}
 <!-- PUSH NOTIFICATION PROMPT -->
 <div id="p-push-prompt" class="page">
   <div style="min-height:100vh;display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,0.3)">
-    <div class="push-prompt" style="width:100%;max-width:540px">
-      <div class="push-prompt-icon">🔔</div>
-      <div class="push-prompt-title">Stay on track with a daily reminder</div>
-      <div class="push-prompt-sub">Marwan set this up so you never miss a day of practice. When would you like your reminder?</div>
+    <div class="push-prompt" style="width:100%;max-width:540px;padding:1.25rem 1.25rem 1.5rem">
+      <div class="push-prompt-icon" style="font-size:24px;margin-bottom:8px">🔔</div>
+      <div class="push-prompt-title" style="font-size:17px;margin-bottom:6px">Stay on track with a daily reminder</div>
+      <div class="push-prompt-sub" style="font-size:12px;margin-bottom:1rem">Marwan set this up so you never miss a day of practice. When would you like your reminder?</div>
       <div class="time-opts" id="push-time-opts">
         <div class="time-opt" onclick="pickPushTime(this,'08:00')">
           <div class="time-opt-icon">🌅</div>
@@ -781,7 +803,7 @@ textarea.field{resize:none;line-height:1.6;font-size:14px}
         </div>
         <div class="time-opt" onclick="pickPushTime(this,'12:30')">
           <div class="time-opt-icon">☀️</div>
-          <div><div class="time-opt-label">Midday — 12:30 pm</div><div class="time-opt-sub" id="midday-science">A midday reset — reviewing before the afternoon improves retention</div></div>
+          <div><div class="time-opt-label">Midday — 12:30 pm</div></div>
         </div>
         <div class="time-opt" onclick="pickPushTime(this,'20:00')">
           <div class="time-opt-icon">🌙</div>
@@ -789,7 +811,7 @@ textarea.field{resize:none;line-height:1.6;font-size:14px}
         </div>
         <div class="time-opt" onclick="pickPushTime(this,'custom')">
           <div class="time-opt-icon">⏰</div>
-          <div><div class="time-opt-label">Custom time</div><div class="time-opt-sub">Pick your own</div></div>
+          <div><div class="time-opt-label">Custom time</div></div>
         </div>
       </div>
       <div class="time-custom" id="push-custom-wrap">
@@ -1138,12 +1160,22 @@ function exitPlacement(){
 function exitQuiz(){
   // Save whatever progress we have mid-quiz
   if(quiz.unitId){
-    const up=getUP(quiz.unitId);
     // Save wrong answers as weak words
-    quiz.wrongIds.forEach(id=>{if(!users[activeUser].weakWords.includes(id))users[activeUser].weakWords.push(id);});
+    if(quiz.wrongIds && quiz.wrongIds.length){
+      quiz.wrongIds.forEach(id=>{
+        if(!users[activeUser].weakWords.includes(id))users[activeUser].weakWords.push(id);
+      });
+    }
     save();
   }
-  go('p-course');
+  // Navigate back appropriately
+  if(isAyaCourse){
+    go('p-course');
+  } else if(profile.name){
+    go('p-course');
+  } else {
+    go('p-login');
+  }
 }
 let users={
   marwan:{name:'',streak:1,weakWords:[],unitProgress:{},checkpoints:{},startDate:null,latency:{}},
@@ -2329,11 +2361,20 @@ async function buildPhase2(){
 // INTRO ANIMATION
 // ═══════════════════════════
 (function(){
-  load();
-  // If returning user with saved profile, skip to course
-  if(profile.name&&users.marwan.unitProgress&&Object.keys(users.marwan.unitProgress).length>0){
-    go('p-course');return;
+  window.addEventListener('online',checkOffline);
+  window.addEventListener('offline',checkOffline);
+  // Skip splash entirely if returning user
+  const storedEmail = localStorage.getItem('arabic_app_email');
+  const localData = JSON.parse(localStorage.getItem('arabic_app_v3')||'{}');
+  const hasProfile = localData.profile && localData.profile.name;
+  const hasProgress = localData.users && localData.users.marwan && Object.keys(localData.users.marwan.unitProgress||{}).length > 0;
+  if(storedEmail || (hasProfile && hasProgress)){
+    // Hide welcome page — initAuth will handle routing
+    document.getElementById('p-welcome').classList.remove('active');
+    return;
   }
+  // First-time user — show splash animation
+  load();
   const splash=$('splash'),seq=$('intro-seq');
   const steps=[{id:'il-1',delay:0},{id:'il-div',delay:600},{id:'il-2',delay:1100},{id:'il-3',delay:2000},{id:'il-4',delay:2900},{id:'il-btn',delay:3700}];
   setTimeout(()=>{
@@ -2343,8 +2384,6 @@ async function buildPhase2(){
       steps.forEach(s=>{setTimeout(()=>{const el=$(s.id);if(el)el.classList.add('shown');},s.delay);});
     },700);
   },2800);
-  window.addEventListener('online',checkOffline);
-  window.addEventListener('offline',checkOffline);
 })();
 
 // PWA manifest injection
@@ -3159,21 +3198,21 @@ function renderAyaPhonics(idx) {
   if (idx === -1) {
     const r = AYA_ROMANIZATION_SCREEN;
     wrap.innerHTML = `
-      <div style="font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--green-m);margin-bottom:6px">Before we begin</div>
-      <div style="font-family:'Lora',serif;font-size:20px;font-weight:400;color:var(--text);margin-bottom:8px">${r.title}</div>
-      <div style="font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:1.25rem">${r.intro}</div>
-      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:1.5rem">
-        ${r.items.map(item => `
-          <div style="display:flex;align-items:center;gap:14px;padding:12px 14px;background:var(--bg2);border-radius:var(--r)">
-            <div style="font-size:22px;font-weight:600;color:var(--green);min-width:36px;text-align:center;font-family:'DM Sans',sans-serif">${item.symbol}</div>
-            <div style="font-size:24px;direction:rtl;color:var(--green);min-width:32px;text-align:center">${item.letter}</div>
-            <div>
-              <div style="font-size:13px;font-weight:500;color:var(--text)">${item.name}</div>
-              <div style="font-size:12px;color:var(--text2);margin-top:2px;line-height:1.5">${item.desc}</div>
-            </div>
-          </div>`).join('')}
+      <div style="flex:1">
+        <div style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:1rem">${r.intro}</div>
+        <div style="display:flex;flex-direction:column;gap:7px">
+          ${r.items.map(item => `
+            <div style="display:flex;align-items:center;gap:12px;padding:9px 12px;background:var(--bg2);border-radius:var(--r)">
+              <div style="font-size:20px;font-weight:700;color:var(--green);min-width:28px;text-align:center;font-family:'DM Sans',sans-serif">${item.symbol}</div>
+              <div style="font-size:22px;direction:rtl;color:var(--green);min-width:28px;text-align:center">${item.letter}</div>
+              <div>
+                <div style="font-size:13px;font-weight:500;color:var(--text)">${item.name}</div>
+                <div style="font-size:11px;color:var(--text2);margin-top:1px;line-height:1.4">${item.desc}</div>
+              </div>
+            </div>`).join('')}
+        </div>
       </div>
-      <button class="btn-primary" onclick="showAyaPhonics(0)">got it — show me the sounds →</button>
+      <button class="btn-primary" style="margin-top:1rem;flex-shrink:0" onclick="showAyaPhonics(0)">got it — show me the sounds →</button>
     `;
     return;
   }
@@ -3185,25 +3224,31 @@ function renderAyaPhonics(idx) {
   ).join('');
 
   wrap.innerHTML = `
-    <div style="font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--green-m);margin-bottom:10px">Sound ${idx + 1} of ${totalSounds}</div>
-    <div class="phonics-pips">${pips}</div>
-    <div class="phonics-card">
-      <div class="phonics-letter">${p.letter}</div>
-      <div class="phonics-name">${p.name}</div>
-      <div class="phonics-sound">"${p.sound}"</div>
-      <div class="phonics-desc">${p.description}</div>
-      <div class="phonics-example">
-        <div class="phonics-ex-ar">${p.example_ar}</div>
-        <div class="phonics-ex-ro">${p.example_ro}</div>
-        <div class="phonics-ex-en">${p.example_en}</div>
+    <div style="flex:1;display:flex;flex-direction:column">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-shrink:0">
+        <div class="phonics-pips" style="margin-bottom:0">${pips}</div>
+        <div style="font-size:11px;color:var(--text3)">${idx + 1} of ${totalSounds}</div>
       </div>
-      <button onclick="speakPhonicsExample('${p.name}','${p.example_ar}','${p.example_en}')"
-        style="margin-top:12px;width:100%;padding:10px;background:var(--green-l);border:1px solid rgba(26,107,80,0.2);border-radius:var(--r);font-family:'DM Sans',sans-serif;font-size:13px;color:var(--green-d);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
-        🔊 Hear it — "The letter ${p.name}, as in ${p.example_en}"
-      </button>
+      <div class="phonics-card" style="flex:1;padding:1rem">
+        <div class="phonics-letter" style="font-size:56px;margin-bottom:2px">${p.letter}</div>
+        <div class="phonics-name" style="margin-bottom:8px">${p.name}</div>
+        <div class="phonics-sound" style="font-size:14px;margin-bottom:6px">"${p.sound}"</div>
+        <div class="phonics-desc" style="font-size:12px;margin-bottom:10px">${p.description}</div>
+        <div class="phonics-example" style="padding:8px 12px">
+          <div class="phonics-ex-ar" style="font-size:22px">${p.example_ar}</div>
+          <div class="phonics-ex-ro" style="margin-top:2px">${p.example_ro}</div>
+          <div class="phonics-ex-en">${p.example_en}</div>
+        </div>
+        <button onclick="speakPhonicsExample('${p.name}','${p.example_ar}','${p.example_en}')"
+          style="margin-top:10px;width:100%;padding:9px;background:var(--green-l);border:1px solid rgba(26,107,80,0.2);border-radius:var(--r);font-family:'DM Sans',sans-serif;font-size:13px;color:var(--green-d);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
+          🔊 The letter ${p.name}, as in ${p.example_en}
+        </button>
+      </div>
     </div>
-    <button class="btn-primary" onclick="nextAyaPhonics()">${idx < AYA_PHONICS.length - 1 ? 'next sound →' : 'start Unit 1 →'}</button>
-    <button class="btn-ghost" onclick="showAyaPhonics(${idx > 0 ? idx - 1 : -1})">← back</button>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:1rem;flex-shrink:0">
+      <button class="btn-primary" onclick="nextAyaPhonics()">${idx < AYA_PHONICS.length - 1 ? 'next sound →' : 'start Unit 1 →'}</button>
+      <button class="btn-ghost" onclick="showAyaPhonics(${idx > 0 ? idx - 1 : -1})">← back</button>
+    </div>
   `;
 }
 
@@ -3290,7 +3335,9 @@ function renderAyaCourse() {
           <div class="l-title">${p.en}${genderTag}</div>
           <div class="l-sub" style="direction:ltr">${up.stage <= 1 ? p.ro : ''}</div>
         </div>
-        ${isWeak ? '<span class="l-badge lb-weak">review</span>' : ''}
+        <button onclick="event.stopPropagation();speakAyaPhrase('${p.ar.replace(/'/g, "\'")}');"
+        style="background:none;border:none;cursor:pointer;font-size:16px;padding:4px;color:var(--green-m)" title="hear pronunciation">🔊</button>
+      ${isWeak ? '<span class="l-badge lb-weak">review</span>' : ''}
       </div>`;
     }).join('') : '';
 
@@ -3310,7 +3357,7 @@ function renderAyaCourse() {
         ${phrases}
         ${stageBar}
         ${unlocked && !up.mastered ? `<div style="padding:10px 14px;border-top:1px solid var(--border)">
-          <button style="width:100%;padding:11px;background:var(--green);color:#fff;border:none;border-radius:40px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer" onclick="startAyaQuiz('${unit.id}')">practise ${stageLabel} →</button>
+          <button style="width:100%;padding:11px;background:var(--green);color:#fff;border:none;border-radius:40px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer" onclick="startAyaFlashcards('${unit.id}')">practise ${stageLabel} →</button>
         </div>` : ''}
         ${up.mastered ? `<div style="padding:10px 14px;text-align:center;font-size:12px;color:var(--green-m);border-top:1px solid var(--border)">Unit mastered · ${unit.words} phrases owned</div>` : ''}
         ${!unlocked ? `<div style="padding:14px;text-align:center;font-size:13px;color:var(--text3)">Complete the previous unit to unlock</div>` : ''}
@@ -3344,6 +3391,10 @@ function showAyaPhrase(pid, uid) {
       <div class="ps-english">${p.en}</div>
       ${p.note ? `<div class="ps-note">${p.note}</div>` : ''}
       ${genderNote}
+      <button onclick="speakAyaPhrase('${p.ar.replace(/'/g,"\'")}')"
+        style="margin-top:12px;width:100%;padding:9px;background:var(--green-l);border:1px solid rgba(26,107,80,0.2);border-radius:var(--r);font-family:'DM Sans',sans-serif;font-size:13px;color:var(--green-d);cursor:pointer">
+        🔊 hear pronunciation
+      </button>
     </div>`;
   document.getElementById('modal').classList.add('open');
 }
@@ -3763,5 +3814,100 @@ function setupPushFromSettings() {
 
 // Init service worker on load
 registerServiceWorker();
+</script>
+
+<script>
+// ═══════════════════════════════════════════
+// AYA FLASHCARDS
+// ═══════════════════════════════════════════
+let ayaFC = { unitId: null, phrases: [], idx: 0, flipped: false };
+
+function startAyaFlashcards(unitId) {
+  const unit = AYA_UNITS.find(u => u.id === unitId);
+  if (!unit || !unit.phrases.length) { startAyaQuiz(unitId); return; }
+  ayaFC = { unitId, phrases: unit.phrases, idx: 0, flipped: false };
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('p-aya-flashcard').classList.add('active');
+  window.scrollTo(0, 0);
+  renderAyaFC();
+}
+
+function renderAyaFC() {
+  const p = ayaFC.phrases[ayaFC.idx];
+  const total = ayaFC.phrases.length;
+  const up = getUP(ayaFC.unitId);
+  const pips = ayaFC.phrases.map((_, i) =>
+    `<div class="fc-pip${i < ayaFC.idx ? ' done' : i === ayaFC.idx ? ' active' : ''}"></div>`
+  ).join('');
+
+  document.getElementById('aya-fc-header').innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div class="fc-pips">${pips}</div>
+      <div style="font-size:11px;color:var(--text3)">${ayaFC.idx + 1} of ${total}</div>
+    </div>`;
+
+  if (!ayaFC.flipped) {
+    // Front — Arabic
+    document.getElementById('aya-fc-card').innerHTML = `
+      <div class="fc-card">
+        <div class="fc-arabic">${up.stage >= 2 ? stripH(p.ar) : p.ar}</div>
+        ${up.stage <= 1 ? `<div class="fc-roman">${p.ro}</div>` : ''}
+        <button onclick="event.stopPropagation();speakAyaPhrase('${p.ar.replace(/'/g, "\\'")}');"
+          style="margin-top:10px;padding:7px 16px;background:var(--green-l);border:1px solid rgba(26,107,80,0.2);border-radius:20px;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--green-d);cursor:pointer">
+          🔊 hear it
+        </button>
+        <div class="fc-tap-hint">tap to reveal meaning</div>
+      </div>`;
+  } else {
+    // Back — English + note
+    document.getElementById('aya-fc-card').innerHTML = `
+      <div class="fc-card" style="background:var(--green-l);border-color:rgba(26,107,80,0.2)">
+        <div class="fc-english">${p.en}</div>
+        ${p.note ? `<div class="fc-note">${p.note}</div>` : ''}
+        <div class="fc-tap-hint" style="color:var(--green-m)">tap to flip back</div>
+      </div>`;
+  }
+
+  const isLast = ayaFC.idx === total - 1;
+  document.getElementById('aya-fc-nav').innerHTML = `
+    <div style="display:flex;gap:8px">
+      ${ayaFC.idx > 0 ? `<button class="btn-ghost" style="flex:1" onclick="prevAyaFC()">← back</button>` : ''}
+      <button class="btn-primary" style="flex:2" onclick="${isLast ? 'startAyaQuiz(\'' + ayaFC.unitId + '\')' : 'nextAyaFC()'}">
+        ${isLast ? 'start quiz →' : 'next →'}
+      </button>
+    </div>
+    ${isLast ? '<button class="btn-ghost" style="margin-top:6px;width:100%" onclick="startAyaQuiz(\'' + ayaFC.unitId + '\')">skip to quiz →</button>' : ''}
+  `;
+}
+
+function flipAyaCard() {
+  ayaFC.flipped = !ayaFC.flipped;
+  renderAyaFC();
+}
+
+function nextAyaFC() {
+  if (ayaFC.idx < ayaFC.phrases.length - 1) {
+    ayaFC.idx++;
+    ayaFC.flipped = false;
+    renderAyaFC();
+  }
+}
+
+function prevAyaFC() {
+  if (ayaFC.idx > 0) {
+    ayaFC.idx--;
+    ayaFC.flipped = false;
+    renderAyaFC();
+  }
+}
+
+function speakAyaPhrase(arabicText) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const utt = new SpeechSynthesisUtterance(arabicText);
+  utt.lang = 'ar-SA';
+  utt.rate = 0.75;
+  window.speechSynthesis.speak(utt);
+}
 </script>
 </body></html>
