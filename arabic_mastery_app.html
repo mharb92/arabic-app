@@ -1098,12 +1098,12 @@ textarea.field{resize:none;line-height:1.6;font-size:14px}
 
 <!-- AYA PHONICS -->
 <div id="p-aya-phonics" class="page">
-  <div style="height:100vh;height:100dvh;display:flex;flex-direction:column;padding:1.25rem 1.25rem 1.5rem;max-width:540px;margin:0 auto;width:100%;overflow:hidden;box-sizing:border-box">
+  <div style="height:100vh;height:100dvh;display:flex;flex-direction:column;padding:1.25rem 1.25rem 0;max-width:540px;margin:0 auto;width:100%;box-sizing:border-box">
     <div style="margin-bottom:0.75rem;flex-shrink:0">
       <div class="step-tag" id="phonics-tag" style="margin-bottom:3px">Before we begin</div>
       <div style="font-family:'Lora',serif;font-size:20px;font-weight:400;color:var(--text)" id="phonics-title">Reading Arabic romanization</div>
     </div>
-    <div id="aya-phonics-content" style="flex:1;display:flex;flex-direction:column;justify-content:space-between;min-height:0;overflow:hidden"></div>
+    <div id="aya-phonics-content" style="flex:1;display:flex;flex-direction:column;min-height:0;overflow-y:auto"></div>
   </div>
 </div>
 
@@ -1158,34 +1158,38 @@ textarea.field{resize:none;line-height:1.6;font-size:14px}
 
 <!-- PUSH NOTIFICATION PROMPT -->
 <div id="p-push-prompt" class="page">
-  <div style="height:100vh;height:100dvh;display:flex;flex-direction:column;justify-content:center;padding:1.5rem;max-width:480px;margin:0 auto;width:100%;box-sizing:border-box">
-    <div style="font-size:28px;margin-bottom:10px;text-align:center">🔔</div>
-    <div style="font-family:'Lora',serif;font-size:20px;font-weight:400;text-align:center;margin-bottom:6px">Daily reminder</div>
-    <div style="font-size:13px;color:var(--text2);line-height:1.6;text-align:center;margin-bottom:1.25rem">Marwan set this up so you never miss a day of practice. When would you like yours?</div>
-    <div class="time-opts" id="push-time-opts" style="margin-bottom:0.75rem">
-      <div class="time-opt" onclick="pickPushTime(this,'08:00')">
-        <div class="time-opt-icon">🌅</div>
-        <div><div class="time-opt-label">Morning — 8:00 am</div></div>
+  <div style="height:100vh;height:100dvh;display:flex;flex-direction:column;max-width:480px;margin:0 auto;width:100%;box-sizing:border-box">
+    <div style="flex:1;overflow-y:auto;padding:1.5rem 1.5rem 0">
+      <div style="font-size:26px;margin-bottom:8px;text-align:center">🔔</div>
+      <div style="font-family:'Lora',serif;font-size:19px;font-weight:400;text-align:center;margin-bottom:5px">Daily reminder</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.5;text-align:center;margin-bottom:1rem">When would you like your daily Arabic practice reminder?</div>
+      <div class="time-opts" id="push-time-opts" style="margin-bottom:0.5rem">
+        <div class="time-opt" onclick="pickPushTime(this,'08:00')">
+          <div class="time-opt-icon">🌅</div>
+          <div><div class="time-opt-label">Morning — 8:00 am</div></div>
+        </div>
+        <div class="time-opt" onclick="pickPushTime(this,'12:30')">
+          <div class="time-opt-icon">☀️</div>
+          <div><div class="time-opt-label">Midday — 12:30 pm</div></div>
+        </div>
+        <div class="time-opt" onclick="pickPushTime(this,'20:00')">
+          <div class="time-opt-icon">🌙</div>
+          <div><div class="time-opt-label">Evening — 8:00 pm</div></div>
+        </div>
+        <div class="time-opt" onclick="pickPushTime(this,'custom')">
+          <div class="time-opt-icon">⏰</div>
+          <div><div class="time-opt-label">Custom time</div></div>
+        </div>
       </div>
-      <div class="time-opt" onclick="pickPushTime(this,'12:30')">
-        <div class="time-opt-icon">☀️</div>
-        <div><div class="time-opt-label">Midday — 12:30 pm</div></div>
-      </div>
-      <div class="time-opt" onclick="pickPushTime(this,'20:00')">
-        <div class="time-opt-icon">🌙</div>
-        <div><div class="time-opt-label">Evening — 8:00 pm</div><div class="time-opt-sub" style="display:block;font-size:10px">Best for memory — your brain stores language during sleep</div></div>
-      </div>
-      <div class="time-opt" onclick="pickPushTime(this,'custom')">
-        <div class="time-opt-icon">⏰</div>
-        <div><div class="time-opt-label">Custom time</div></div>
+      <div class="time-custom" id="push-custom-wrap">
+        <input class="time-input" type="time" id="push-custom-time" value="09:00"/>
       </div>
     </div>
-    <div class="time-custom" id="push-custom-wrap">
-      <input class="time-input" type="time" id="push-custom-time" value="09:00" style="margin-bottom:0.75rem"/>
+    <div style="padding:1rem 1.5rem 1.5rem;flex-shrink:0;border-top:1px solid var(--border)">
+      <button class="btn-primary" id="btn-push-confirm" onclick="confirmPushTime()" disabled style="margin-bottom:8px">set my reminder →</button>
+      <button class="btn-ghost" onclick="skipPushPrompt()">not now</button>
+      <div style="font-size:11px;color:var(--text3);margin-top:8px;text-align:center">You can change this anytime in settings</div>
     </div>
-    <button class="btn-primary" id="btn-push-confirm" onclick="confirmPushTime()" disabled>set my reminder →</button>
-    <button class="btn-ghost" onclick="skipPushPrompt()" style="margin-top:6px">not now</button>
-    <div style="font-size:11px;color:var(--text3);margin-top:8px;text-align:center">You can change this anytime in settings</div>
   </div>
 </div>
 
@@ -3072,15 +3076,13 @@ async function endCheckpoint(day) {
 (async function initAuth() {
   initSupabase();
   load();
-  // Check for stored email from previous session
   try {
     const storedEmail = localStorage.getItem('arabic_app_email');
     if (storedEmail) {
       await onAuthSuccess({ email: storedEmail, id: storedEmail });
       return;
     }
-  } catch(e) {}
-  // Check for returning user with local progress
+  } catch(e) { console.warn('initAuth email check failed:', e); }
   try {
     const local = JSON.parse(localStorage.getItem('arabic_app_v3') || '{}');
     if (local.profile && local.profile.name) {
@@ -3090,8 +3092,14 @@ async function endCheckpoint(day) {
         return;
       }
     }
-  } catch(e) {}
-  // No saved state — show intro animation
+  } catch(e) { console.warn('initAuth local check failed:', e); }
+  // No saved state — ensure login page is visible (handles iOS blank page)
+  const anyActive = document.querySelector('.page.active');
+  if (!anyActive || anyActive.id === 'p-welcome') {
+    // Only show login if welcome animation isn't running
+    const welcomeVisible = document.getElementById('p-welcome')?.classList.contains('active');
+    if (!welcomeVisible) go('p-login');
+  }
 })();
 
 function showLoginAfterIntro() {
@@ -3395,6 +3403,8 @@ async function launchAyaCourse() {
   if (hasSeen) {
     showAyaReturnSplashNew();
   } else {
+    // Mark splash seen immediately so re-opening before tapping يلا doesn't re-show
+    await markAyaSplashSeen();
     showAyaFirstSplash();
   }
 }
@@ -3640,21 +3650,23 @@ function renderAyaPhonics(idx) {
   if (idx === -1) {
     const r = AYA_ROMANIZATION_SCREEN;
     wrap.innerHTML = `
-      <div style="flex:1">
-        <div style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:1rem">${r.intro}</div>
-        <div style="display:flex;flex-direction:column;gap:7px">
+      <div style="flex:1;overflow-y:auto;padding-bottom:0.5rem">
+        <div style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:0.75rem">${r.intro}</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
           ${r.items.map(item => `
-            <div style="display:flex;align-items:center;gap:12px;padding:9px 12px;background:var(--bg2);border-radius:var(--r)">
-              <div style="font-size:20px;font-weight:700;color:var(--green);min-width:28px;text-align:center;font-family:'DM Sans',sans-serif">${item.symbol}</div>
-              <div style="font-size:22px;direction:rtl;color:var(--green);min-width:28px;text-align:center">${item.letter}</div>
+            <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg2);border-radius:var(--r)">
+              <div style="font-size:18px;font-weight:700;color:var(--green);min-width:24px;text-align:center;font-family:'DM Sans',sans-serif">${item.symbol}</div>
+              <div style="font-size:20px;direction:rtl;color:var(--green);min-width:24px;text-align:center">${item.letter}</div>
               <div>
-                <div style="font-size:13px;font-weight:500;color:var(--text)">${item.name}</div>
+                <div style="font-size:12px;font-weight:500;color:var(--text)">${item.name}</div>
                 <div style="font-size:11px;color:var(--text2);margin-top:1px;line-height:1.4">${item.desc}</div>
               </div>
             </div>`).join('')}
         </div>
       </div>
-      <button class="btn-primary" style="margin-top:1rem;flex-shrink:0" onclick="showAyaPhonics(0)">got it — show me the sounds →</button>
+      <div style="flex-shrink:0;padding-top:0.75rem;padding-bottom:1.5rem">
+        <button class="btn-primary" onclick="showAyaPhonics(0)">got it — show me the sounds →</button>
+      </div>
     `;
     return;
   }
@@ -3666,28 +3678,28 @@ function renderAyaPhonics(idx) {
   ).join('');
 
   wrap.innerHTML = `
-    <div style="flex:1;display:flex;flex-direction:column">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-shrink:0">
+    <div style="flex:1;overflow-y:auto;padding-bottom:0.5rem">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
         <div class="phonics-pips" style="margin-bottom:0">${pips}</div>
         <div style="font-size:11px;color:var(--text3)">${idx + 1} of ${totalSounds}</div>
       </div>
-      <div class="phonics-card" style="flex:1;padding:1rem">
-        <div class="phonics-letter" style="font-size:56px;margin-bottom:2px">${p.letter}</div>
-        <div class="phonics-name" style="margin-bottom:8px">${p.name}</div>
-        <div class="phonics-sound" style="font-size:14px;margin-bottom:6px">"${p.sound}"</div>
-        <div class="phonics-desc" style="font-size:12px;margin-bottom:10px">${p.description}</div>
-        <div class="phonics-example" style="padding:8px 12px">
-          <div class="phonics-ex-ar" style="font-size:22px">${p.example_ar}</div>
+      <div class="phonics-card" style="padding:1rem">
+        <div class="phonics-letter" style="font-size:52px;margin-bottom:2px">${p.letter}</div>
+        <div class="phonics-name" style="margin-bottom:6px">${p.name}</div>
+        <div class="phonics-sound" style="font-size:13px;margin-bottom:5px">"${p.sound}"</div>
+        <div class="phonics-desc" style="font-size:12px;margin-bottom:8px">${p.description}</div>
+        <div class="phonics-example" style="padding:7px 10px">
+          <div class="phonics-ex-ar" style="font-size:20px">${p.example_ar}</div>
           <div class="phonics-ex-ro" style="margin-top:2px">${p.example_ro}</div>
           <div class="phonics-ex-en">${p.example_en}</div>
         </div>
         <button onclick="speakPhonicsExample('${p.name}','${p.example_ar}','${p.example_en}')"
-          style="margin-top:10px;width:100%;padding:9px;background:var(--green-l);border:1px solid rgba(26,107,80,0.2);border-radius:var(--r);font-family:'DM Sans',sans-serif;font-size:13px;color:var(--green-d);cursor:pointer;text-align:left;line-height:1.5">
-          🔊 The letter ${p.letter}, as in ${p.example_ar}.${p.numeral?' This is portrayed in English text with the number '+p.numeral+'.':''}
+          style="margin-top:8px;width:100%;padding:9px;background:var(--green-l);border:1px solid rgba(26,107,80,0.2);border-radius:var(--r);font-family:'DM Sans',sans-serif;font-size:12px;color:var(--green-d);cursor:pointer;text-align:left;line-height:1.5">
+          🔊 The letter ${p.letter}, as in ${p.example_ar}.${p.numeral ? ' This is portrayed in English text with the number ' + p.numeral + '.' : ''}
         </button>
       </div>
     </div>
-    <div style="display:flex;flex-direction:column;gap:8px;margin-top:1rem;flex-shrink:0">
+    <div style="flex-shrink:0;padding-top:0.75rem;padding-bottom:1.5rem;display:flex;flex-direction:column;gap:8px">
       <button class="btn-primary" onclick="nextAyaPhonics()">${idx < AYA_PHONICS.length - 1 ? 'next sound →' : 'start Unit 1 →'}</button>
       <button class="btn-ghost" onclick="showAyaPhonics(${idx > 0 ? idx - 1 : -1})">← back</button>
     </div>
@@ -4579,8 +4591,7 @@ function finishOnboarding() {
   renderHome();
 }
 
-// Override go() to trigger renderHome when navigating to p-home
-const _originalGo = go;
+// Single canonical go() — handles all navigation side effects
 function go(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const el = document.getElementById(id);
@@ -4590,6 +4601,8 @@ function go(id) {
   if (id === 'p-summary') buildSummary();
   if (id === 'p-unit-overview') renderUnitOverview();
   if (id === 'p-enrichment') loadEnrichmentPage();
+  if (id === 'p-focused-study') loadFSHistory();
+  if (id === 'p-my-vocab') { loadVocabBank(); loadSharedVocabFromSupabase().then(() => renderMyVocab()); }
 }
 
 async function loadEnrichmentPage() {
@@ -4891,14 +4904,7 @@ async function saveFSSessionToSupabase(session) {
   } catch(e) {}
 }
 
-// Load FS history when navigating to focused study
-const _origGo = go;
-// Patch already exists — extend it to load FS history
-const __patchedGo = go;
-window.go = function(id) {
-  __patchedGo(id);
-  if (id === 'p-focused-study') loadFSHistory();
-};
+// go() is defined above — all navigation side effects handled there
 
 // ═══════════════════════════════════════════
 // STAGE 5 — MY VOCABULARY
@@ -5311,11 +5317,6 @@ async function loadSharedVocabFromSupabase() {
   } catch(e) {}
 }
 
-// Wire up renderMyVocab to go() override
-window.go = function(id) {
-  __patchedGo(id);
-  if (id === 'p-focused-study') loadFSHistory();
-  if (id === 'p-my-vocab') { loadVocabBank(); loadSharedVocabFromSupabase().then(() => renderMyVocab()); }
-};
+// go() handles p-my-vocab navigation above
 </script>
 </body></html>
