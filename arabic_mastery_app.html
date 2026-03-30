@@ -283,7 +283,7 @@ textarea.field{resize:none;line-height:1.6;font-size:14px}
 .fc-pip.done{background:var(--green)}.fc-pip.active{background:var(--green-m)}
 
 /* AYA SPLASH */
-#p-aya-splash{min-height:100vh;align-items:center;justify-content:center;background:var(--bg);position:relative;overflow:hidden}
+#p-aya-splash{height:100vh;height:100dvh;display:flex;align-items:center;justify-content:center;background:var(--bg);position:relative;overflow:hidden}
 .aya-jp{font-family:'Lora',serif;font-size:56px;color:var(--green);line-height:1.2;opacity:0;transform:translateY(8px);transition:opacity 0.8s ease,transform 0.8s ease;text-align:center;max-width:380px;margin:0 auto}
 .aya-jp.shown{opacity:1;transform:translateY(0)}
 .aya-letter-wrap{text-align:center;max-width:380px;margin:0 auto;padding:0 1.5rem}
@@ -303,7 +303,7 @@ textarea.field{resize:none;line-height:1.6;font-size:14px}
 .aya-btn-roman{font-family:'DM Sans',sans-serif;font-size:11px;color:rgba(255,255,255,0.7);letter-spacing:0.08em;margin-top:3px}
 
 /* AYA RETURN SPLASH */
-#p-aya-return{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg)}
+#p-aya-return{height:100vh;height:100dvh;display:flex;align-items:center;justify-content:center;background:var(--bg);overflow:hidden}
 .aya-return-wrap{text-align:center;max-width:320px;margin:0 auto;padding:2rem 1.5rem}
 
 /* AYA PHONICS */
@@ -497,7 +497,7 @@ textarea.field{resize:none;line-height:1.6;font-size:14px}
 <!-- ═══════════════════════════════════════
      WELCOME / INTRO
 ═══════════════════════════════════════ -->
-<div id="p-welcome" class="page active">
+<div id="p-welcome" class="page">
   <div id="splash"><div class="splash-arabic">مرحباً</div><div class="splash-roman">marhaba</div></div>
   <div id="intro-seq">
     <div class="intro-line" id="il-1">This course finds your level<br>before teaching you anything.</div>
@@ -1767,7 +1767,7 @@ function pickM(g,el,val){
 }
 function onOther(){profile.dialectOther=$('inp-other').value.trim();$('btn-dialect').disabled=profile.dialectOther.length<1;}
 function onGoalsContinue(){profile.goalsExtra=($('goals-extra').value||'').trim();go('p-dialect');}
-function onDialectContinue(){go('p-summary');}
+function onDialectContinue(){go('p-dialect');}
 function buildSummary(){
   const gr=GREETINGS[profile.speaker]||GREETINGS.new;
   $('sum-title').textContent='Welcome, '+profile.name+'.';
@@ -3093,13 +3093,25 @@ async function endCheckpoint(day) {
       }
     }
   } catch(e) { console.warn('initAuth local check failed:', e); }
-  // No saved state — ensure login page is visible (handles iOS blank page)
-  const anyActive = document.querySelector('.page.active');
-  if (!anyActive || anyActive.id === 'p-welcome') {
-    // Only show login if welcome animation isn't running
-    const welcomeVisible = document.getElementById('p-welcome')?.classList.contains('active');
-    if (!welcomeVisible) go('p-login');
-  }
+  // No saved state — show welcome animation
+  go('p-welcome');
+  setTimeout(() => {
+    const splash = document.getElementById('splash');
+    const seq = document.getElementById('intro-seq');
+    if (splash) splash.style.opacity = '0';
+    if (seq) {
+      setTimeout(() => {
+        if (splash) splash.style.display = 'none';
+        seq.classList.add('visible');
+        setTimeout(() => document.getElementById('il-1')?.classList.add('shown'), 100);
+        setTimeout(() => document.getElementById('il-div')?.classList.add('shown'), 800);
+        setTimeout(() => document.getElementById('il-2')?.classList.add('shown'), 1200);
+        setTimeout(() => document.getElementById('il-3')?.classList.add('shown'), 1800);
+        setTimeout(() => document.getElementById('il-4')?.classList.add('shown'), 2400);
+        setTimeout(() => document.getElementById('il-btn')?.classList.add('shown'), 2800);
+      }, 500);
+    }
+  }, 2800);
 })();
 
 function showLoginAfterIntro() {
@@ -3650,7 +3662,7 @@ function renderAyaPhonics(idx) {
   if (idx === -1) {
     const r = AYA_ROMANIZATION_SCREEN;
     wrap.innerHTML = `
-      <div style="flex:1;overflow-y:auto;padding-bottom:0.5rem">
+      <div style="flex:1;display:flex;flex-direction:column;padding-bottom:0.5rem">
         <div style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:0.75rem">${r.intro}</div>
         <div style="display:flex;flex-direction:column;gap:6px">
           ${r.items.map(item => `
@@ -3709,14 +3721,14 @@ function renderAyaPhonics(idx) {
 function speakPhonicsExample(letterName, arabicWord, englishMeaning) {
   if (!window.speechSynthesis) return;
   window.speechSynthesis.cancel();
-  const intro = new SpeechSynthesisUtterance('The letter ' + letterName + ', as in');
-  intro.lang = 'en-US';
-  intro.rate = 0.9;
+  const letter = new SpeechSynthesisUtterance(letterName);
+  letter.lang = 'ar-SA';
+  letter.rate = 0.7;
   const arabic = new SpeechSynthesisUtterance(arabicWord);
   arabic.lang = 'ar-SA';
   arabic.rate = 0.7;
-  window.speechSynthesis.speak(intro);
-  window.speechSynthesis.speak(arabic);
+  window.speechSynthesis.speak(letter);
+  setTimeout(() => window.speechSynthesis.speak(arabic), 600);
 }
 
 async function nextAyaPhonics() {
