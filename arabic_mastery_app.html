@@ -3421,9 +3421,16 @@ async function launchAyaCourse() {
   if (currentUser) await loadProgressFromSupabaseByEmail(currentUser.email);
   profile.name = ayaConfig.name || 'Aya';
   users.marwan.name = profile.name;
-  // ALWAYS show first splash with button (never auto-advancing return splash)
-  console.log('  → Showing FIRST splash');
-  showAyaFirstSplash();
+  const hasSeen = ayaConfig.has_seen_splash === true;
+  console.log('  has_seen_splash:', hasSeen);
+  if (hasSeen) {
+    console.log('  → Going directly to home (splash already seen)');
+    go('p-home');
+  } else {
+    console.log('  → Showing FIRST splash');
+    await markAyaSplashSeen();
+    showAyaFirstSplash();
+  }
   console.log('✅ launchAyaCourse complete');
 }
 
@@ -4646,8 +4653,7 @@ function finishOnboarding() {
   if (sb && currentUser) {
     try { sb.from('profiles').upsert({id: currentUser.id, email: currentUser.email, name: profile.name, speaker_type: profile.speaker, goals: profile.goals, goals_extra: profile.goalsExtra, dialect: profile.dialect, dialect_other: profile.dialectOther}); } catch(e) {}
   }
-  go('p-home');
-  renderHome();
+  go('p-home'); // go() already calls renderHome(), no need to call it again
 }
 
 // Single canonical go() — handles all navigation side effects
