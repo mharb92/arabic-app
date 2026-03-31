@@ -3408,17 +3408,23 @@ const AYA_UNITS = [
 
 
 async function launchAyaCourse() {
+  console.log('🚀 launchAyaCourse called');
   if (currentUser) await loadProgressFromSupabaseByEmail(currentUser.email);
   profile.name = ayaConfig.name || 'Aya';
   users.marwan.name = profile.name;
   const hasSeen = ayaConfig.has_seen_splash === true;
+  console.log('  ayaConfig:', ayaConfig);
+  console.log('  has_seen_splash:', hasSeen);
   if (hasSeen) {
+    console.log('  → Showing RETURN splash');
     showAyaReturnSplashNew();
   } else {
+    console.log('  → Showing FIRST splash');
     // Mark splash seen immediately so re-opening before tapping يلا doesn't re-show
     await markAyaSplashSeen();
     showAyaFirstSplash();
   }
+  console.log('✅ launchAyaCourse complete');
 }
 
 function showAyaReturnSplashNew() {
