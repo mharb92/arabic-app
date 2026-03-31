@@ -34,9 +34,9 @@
   --purple-l:#26215C;--purple-d:#CECBF6;
   --blue-l:#042C53;--blue-d:#B5D4F4;
 }}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow:hidden;position:fixed;width:100%;height:100vh}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-.page{display:none;flex-direction:column}.page.active{display:flex}
+.page{display:none;flex-direction:column;visibility:hidden;position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto}.page.active{display:flex;visibility:visible;position:relative}
 .wrap{max-width:540px;margin:0 auto;padding:1.75rem 1.25rem 3rem;width:100%;overflow-x:hidden}
 #p-welcome{min-height:100vh;align-items:center;justify-content:center;padding:2rem 1.5rem;text-align:center;position:relative;overflow:hidden}
 @keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
@@ -1059,29 +1059,29 @@ textarea.field{resize:none;line-height:1.6;font-size:14px}
 
 <!-- AYA FIRST VISIT SPLASH -->
 <div id="p-aya-splash" class="page">
-  <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1.5rem;text-align:center;position:relative">
+  <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem 1.5rem 2.5rem;text-align:center;position:relative">
     <div id="aya-jp-screen" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);z-index:5;opacity:1;transition:opacity 0.8s ease">
       <div class="aya-jp" id="aya-jp-line">アラビア語コース、あなたのために作りました</div>
     </div>
-    <div class="aya-letter-wrap" style="width:100%">
-      <div class="aya-arabic-big" id="aya-arabic-big">تَفَضَّلِي</div>
+    <div class="aya-letter-wrap" style="width:100%;max-width:360px">
+      <div class="aya-arabic-big" id="aya-arabic-big" style="font-size:56px">تَفَضَّلِي</div>
       <div class="aya-roman" id="aya-roman">tafaDDali</div>
       <div class="aya-english" id="aya-english">welcome</div>
       <div class="aya-divider" id="aya-div-1"></div>
-      <div class="aya-line" id="aya-l-1">Hello, my love.</div>
+      <div class="aya-line" id="aya-l-1" style="font-size:16px">Hello, my love.</div>
       <div class="aya-divider" id="aya-div-2"></div>
-      <div class="aya-line" id="aya-l-2">I built this for you.</div>
-      <div class="aya-line soft" id="aya-l-3">Not because you had to learn —</div>
-      <div class="aya-line soft" id="aya-l-4">but because you wanted to.</div>
+      <div class="aya-line" id="aya-l-2" style="font-size:16px">I built this for you.</div>
+      <div class="aya-line soft" id="aya-l-3" style="font-size:15px">Not because you had to learn —</div>
+      <div class="aya-line soft" id="aya-l-4" style="font-size:15px">but because you wanted to.</div>
       <div class="aya-divider" id="aya-div-3"></div>
-      <div class="aya-line" id="aya-l-5">This course will take you from zero</div>
-      <div class="aya-line soft" id="aya-l-6">to walking into my family's home</div>
-      <div class="aya-line soft" id="aya-l-7">and making them fall in love with you</div>
-      <div class="aya-line soft" id="aya-l-8">the way I did.</div>
+      <div class="aya-line" id="aya-l-5" style="font-size:15px">This course will take you from zero</div>
+      <div class="aya-line soft" id="aya-l-6" style="font-size:14px">to walking into my family's home</div>
+      <div class="aya-line soft" id="aya-l-7" style="font-size:14px">and making them fall in love with you</div>
+      <div class="aya-line soft" id="aya-l-8" style="font-size:14px">the way I did.</div>
       <div class="aya-divider" id="aya-div-4"></div>
-      <div class="aya-line" id="aya-l-9">I've set some goals to get you started.</div>
-      <div class="aya-line soft" id="aya-l-10">Change them whenever you like —</div>
-      <div class="aya-line soft" id="aya-l-11">this is yours.</div>
+      <div class="aya-line" id="aya-l-9" style="font-size:15px">I've set some goals to get you started.</div>
+      <div class="aya-line soft" id="aya-l-10" style="font-size:14px">Change them whenever you like —</div>
+      <div class="aya-line soft" id="aya-l-11" style="font-size:14px">this is yours.</div>
       <div class="aya-divider" id="aya-div-5"></div>
       <button class="aya-btn" id="aya-begin-btn" onclick="beginAyaCourse()">
         يلا نبدأ
