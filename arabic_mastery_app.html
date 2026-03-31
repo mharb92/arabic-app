@@ -36,7 +36,7 @@
 }}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-.page{display:none;flex-direction:column;position:absolute;top:0;left:0;right:0;bottom:0;width:100%;min-height:100vh}.page.active{display:flex}
+.page{display:none;flex-direction:column}.page.active{display:flex}
 .wrap{max-width:540px;margin:0 auto;padding:1.75rem 1.25rem 3rem;width:100%;overflow-x:hidden}
 #p-welcome{min-height:100vh;align-items:center;justify-content:center;padding:2rem 1.5rem;text-align:center;position:relative;overflow:hidden}
 @keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
@@ -3432,7 +3432,10 @@ function showAyaReturnSplashNew() {
   // Fades in 1.8s then auto-advances to home
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const page = document.getElementById('p-aya-return');
-  if(page) page.classList.add('active');
+  if(page) {
+    page.classList.add('active');
+    setTimeout(() => page.scrollIntoView({ behavior: 'instant', block: 'start' }), 0);
+  }
   window.scrollTo(0,0);
   const wrap = document.getElementById('aya-return-wrap');
   if(!wrap) { go('p-home'); return; }
@@ -3483,7 +3486,10 @@ function showAyaFirstSplash() {
   const splash = document.getElementById('p-aya-splash');
   const returnSplash = document.getElementById('p-aya-return');
   if (returnSplash) returnSplash.classList.remove('active'); // Explicitly remove return splash
-  if (splash) splash.classList.add('active');
+  if (splash) {
+    splash.classList.add('active');
+    setTimeout(() => splash.scrollIntoView({ behavior: 'instant', block: 'start' }), 0);
+  }
   window.scrollTo(0, 0);
   runAyaSplashAnimation();
 }
@@ -3680,7 +3686,10 @@ function showAyaPhonics(idx) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const page = document.getElementById('p-aya-phonics');
   console.log('  p-aya-phonics element:', page ? 'found' : 'NOT FOUND');
-  if (page) page.classList.add('active');
+  if (page) {
+    page.classList.add('active');
+    setTimeout(() => page.scrollIntoView({ behavior: 'instant', block: 'start' }), 0);
+  }
   window.scrollTo(0, 0);
   renderAyaPhonics(idx);
   console.log('✅ showAyaPhonics complete');
@@ -4645,7 +4654,11 @@ function finishOnboarding() {
 function go(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const el = document.getElementById(id);
-  if (el) el.classList.add('active');
+  if (el) {
+    el.classList.add('active');
+    // Scroll the page into view
+    setTimeout(() => el.scrollIntoView({ behavior: 'instant', block: 'start' }), 0);
+  }
   window.scrollTo(0, 0);
   if (id === 'p-home') renderHome();
   if (id === 'p-summary') buildSummary();
