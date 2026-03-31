@@ -3667,12 +3667,15 @@ function getAyaReturnMessage() {
 let ayaPhonicsIdx = 0;
 
 function showAyaPhonics(idx) {
+  console.log('🎵 showAyaPhonics called with idx:', idx);
   ayaPhonicsIdx = idx;
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const page = document.getElementById('p-aya-phonics');
+  console.log('  p-aya-phonics element:', page ? 'found' : 'NOT FOUND');
   if (page) page.classList.add('active');
   window.scrollTo(0, 0);
   renderAyaPhonics(idx);
+  console.log('✅ showAyaPhonics complete');
 }
 
 function renderAyaPhonics(idx) {
@@ -4251,13 +4254,20 @@ async function registerServiceWorker() {
 
 // Check if push notifications already set up, if not show prompt after Aya course launch
 async function showAyaPushPromptThenPhonics() {
+  console.log('📱 showAyaPushPromptThenPhonics called');
+  console.log('  Notification in window:', 'Notification' in window);
+  console.log('  serviceWorker in navigator:', 'serviceWorker' in navigator);
+  console.log('  Notification.permission:', typeof Notification !== 'undefined' ? Notification.permission : 'N/A');
+  console.log('  ayaConfig.push_enabled:', ayaConfig ? ayaConfig.push_enabled : 'N/A');
+  
   // Show push prompt as its own page before phonics
   // After they respond (yes or skip), go to phonics screen -1
   if (!('Notification' in window) || !('serviceWorker' in navigator) || Notification.permission !== 'default' || (ayaConfig && ayaConfig.push_enabled)) {
-    // Skip push prompt — go straight to phonics
+    console.log('⏭️  Skipping push prompt, going straight to phonics');
     showAyaPhonics(-1);
     return;
   }
+  console.log('🔔 Showing push prompt page');
   // Show the push prompt page with a callback to proceed to phonics
   window._pushPromptCallback = () => showAyaPhonics(-1);
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
