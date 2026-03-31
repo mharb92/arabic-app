@@ -1627,6 +1627,11 @@ function getUP(uid){
   return u.unitProgress[uid];
 }
 function getAllUnits(){
+  // Heritage speakers MUST complete placement before seeing ANY units
+  if (profile.speaker === 'heritage' && !users.marwan.startDate && Object.keys(users.marwan.unitProgress || {}).length === 0) {
+    return []; // No units until placement is done
+  }
+  
   // Dynamic units take priority over static units — static are fallback only
   const result=[];
   const allIds=new Set([
@@ -4489,7 +4494,7 @@ function renderHomeLessonCard() {
     document.getElementById('hlc-action-text').textContent = 'start placement test →';
     document.getElementById('hlc-session').style.display = 'none';
     document.getElementById('hlc-countdown').style.display = 'none';
-    card.onclick = () => go('p-test');
+    card.onclick = () => startPlacement(); // FIX: Call startPlacement() not go('p-test')
     return;
   }
   
