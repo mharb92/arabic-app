@@ -3088,23 +3088,32 @@ async function endCheckpoint(day) {
 (async function initAuth() {
   initSupabase();
   load();
+  console.log('🔐 initAuth started');
   try {
     const storedEmail = localStorage.getItem('arabic_app_email');
+    console.log('  storedEmail:', storedEmail);
     if (storedEmail) {
+      console.log('  → Calling onAuthSuccess with stored email');
       await onAuthSuccess({ email: storedEmail, id: storedEmail });
+      console.log('  ← onAuthSuccess completed, returning from initAuth');
       return;
     }
   } catch(e) { console.warn('initAuth email check failed:', e); }
+  console.log('  No storedEmail, checking localStorage for existing profile...');
   try {
     const local = JSON.parse(localStorage.getItem('arabic_app_v3') || '{}');
+    console.log('  localStorage profile:', local.profile);
+    console.log('  localStorage unitProgress keys:', Object.keys(local.users?.marwan?.unitProgress || {}));
     if (local.profile && local.profile.name) {
       if (local.users && local.users.marwan && Object.keys(local.users.marwan.unitProgress||{}).length > 0) {
+        console.log('  → Found local progress, going to p-home as GUEST');
         isGuest = true;
         go('p-home');
         return;
       }
     }
   } catch(e) { console.warn('initAuth local check failed:', e); }
+  console.log('  → No saved state, showing welcome');
   // No saved state — show welcome animation
   go('p-welcome');
   setTimeout(() => {
@@ -3412,18 +3421,9 @@ async function launchAyaCourse() {
   if (currentUser) await loadProgressFromSupabaseByEmail(currentUser.email);
   profile.name = ayaConfig.name || 'Aya';
   users.marwan.name = profile.name;
-  const hasSeen = ayaConfig.has_seen_splash === true;
-  console.log('  ayaConfig:', ayaConfig);
-  console.log('  has_seen_splash:', hasSeen);
-  if (hasSeen) {
-    console.log('  → Showing RETURN splash');
-    showAyaReturnSplashNew();
-  } else {
-    console.log('  → Showing FIRST splash');
-    // Mark splash seen immediately so re-opening before tapping يلا doesn't re-show
-    await markAyaSplashSeen();
-    showAyaFirstSplash();
-  }
+  // ALWAYS show first splash with button (never auto-advancing return splash)
+  console.log('  → Showing FIRST splash');
+  showAyaFirstSplash();
   console.log('✅ launchAyaCourse complete');
 }
 
