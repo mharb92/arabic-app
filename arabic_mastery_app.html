@@ -3481,6 +3481,8 @@ function showAyaFirstSplash() {
   // Show the custom splash page
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const splash = document.getElementById('p-aya-splash');
+  const returnSplash = document.getElementById('p-aya-return');
+  if (returnSplash) returnSplash.classList.remove('active'); // Explicitly remove return splash
   if (splash) splash.classList.add('active');
   window.scrollTo(0, 0);
   runAyaSplashAnimation();
