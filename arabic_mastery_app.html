@@ -4271,8 +4271,18 @@ async function showAyaPushPromptThenPhonics() {
   // Show the push prompt page with a callback to proceed to phonics
   window._pushPromptCallback = () => showAyaPhonics(-1);
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById('p-push-prompt').classList.add('active');
+  const pushPage = document.getElementById('p-push-prompt');
+  console.log('  p-push-prompt element:', pushPage ? 'FOUND' : 'NOT FOUND');
+  if (pushPage) {
+    pushPage.classList.add('active');
+    console.log('  Added active class to push prompt');
+    console.log('  Page display:', window.getComputedStyle(pushPage).display);
+    console.log('  Page visibility:', window.getComputedStyle(pushPage).visibility);
+  } else {
+    console.error('❌ p-push-prompt element not found in DOM!');
+  }
   window.scrollTo(0, 0);
+  console.log('✅ showAyaPushPromptThenPhonics complete');
 }
 
 async function maybeShowPushPrompt() {
