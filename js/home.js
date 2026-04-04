@@ -80,58 +80,78 @@ export function renderHomeScreen(container) {
  */
 function renderHomeTab(currentUnit, currentUnitId, unitProgress, units) {
   const hasPlacementScore = AppState.profile.placementLevel !== undefined;
+  const isBeginner = AppState.profile.speaker_type === 'beginner' || AppState.isAya;
+  const needsPlacement = !isBeginner && !hasPlacementScore;
+  const canAccessLesson = isBeginner || hasPlacementScore;
   
   return `
-    <!-- Continue Card -->
-    <div class="continue-card card">
-      <h3>${unitProgress.mastered ? '🎉 Unit Complete!' : 'Continue Learning'}</h3>
-      <p class="unit-title">${currentUnit.title}</p>
-      <p class="unit-subtitle">${currentUnit.subtitle || ''}</p>
-      <div class="progress-bar">
-        <div class="progress-fill" style="width: ${(unitProgress.stage / 3) * 100}%"></div>
+    ${canAccessLesson ? `
+      <!-- Continue Learning Card (GREEN) -->
+      <div class="continue-card card card-green">
+        <h3>${unitProgress.mastered ? '🎉 Unit Complete!' : 'Continue Learning'}</h3>
+        <p class="unit-title">${currentUnit.title}</p>
+        <p class="unit-subtitle">${currentUnit.subtitle || ''}</p>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: ${(unitProgress.stage / 3) * 100}%"></div>
+        </div>
+        <p class="progress-text">Stage ${unitProgress.stage}/3 • ${unitProgress.consec} consecutive correct</p>
+        <button class="btn-primary btn-green" id="continue-btn">
+          ${unitProgress.mastered ? 'Next Unit' : 'Continue'}
+        </button>
       </div>
-      <p class="progress-text">Stage ${unitProgress.stage}/3 • ${unitProgress.consec} consecutive correct</p>
-      <button class="btn-primary" id="continue-btn">
-        ${unitProgress.mastered ? 'Next Unit' : 'Continue'}
-      </button>
-    </div>
+    ` : ''}
     
-    <!-- Phrase of the Day -->
-    <div class="phrase-card card">
-      <h3>📝 Phrase of the Day</h3>
-      <p class="arabic" dir="rtl">${getRandomPhrase(units)}</p>
-    </div>
+    ${needsPlacement ? `
+      <!-- Placement Test (GOLD, LARGEST) -->
+      <div class="primary-action-card card-gold">
+        <div class="primary-action-content">
+          <h2>🎯 Take Placement Test</h2>
+          <p>Find your starting level with our adaptive placement test</p>
+        </div>
+        <button class="btn-primary btn-gold btn-large" id="placement-btn">
+          Start Placement Test
+        </button>
+      </div>
+    ` : `
+      <!-- Today's Practice (GOLD, LARGEST) -->
+      <div class="primary-action-card card-gold">
+        <div class="primary-action-content">
+          <h2>🎯 Today's Practice</h2>
+          <p>Reinforce what you've learned</p>
+        </div>
+        <button class="btn-primary btn-gold btn-large" id="practice-btn">
+          Start Practice
+        </button>
+      </div>
+    `}
     
-    <!-- Quick Actions -->
-    <div class="quick-actions">
-      <button class="action-btn" id="practice-btn">
-        <span class="icon">🎯</span>
-        <span>Today's Practice</span>
+    <!-- Secondary Actions Grid -->
+    <div class="secondary-actions">
+      <!-- My Vocabulary (PURPLE) -->
+      <button class="action-card card-purple" id="vocab-btn">
+        <span class="action-icon">📝</span>
+        <span class="action-label">My Vocabulary</span>
       </button>
       
-      ${!hasPlacementScore ? `
-        <button class="action-btn" id="placement-btn">
-          <span class="icon">📊</span>
-          <span>Take Placement Test</span>
+      <!-- Focused Practice (DEEP BLUE) -->
+      <button class="action-card card-blue" id="focused-btn">
+        <span class="action-icon">⚡</span>
+        <span class="action-label">Focused Practice</span>
+      </button>
+      
+      <!-- Browse Units (TEAL) -->
+      <button class="action-card card-teal" id="units-btn">
+        <span class="action-icon">📚</span>
+        <span class="action-label">Browse Units</span>
+      </button>
+      
+      ${isBeginner ? `
+        <!-- Alphabet/Phonics (TEAL) -->
+        <button class="action-card card-teal" id="${AppState.isAya ? 'phonics' : 'alphabet'}-btn">
+          <span class="action-icon">🔤</span>
+          <span class="action-label">${AppState.isAya ? 'Phonics Review' : 'Arabic Alphabet'}</span>
         </button>
       ` : ''}
-      
-      <button class="action-btn" id="units-btn">
-        <span class="icon">📚</span>
-        <span>Browse Units</span>
-      </button>
-      
-      ${AppState.isAya ? `
-        <button class="action-btn" id="phonics-btn">
-          <span class="icon">🔤</span>
-          <span>Phonics Review</span>
-        </button>
-      ` : `
-        <button class="action-btn" id="alphabet-btn">
-          <span class="icon">🔤</span>
-          <span>Arabic Alphabet</span>
-        </button>
-      `}
     </div>
   `;
 }
@@ -296,6 +316,22 @@ function attachHomeListeners(container) {
   if (phonicsBtn) {
     phonicsBtn.addEventListener('click', () => {
       import('./router.js').then(({ navigateTo }) => navigateTo('aya-phonics'));
+    });
+  }
+  
+  // My Vocabulary
+  const vocabBtn = container.querySelector('#vocab-btn');
+  if (vocabBtn) {
+    vocabBtn.addEventListener('click', () => {
+      import('./router.js').then(({ navigateTo }) => navigateTo('my-vocab'));
+    });
+  }
+  
+  // Focused Practice
+  const focusedBtn = container.querySelector('#focused-btn');
+  if (focusedBtn) {
+    focusedBtn.addEventListener('click', () => {
+      import('./router.js').then(({ navigateTo }) => navigateTo('focused-study'));
     });
   }
   

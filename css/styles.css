@@ -447,26 +447,164 @@ textarea[dir="rtl"] {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  padding: var(--space-md);
+  padding: 1rem;
   background: var(--bg-dark);
   color: var(--text-light);
 }
 
 .home-header {
-  padding: var(--space-lg) 0 var(--space-md);
+  padding: 1rem 0 0.75rem;
 }
 
 .home-header h1 {
-  font-size: 1.75rem;
-  margin-bottom: var(--space-xs);
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
   color: var(--text-light);
 }
 
 .countdown {
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   color: var(--text-muted);
   text-align: center;
-  margin-top: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+/* Tab Bar */
+.tab-bar {
+  display: flex;
+  gap: var(--space-sm);
+  padding: 0.5rem 0;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 10px;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition);
+  position: relative;
+  margin-bottom: -2px;
+}
+
+.tab-btn:hover {
+  color: var(--text-light);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+
+.tab-btn.active {
+  color: var(--primary-green);
+  border-bottom-color: var(--primary-green);
+}
+
+/* Color-Coded Cards */
+.card-green {
+  border-left: 3px solid var(--primary-green);
+}
+
+.card-gold {
+  background: rgba(212, 175, 55, 0.1);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+.card-purple {
+  background: rgba(155, 89, 182, 0.1);
+  border: 1px solid rgba(155, 89, 182, 0.3);
+}
+
+.card-blue {
+  background: rgba(52, 152, 219, 0.1);
+  border: 1px solid rgba(52, 152, 219, 0.3);
+}
+
+.card-teal {
+  background: rgba(78, 205, 196, 0.1);
+  border: 1px solid rgba(78, 205, 196, 0.3);
+}
+
+/* Primary Action Card (Placement Test / Today's Practice) */
+.primary-action-card {
+  padding: 1.25rem;
+  border-radius: var(--radius-lg);
+  margin-bottom: 0.75rem;
+}
+
+.primary-action-content {
+  margin-bottom: 1rem;
+}
+
+.primary-action-content h2 {
+  font-size: 1.4rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-light);
+}
+
+.primary-action-content p {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+/* Button Colors */
+.btn-green {
+  background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
+}
+
+.btn-gold {
+  background: linear-gradient(135deg, #d4af37, #b8941f);
+}
+
+.btn-large {
+  width: 100%;
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+}
+
+/* Secondary Actions Grid */
+.secondary-actions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.action-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all var(--transition);
+  font-size: 0.85rem;
+  color: var(--text-light);
+  text-decoration: none;
+  border: none;
+  min-height: 80px;
+}
+
+.action-card:hover,
+.action-card:active {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.action-icon {
+  font-size: 1.75rem;
+}
+
+.action-label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-align: center;
 }
 
 /* Tab Bar */
@@ -536,85 +674,34 @@ textarea[dir="rtl"] {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-lg);
-  padding: var(--space-lg);
-  margin-bottom: var(--space-md);
+  padding: 1rem;
+  margin-bottom: 0.75rem;
 }
 
 .continue-card h3 {
-  font-size: 1.125rem;
-  margin-bottom: var(--space-sm);
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
   color: var(--text-light);
 }
 
 .unit-title {
   font-family: var(--font-display);
-  font-size: 1.25rem;
-  margin-bottom: var(--space-xs);
+  font-size: 1.1rem;
+  margin-bottom: 0.25rem;
   color: var(--text-light);
 }
 
 .unit-subtitle {
-  font-size: 0.9375rem;
+  font-size: 0.85rem;
   color: var(--text-muted);
-  margin-bottom: var(--space-md);
+  margin-bottom: 0.75rem;
 }
 
 .progress-text {
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
-  margin-top: var(--space-sm);
-  margin-bottom: var(--space-md);
-}
-
-/* Phrase Card */
-.phrase-card {
-  background: rgba(26, 107, 80, 0.15);
-  border: 1px solid rgba(26, 107, 80, 0.3);
-  border-radius: var(--radius-lg);
-  padding: var(--space-lg);
-}
-
-.phrase-card .arabic {
-  font-size: 1.5rem;
-  color: var(--accent-teal);
-  text-align: center;
-  direction: rtl;
-}
-
-/* Quick Actions */
-.quick-actions {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-md);
-  margin-top: var(--space-lg);
-}
-
-.action-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-sm);
-  padding: var(--space-lg);
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-lg);
-  cursor: pointer;
-  transition: all var(--transition);
-  font-size: 0.875rem;
-  color: var(--text-light);
-  text-decoration: none;
-}
-
-.action-btn:hover,
-.action-btn:active {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: var(--primary-green);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-.action-btn .icon {
-  font-size: 2rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.75rem;
 }
 
 /* Stats Grid */
