@@ -43,7 +43,7 @@ export async function saveProfile(email, profileData) {
  */
 export async function loadProfile(email) {
   const sb = initSupabase();
-  if (!sb) return null;
+  if (!sb) return { profile: null };
   
   const { data, error } = await sb
     .from('profiles')
@@ -53,10 +53,10 @@ export async function loadProfile(email) {
     
   if (error) {
     console.error('Load profile error:', error);
-    return null;
+    return { profile: null };
   }
   
-  return data;
+  return { profile: data };
 }
 
 /**
@@ -85,7 +85,7 @@ export async function saveUnitProgress(email, unitId, progressData) {
  */
 export async function loadUnitProgress(email) {
   const sb = initSupabase();
-  if (!sb) return [];
+  if (!sb) return { progress: [] };
   
   const { data, error } = await sb
     .from('unit_progress')
@@ -94,10 +94,10 @@ export async function loadUnitProgress(email) {
     
   if (error) {
     console.error('Load unit progress error:', error);
-    return [];
+    return { progress: [] };
   }
   
-  return data;
+  return { progress: data || [] };
 }
 
 /**
@@ -122,11 +122,32 @@ export async function saveWeakWords(email, weakWords) {
 }
 
 /**
+ * Load weak words
+ */
+export async function loadWeakWords(email) {
+  const sb = initSupabase();
+  if (!sb) return { weakWords: [] };
+  
+  const { data, error } = await sb
+    .from('weak_words')
+    .select('words')
+    .eq('email', email)
+    .single();
+    
+  if (error) {
+    console.error('Load weak words error:', error);
+    return { weakWords: [] };
+  }
+  
+  return { weakWords: data?.words || [] };
+}
+
+/**
  * Check if user has special course (Aya)
  */
 export async function checkSpecialCourse(email) {
   const sb = initSupabase();
-  if (!sb) return null;
+  if (!sb) return { config: null };
   
   const { data, error } = await sb
     .from('special_courses')
@@ -135,10 +156,10 @@ export async function checkSpecialCourse(email) {
     .single();
     
   if (error) {
-    return null;
+    return { config: null };
   }
   
-  return data;
+  return { config: data };
 }
 
 /**
@@ -167,7 +188,7 @@ export async function saveFocusedSession(email, sessionData) {
  */
 export async function loadFocusedSessions(email) {
   const sb = initSupabase();
-  if (!sb) return [];
+  if (!sb) return { sessions: [] };
   
   const { data, error } = await sb
     .from('focused_sessions')
@@ -177,10 +198,10 @@ export async function loadFocusedSessions(email) {
     
   if (error) {
     console.error('Load focused sessions error:', error);
-    return [];
+    return { sessions: [] };
   }
   
-  return data;
+  return { sessions: data || [] };
 }
 
 /**
@@ -209,7 +230,7 @@ export async function savePersonalVocab(email, vocabData) {
  */
 export async function loadPersonalVocab(email) {
   const sb = initSupabase();
-  if (!sb) return [];
+  if (!sb) return { words: [] };
   
   const { data, error } = await sb
     .from('personal_vocab')
@@ -219,10 +240,10 @@ export async function loadPersonalVocab(email) {
     
   if (error) {
     console.error('Load personal vocab error:', error);
-    return [];
+    return { words: [] };
   }
   
-  return data;
+  return { words: data || [] };
 }
 
 /**
@@ -268,6 +289,27 @@ export async function toggleVocabPoolOptIn(email, optIn) {
   }
   
   return data;
+}
+
+/**
+ * Load checkpoints
+ */
+export async function loadCheckpoints(email) {
+  const sb = initSupabase();
+  if (!sb) return { checkpoints: [] };
+  
+  const { data, error } = await sb
+    .from('checkpoints')
+    .select('*')
+    .eq('email', email)
+    .order('created_at', { ascending: false });
+    
+  if (error) {
+    console.error('Load checkpoints error:', error);
+    return { checkpoints: [] };
+  }
+  
+  return { checkpoints: data || [] };
 }
 
 /**

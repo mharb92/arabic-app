@@ -19,7 +19,8 @@ export async function renderMyVocabScreen(container) {
   showLoading('Loading your vocabulary...');
   
   try {
-    personalVocab = await loadPersonalVocab(AppState.email);
+    const { words } = await loadPersonalVocab(AppState.email);
+    personalVocab = words;
     hideLoading();
     
     if (viewMode === 'list') {
