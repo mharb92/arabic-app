@@ -19,7 +19,7 @@ export async function renderMyVocabScreen(container) {
   showLoading('Loading your vocabulary...');
   
   try {
-    personalVocab = await loadPersonalVocab();
+    personalVocab = await loadPersonalVocab(AppState.email);
     hideLoading();
     
     if (viewMode === 'list') {
@@ -130,7 +130,7 @@ function attachListViewListeners(container) {
   if (poolToggle) {
     poolToggle.addEventListener('change', async (e) => {
       try {
-        await toggleVocabPoolOptIn(e.target.checked);
+        await toggleVocabPoolOptIn(AppState.email, e.target.checked);
         AppState.profile.vocabPoolOptIn = e.target.checked;
         await save();
         showToast(e.target.checked ? 'Sharing enabled' : 'Sharing disabled');
@@ -158,7 +158,7 @@ function attachListViewListeners(container) {
       
       if (confirm(`Delete "${word.english}"?`)) {
         try {
-          await deletePersonalVocab(word.id);
+          await deletePersonalVocab(AppState.email, word.id);
           personalVocab.splice(index, 1);
           showToast('Word deleted');
           renderListView(container);
@@ -248,7 +248,7 @@ function attachAddFormListeners(container) {
           createdAt: new Date().toISOString()
         };
         
-        const savedWord = await savePersonalVocab(newWord);
+        const savedWord = await savePersonalVocab(AppState.email, newWord);
         personalVocab.push(savedWord);
         
         hideLoading();
