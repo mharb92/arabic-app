@@ -3,7 +3,7 @@
  * Initializes the app, handles auth flow, and sets up routing
  */
 
-import { AppState, loadFromStorage } from './state.js';
+import { AppState, load } from './state.js';
 import { initAuth, renderLoginScreen } from './auth.js';
 import { renderOnboardingScreen } from './onboarding.js';
 import { initRouter, navigateTo, handleAyaRouting } from './router.js';
@@ -18,7 +18,7 @@ export async function initApp(container) {
   appContainer = container;
   
   // Load state from localStorage
-  await loadFromStorage();
+  await load();
   
   // Initialize router
   initRouter(container);
@@ -182,4 +182,21 @@ window.addEventListener('error', (event) => {
 
 window.addEventListener('unhandledrejection', (event) => {
   handleAppError(event.reason);
+});
+
+// ============================================================================
+// AUTO-INITIALIZATION (BUG FIX)
+// ============================================================================
+
+/**
+ * Initialize app when DOM is ready
+ * This fixes the bug where initApp was defined but never called
+ */
+document.addEventListener('DOMContentLoaded', () => {
+  const appRoot = document.getElementById('app-root');
+  if (appRoot) {
+    initApp(appRoot);
+  } else {
+    console.error('FATAL: #app-root element not found in DOM');
+  }
 });
