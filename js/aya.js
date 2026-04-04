@@ -61,11 +61,33 @@ export function renderAyaSplash(container, onComplete) {
   // Handle button click
   const beginBtn = container.querySelector('#aya-begin-btn');
   if (beginBtn) {
-    beginBtn.addEventListener('click', () => {
+    beginBtn.addEventListener('click', async () => {
+      // Mark splash as seen
       markAyaSplashSeen();
+      
+      // Create Aya's profile and save to Supabase
+      await createAyaProfile();
+      
+      // Continue to app
       if (onComplete) onComplete();
     });
   }
+}
+
+/**
+ * Create and save Aya's profile to Supabase
+ */
+async function createAyaProfile() {
+  // Set profile data from config
+  if (!AppState.profile) AppState.profile = {};
+  
+  AppState.profile.name = AppState.ayaConfig?.name || AppState.ayaConfig?.config?.name || 'Aya';
+  AppState.profile.speakerType = 'beginner'; // Aya's custom course
+  AppState.profile.dialect = 'Palestinian';
+  AppState.profile.goals = ['Meet the family', 'Basic conversation'];
+  
+  // Save to Supabase
+  await save();
 }
 
 function runAyaSplashAnimation() {
@@ -130,20 +152,33 @@ function runAyaSplashAnimation() {
  * Render Aya's returning splash
  */
 export function renderAyaReturnSplash(container, onComplete) {
-  const messages = [
-    'Welcome back, Aya 💚',
-    'Ready for today\'s practice?',
-    'おかえり、あやちゃん',
-    'Let\'s continue where you left off',
-    'Time to learn more Arabic!'
-  ];
+  // Calculate progress
+  const completedUnits = Object.keys(AppState.unitProgress || {}).filter(
+    key => AppState.unitProgress[key]?.mastered
+  ).length;
+  const totalUnits = AYA_UNITS.length;
   
-  const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+  // Get countdown to San Diego
+  const daysLeft = daysUntilJune5();
   
   container.innerHTML = `
     <div class="aya-return-splash">
-      <h2>${randomMessage}</h2>
-      <p class="countdown">${getCountdownMessage()}</p>
+      <div class="aya-arabic-reveal">
+        <p class="aya-arabic-big shown" dir="rtl">تَفَضَّلِي</p>
+        <p class="aya-roman shown">tafaDDAli</p>
+        <p class="aya-english shown">welcome</p>
+      </div>
+      
+      <div class="aya-divider shown"></div>
+      
+      <h2>Welcome back, Aya.</h2>
+      
+      <p class="countdown">${daysLeft} days until San Diego 🇵🇸</p>
+      
+      <p class="progress-text">You've completed ${completedUnits} of ${totalUnits} units</p>
+      
+      <div class="aya-divider shown"></div>
+      
       <button class="btn-primary" id="continue-btn">Continue</button>
     </div>
   `;

@@ -1141,3 +1141,688 @@ textarea[dir="rtl"] {
     padding-bottom: env(safe-area-inset-bottom);
   }
 }
+/* ============================================================================
+   DESIGN SYSTEM - Comprehensive UX Overhaul
+   Typography, Components, Animations for Professional Experience
+   ========================================================================== */
+
+/* ---------------------------------------------------------------------------
+   TYPOGRAPHY SYSTEM
+   --------------------------------------------------------------------------- */
+
+:root {
+  /* Font Families */
+  --font-arabic: 'Noto Kufi Arabic', 'Amiri', 'Arial', sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  --font-accent: 'Lora', 'Georgia', serif;
+  
+  /* Font Sizes */
+  --text-hero: 4rem;      /* Splash screen Arabic */
+  --text-h1: 2.5rem;      /* Page titles */
+  --text-h2: 1.75rem;     /* Card titles */
+  --text-body: 1.125rem;  /* Main content */
+  --text-caption: 0.9rem; /* Supporting text */
+  
+  /* Line Heights */
+  --lh-tight: 1.2;   /* Headers */
+  --lh-normal: 1.6;  /* Body text */
+  --lh-loose: 1.8;   /* Long-form */
+  
+  /* Design System Colors - Updated */
+  --primary-green: #1a6b50;
+  --primary-green-dark: #0f4436;
+  --accent-teal: #4ecdc4;
+  --accent-gold: #d4af37;
+  --bg-dark: #16140f;
+  --bg-dark-elevated: #1e1c16;
+  --text-light: #f5f5dc;
+  --text-muted: #b8b8a0;
+}
+
+/* Mobile Typography Adjustments */
+@media (max-width: 768px) {
+  :root {
+    --text-hero: 3rem;
+    --text-h1: 2rem;
+    --text-h2: 1.5rem;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   COMPONENT LIBRARY - Buttons
+   --------------------------------------------------------------------------- */
+
+.btn-primary {
+  display: inline-block;
+  padding: 16px 32px;
+  background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: var(--text-body);
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(26, 107, 80, 0.3);
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(26, 107, 80, 0.4);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(26, 107, 80, 0.3);
+}
+
+.btn-secondary {
+  display: inline-block;
+  padding: 12px 24px;
+  background: transparent;
+  color: var(--accent-teal);
+  border: 2px solid var(--accent-teal);
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 44px;
+}
+
+.btn-secondary:hover {
+  background: rgba(78, 205, 196, 0.1);
+}
+
+/* ---------------------------------------------------------------------------
+   COMPONENT LIBRARY - Cards
+   --------------------------------------------------------------------------- */
+
+.card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 24px;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  border-color: rgba(78, 205, 196, 0.3);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px);
+}
+
+.card-title {
+  font-size: var(--text-h2);
+  font-weight: 600;
+  margin-bottom: 12px;
+  line-height: var(--lh-tight);
+}
+
+.card-subtitle {
+  font-size: var(--text-caption);
+  color: var(--text-muted);
+  line-height: var(--lh-normal);
+}
+
+/* ---------------------------------------------------------------------------
+   COMPONENT LIBRARY - Inputs
+   --------------------------------------------------------------------------- */
+
+.input-field {
+  width: 100%;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  font-size: var(--text-body);
+  color: var(--text-light);
+  transition: all 0.3s ease;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: var(--primary-green);
+  box-shadow: 0 0 0 4px rgba(26, 107, 80, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.input-field::placeholder {
+  color: var(--text-muted);
+}
+
+/* ---------------------------------------------------------------------------
+   ANIMATION UTILITIES
+   --------------------------------------------------------------------------- */
+
+/* Staggered Reveal - Initial State */
+.fade-in-element {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.8s ease;
+}
+
+.fade-in-element.shown {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Divider Animation */
+.animated-divider {
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+.animated-divider.shown {
+  opacity: 1;
+}
+
+/* Page Transitions */
+.page-transition {
+  animation: fadeSlideIn 0.3s ease;
+}
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Success Animation */
+.success-state {
+  animation: successBounce 0.4s ease;
+}
+
+@keyframes successBounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+/* ---------------------------------------------------------------------------
+   AYA SPLASH SCREEN - First Visit
+   --------------------------------------------------------------------------- */
+
+.aya-splash {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
+}
+
+.aya-splash-content {
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+  color: var(--text-light);
+}
+
+/* Arabic Reveal */
+.aya-arabic-big {
+  font-family: var(--font-arabic);
+  font-size: var(--text-hero);
+  font-weight: 600;
+  color: var(--accent-teal);
+  margin: 2rem 0;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.8s ease;
+}
+
+.aya-roman {
+  font-family: var(--font-accent);
+  font-size: 1.5rem;
+  font-style: italic;
+  color: var(--accent-gold);
+  margin: 1rem 0;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.8s ease;
+}
+
+.aya-english {
+  font-size: 1.2rem;
+  color: var(--text-muted);
+  margin: 1rem 0 3rem 0;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.8s ease;
+}
+
+/* Letter Lines */
+.aya-letter {
+  margin: 3rem 0;
+}
+
+.aya-line {
+  font-family: var(--font-accent);
+  font-size: 1.1rem;
+  line-height: var(--lh-loose);
+  margin: 0.8rem 0;
+  opacity: 0;
+  transform: translateY(15px);
+  transition: all 0.6s ease;
+}
+
+.aya-divider {
+  width: 60px;
+  height: 2px;
+  background: var(--accent-gold);
+  margin: 2rem auto;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+/* Button */
+.aya-begin-btn {
+  margin-top: 3rem;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.8s ease;
+  padding: 18px 36px;
+  font-size: 1.25rem;
+}
+
+.btn-subtitle {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: normal;
+  margin-top: 0.5rem;
+  opacity: 0.8;
+  font-family: var(--font-body);
+}
+
+/* Shown State - Applied by JS */
+.shown {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+
+/* Mobile Adjustments */
+@media (max-width: 768px) {
+  .aya-splash {
+    padding: 1.5rem;
+  }
+  
+  .aya-line {
+    font-size: 1rem;
+  }
+  
+  .aya-begin-btn {
+    padding: 16px 28px;
+    font-size: 1.1rem;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   AYA RETURN SPLASH
+   --------------------------------------------------------------------------- */
+
+.aya-return-splash {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
+  color: var(--text-light);
+  text-align: center;
+}
+
+.aya-return-splash h2 {
+  font-size: var(--text-h1);
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+}
+
+.aya-return-splash .countdown {
+  font-size: 1.3rem;
+  color: var(--accent-gold);
+  margin: 1.5rem 0;
+}
+
+.aya-return-splash .progress-text {
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  margin: 1rem 0 3rem 0;
+}
+
+/* ---------------------------------------------------------------------------
+   LOGIN SCREEN
+   --------------------------------------------------------------------------- */
+
+.login-screen {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
+}
+
+.login-content {
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+  color: var(--text-light);
+}
+
+.login-greeting {
+  font-family: var(--font-arabic);
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  color: var(--accent-teal);
+}
+
+.login-subtitle {
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  margin-bottom: 2rem;
+  line-height: var(--lh-normal);
+}
+
+.login-divider {
+  width: 80px;
+  height: 2px;
+  background: var(--accent-gold);
+  margin: 2rem auto;
+}
+
+.login-input {
+  width: 100%;
+  margin-bottom: 1.5rem;
+}
+
+.login-guest {
+  margin-top: 2rem;
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.login-guest:hover {
+  color: var(--accent-teal);
+}
+
+/* ---------------------------------------------------------------------------
+   LESSON SCREEN
+   --------------------------------------------------------------------------- */
+
+.lesson-screen {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.lesson-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.lesson-back {
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lesson-back:hover {
+  transform: translateX(-4px);
+}
+
+.lesson-title {
+  font-size: var(--text-h2);
+  font-weight: 600;
+}
+
+.lesson-card {
+  background: var(--card);
+  border-radius: 20px;
+  padding: 48px 32px;
+  text-align: center;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.lesson-arabic {
+  font-family: var(--font-arabic);
+  font-size: 3rem;
+  color: var(--accent-teal);
+  margin-bottom: 1rem;
+  line-height: var(--lh-tight);
+}
+
+.lesson-roman {
+  font-style: italic;
+  font-size: 1.3rem;
+  color: var(--accent-gold);
+  margin-bottom: 0.5rem;
+}
+
+.lesson-english {
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  margin-bottom: 2rem;
+}
+
+.lesson-audio-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: rgba(78, 205, 196, 0.1);
+  border: 2px solid var(--accent-teal);
+  border-radius: 12px;
+  color: var(--accent-teal);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1rem;
+  min-height: 44px;
+}
+
+.lesson-audio-btn:hover {
+  background: rgba(78, 205, 196, 0.2);
+}
+
+.lesson-progress {
+  margin: 2rem 0;
+  text-align: center;
+}
+
+.lesson-progress-text {
+  font-size: var(--text-caption);
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.lesson-progress-bar {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.lesson-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary-green), var(--accent-teal));
+  transition: width 0.3s ease;
+  border-radius: 4px;
+}
+
+/* ---------------------------------------------------------------------------
+   QUIZ SCREEN
+   --------------------------------------------------------------------------- */
+
+.quiz-screen {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.quiz-progress {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.quiz-progress-text {
+  font-size: var(--text-caption);
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.quiz-question-card {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 32px 24px;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.quiz-question {
+  font-size: var(--text-h2);
+  font-weight: 500;
+  line-height: var(--lh-normal);
+  margin-bottom: 0.5rem;
+}
+
+.quiz-question-sub {
+  font-size: var(--text-body);
+  color: var(--text-muted);
+}
+
+.quiz-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.quiz-option {
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 20px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 44px;
+  font-family: var(--font-arabic);
+  font-size: 1.5rem;
+}
+
+.quiz-option:hover {
+  border-color: var(--accent-teal);
+  background: rgba(78, 205, 196, 0.1);
+  transform: translateX(4px);
+}
+
+.quiz-option.correct {
+  border-color: var(--primary-green);
+  background: rgba(26, 107, 80, 0.2);
+  box-shadow: 0 0 0 4px rgba(26, 107, 80, 0.1);
+}
+
+.quiz-option.incorrect {
+  border-color: var(--red);
+  background: rgba(184, 66, 45, 0.1);
+}
+
+/* ---------------------------------------------------------------------------
+   PROGRESS BAR COMPONENT (Reusable)
+   --------------------------------------------------------------------------- */
+
+.progress-container {
+  width: 100%;
+  margin: 1rem 0;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary-green), var(--accent-teal));
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+/* ---------------------------------------------------------------------------
+   MOBILE TOUCH OPTIMIZATIONS
+   --------------------------------------------------------------------------- */
+
+@media (hover: none) and (pointer: coarse) {
+  /* Ensure all interactive elements meet 44x44px minimum */
+  .btn-primary,
+  .btn-secondary,
+  .lesson-audio-btn,
+  .quiz-option,
+  .lesson-back {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Remove hover states on touch devices */
+  .card:hover {
+    transform: none;
+  }
+  
+  /* Add tap feedback instead */
+  .card:active {
+    transform: scale(0.98);
+  }
+  
+  .btn-primary:active {
+    transform: scale(0.98);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   ACCESSIBILITY
+   --------------------------------------------------------------------------- */
+
+/* Focus States */
+.btn-primary:focus-visible,
+.btn-secondary:focus-visible,
+.input-field:focus-visible,
+.quiz-option:focus-visible {
+  outline: 3px solid var(--accent-teal);
+  outline-offset: 2px;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

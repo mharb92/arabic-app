@@ -14,18 +14,31 @@ export async function initAuth() {
 
 export function renderLoginScreen(container) {
   container.innerHTML = `
-    <div class="screen" style="justify-content:center;align-items:center;padding:2rem;">
-      <div style="max-width:400px;width:100%;text-align:center;">
-        <h1 style="margin-bottom:2rem;">مرحبا</h1>
-        <input type="email" id="email-input" placeholder="Enter your email" 
-               style="width:100%;padding:12px;margin-bottom:1rem;border:1px solid #ddd;border-radius:8px;font-size:16px;" />
-        <button id="login-btn" class="btn-primary">Continue</button>
+    <div class="login-screen">
+      <div class="login-content">
+        <h1 class="login-greeting">مرحبا</h1>
+        <p class="login-subtitle">Welcome to your<br>Arabic learning journey</p>
+        
+        <div class="login-divider"></div>
+        
+        <input 
+          type="email" 
+          id="email-input" 
+          class="input-field login-input" 
+          placeholder="your@email.com"
+          autocomplete="email"
+        />
+        
+        <button id="login-btn" class="btn-primary" style="width: 100%;">Continue</button>
+        
+        <a href="#" class="login-guest" id="guest-link">Or continue as guest</a>
       </div>
     </div>
   `;
   
   const emailInput = container.querySelector('#email-input');
   const loginBtn = container.querySelector('#login-btn');
+  const guestLink = container.querySelector('#guest-link');
   
   loginBtn.addEventListener('click', async () => {
     const email = emailInput.value.trim();
@@ -45,7 +58,18 @@ export function renderLoginScreen(container) {
     import('./app.js').then(({ onAuthSuccess }) => onAuthSuccess());
   });
   
+  guestLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    saveLocal('arabic_app_email', 'guest@app.com');
+    setUser({ id: 'guest', email: 'guest@app.com' });
+    AppState.isGuest = true;
+    import('./app.js').then(({ onAuthSuccess }) => onAuthSuccess());
+  });
+  
   emailInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') loginBtn.click();
   });
+  
+  // Auto-focus input
+  setTimeout(() => emailInput.focus(), 100);
 }
