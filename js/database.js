@@ -24,7 +24,7 @@ export async function saveProfile(userId, profileData) {
 export async function loadProfile(userId) {
   const sb = initSupabase();
   if (!sb) return { profile: null };
-  const { data, error } = await sb.from('profiles').select('*').eq('email', userId).single();
+  const { data, error } = await sb.from('profiles').select('*').eq('email', userId).maybeSingle();
   if (error) { console.error('Load profile error:', error); return { profile: null }; }
   return { profile: data };
 }
@@ -56,7 +56,7 @@ export async function saveWeakWords(userId, weakWords) {
 export async function loadWeakWords(userId) {
   const sb = initSupabase();
   if (!sb) return { weakWords: [] };
-  const { data, error } = await sb.from('weak_words').select('words').eq('email', userId).single();
+  const { data, error } = await sb.from('weak_words').select('words').eq('email', userId).maybeSingle();
   if (error) { console.error('Load weak words error:', error); return { weakWords: [] }; }
   return { weakWords: data?.words || [] };
 }
@@ -64,7 +64,7 @@ export async function loadWeakWords(userId) {
 export async function checkSpecialCourse(email) {
   const sb = initSupabase();
   if (!sb) return { config: null };
-  const { data, error } = await sb.from('special_courses').select('*').eq('email', email).single();
+  const { data, error } = await sb.from('special_courses').select('*').eq('email', email).maybeSingle();
   if (error) return { config: null };
   return { config: data };
 }
