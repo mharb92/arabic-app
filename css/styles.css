@@ -510,23 +510,23 @@ textarea[dir="rtl"] {
 }
 
 .card-gold {
-  background: rgba(212, 175, 55, 0.1);
-  border: 1px solid rgba(212, 175, 55, 0.3);
+  background: rgba(212, 175, 55, 0.15) !important;
+  border: 1px solid rgba(212, 175, 55, 0.4);
 }
 
 .card-purple {
-  background: rgba(155, 89, 182, 0.1);
-  border: 1px solid rgba(155, 89, 182, 0.3);
+  background: rgba(155, 89, 182, 0.15) !important;
+  border: 1px solid rgba(155, 89, 182, 0.4);
 }
 
 .card-blue {
-  background: rgba(52, 152, 219, 0.1);
-  border: 1px solid rgba(52, 152, 219, 0.3);
+  background: rgba(52, 152, 219, 0.15) !important;
+  border: 1px solid rgba(52, 152, 219, 0.4);
 }
 
 .card-teal {
-  background: rgba(78, 205, 196, 0.1);
-  border: 1px solid rgba(78, 205, 196, 0.3);
+  background: rgba(78, 205, 196, 0.15) !important;
+  border: 1px solid rgba(78, 205, 196, 0.4);
 }
 
 /* Primary Action Card (Placement Test / Today's Practice) */
@@ -553,11 +553,11 @@ textarea[dir="rtl"] {
 
 /* Button Colors */
 .btn-green {
-  background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
+  background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark)) !important;
 }
 
 .btn-gold {
-  background: linear-gradient(135deg, #d4af37, #b8941f);
+  background: linear-gradient(135deg, #d4af37, #b8941f) !important;
 }
 
 .btn-large {
