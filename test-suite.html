@@ -263,18 +263,33 @@
         async function test4_ContainerIDMatch() {
             const section = addTestSection('📝 TEST 4: HTML Container ID');
             
-            const htmlId = document.querySelector('main') ? document.querySelector('main').id : null;
-            
-            addTestLine(section, `HTML uses container ID: ${htmlId || 'not found'}`, 'info');
-            addTestLine(section, `Expected: app-root`, 'info');
-            
-            const passed = htmlId === 'app-root';
-            
-            addTestLine(section, '', 'info');
-            addTestLine(section, `Result: ${passed ? '✅ PASS' : '❌ FAIL'}`, passed ? 'pass' : 'fail');
-            
-            testResults.push({ test: 'Container ID Match', passed });
-            return passed;
+            try {
+                const htmlResponse = await fetch('./index.html');
+                const htmlText = await htmlResponse.text();
+                
+                const mainMatch = htmlText.match(/<main[^>]+id=["']([^"']+)["']/);
+                const htmlId = mainMatch ? mainMatch[1] : null;
+                
+                addTestLine(section, `HTML uses container ID: ${htmlId || 'not found'}`, 'info');
+                addTestLine(section, `Expected: app-root`, 'info');
+                
+                const passed = htmlId === 'app-root';
+                
+                addTestLine(section, '', 'info');
+                addTestLine(section, `Result: ${passed ? '✅ PASS' : '❌ FAIL'}`, passed ? 'pass' : 'fail');
+                
+                if (!passed) {
+                    addFix(section, `Fix: Change HTML <main> tag to use id="app-root"`);
+                }
+                
+                testResults.push({ test: 'Container ID Match', passed });
+                return passed;
+                
+            } catch (error) {
+                addTestLine(section, `Error: ${error.message}`, 'fail');
+                testResults.push({ test: 'Container ID Match', passed: false });
+                return false;
+            }
         }
 
         // ========================================================================
