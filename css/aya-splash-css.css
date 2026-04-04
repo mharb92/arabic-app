@@ -1,0 +1,108 @@
+/* ============================================================================
+   AYA SPLASH SCREEN ANIMATION
+   ============================================================================ */
+
+.aya-splash {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: linear-gradient(135deg, #1a6b50 0%, #0f4436 100%);
+}
+
+.aya-splash-content {
+  max-width: 600px;
+  text-align: center;
+  color: #f5f5dc;
+}
+
+/* Arabic reveal */
+.aya-arabic-big {
+  font-size: 4rem;
+  font-weight: 600;
+  color: #4ecdc4;
+  margin: 2rem 0;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.8s ease;
+}
+
+.aya-roman {
+  font-size: 1.5rem;
+  font-style: italic;
+  color: #d4af37;
+  margin: 1rem 0;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.8s ease;
+}
+
+.aya-english {
+  font-size: 1.2rem;
+  color: #b8b8a0;
+  margin: 1rem 0 3rem 0;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.8s ease;
+}
+
+/* Letter lines */
+.aya-letter {
+  margin: 3rem 0;
+}
+
+.aya-line {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  margin: 0.8rem 0;
+  opacity: 0;
+  transform: translateY(15px);
+  transition: all 0.6s ease;
+}
+
+.aya-divider {
+  width: 60px;
+  height: 2px;
+  background: #d4af37;
+  margin: 2rem auto;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+/* Button */
+.aya-begin-btn {
+  margin-top: 3rem;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.8s ease;
+}
+
+.btn-subtitle {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: normal;
+  margin-top: 0.5rem;
+  opacity: 0.8;
+}
+
+/* Shown state */
+.shown {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .aya-arabic-big {
+    font-size: 3rem;
+  }
+  
+  .aya-roman {
+    font-size: 1.2rem;
+  }
+  
+  .aya-line {
+    font-size: 1rem;
+  }
+}
