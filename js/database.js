@@ -1,10 +1,9 @@
 /**
- * database.js
- * All Supabase operations - this is the ONLY file that calls supabase.from()
- * Dependencies: config.js
+ * database.js - All Supabase database operations
+ * Handles profiles, progress, vocab, focused sessions, and push subscriptions
  */
 
-import { SUPABASE_URL, SUPABASE_KEY } from './config.js';
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js';
 
 let supabase = null;
 
@@ -12,269 +11,282 @@ let supabase = null;
  * Initialize Supabase client
  */
 export function initSupabase() {
-  if (!supabase) {
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  if (!supabase && window.supabase) {
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   }
   return supabase;
 }
 
 /**
- * Profile Operations
+ * Save profile to Supabase
  */
-export async function saveProfile(userId, profile) {
-  try {
-    const { data, error } = await supabase
-      .from('profiles')
-      .upsert({ user_id: userId, ...profile });
+export async function saveProfile(email, profileData) {
+  const sb = initSupabase();
+  if (!sb) return null;
+  
+  const { data, error } = await sb
+    .from('profiles')
+    .upsert({ email, ...profileData }, { onConflict: 'email' })
+    .select()
+    .single();
     
-    if (error) return { success: false, error: error.message };
-    return { success: true, data };
-  } catch (err) {
-    return { success: false, error: err.message };
+  if (error) {
+    console.error('Save profile error:', error);
+    return null;
   }
-}
-
-export async function loadProfile(userId) {
-  try {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('user_id', userId)
-      .single();
-    
-    if (error) return { profile: null, error: error.message };
-    return { profile: data, error: null };
-  } catch (err) {
-    return { profile: null, error: err.message };
-  }
+  
+  return data;
 }
 
 /**
- * Unit Progress Operations
+ * Load profile from Supabase
  */
-export async function saveUnitProgress(userId, unitId, progress) {
-  try {
-    const { data, error } = await supabase
-      .from('unit_progress')
-      .upsert({ 
-        user_id: userId, 
-        unit_id: unitId, 
-        ...progress,
-        updated_at: new Date().toISOString()
-      });
+export async function loadProfile(email) {
+  const sb = initSupabase();
+  if (!sb) return null;
+  
+  const { data, error } = await sb
+    .from('profiles')
+    .select('*')
+    .eq('email', email)
+    .single();
     
-    if (error) return { success: false, error: error.message };
-    return { success: true, data };
-  } catch (err) {
-    return { success: false, error: err.message };
+  if (error) {
+    console.error('Load profile error:', error);
+    return null;
   }
-}
-
-export async function loadUnitProgress(userId) {
-  try {
-    const { data, error } = await supabase
-      .from('unit_progress')
-      .select('*')
-      .eq('user_id', userId);
-    
-    if (error) return { progress: [], error: error.message };
-    return { progress: data || [], error: null };
-  } catch (err) {
-    return { progress: [], error: err.message };
-  }
+  
+  return data;
 }
 
 /**
- * Weak Words Operations
+ * Save unit progress
  */
-export async function saveWeakWords(userId, weakWords) {
-  try {
-    const { data, error } = await supabase
-      .from('weak_words')
-      .upsert({ 
-        user_id: userId, 
-        words: weakWords,
-        updated_at: new Date().toISOString()
-      });
+export async function saveUnitProgress(email, unitId, progressData) {
+  const sb = initSupabase();
+  if (!sb) return null;
+  
+  const { data, error } = await sb
+    .from('unit_progress')
+    .upsert({ email, unit_id: unitId, ...progressData }, { onConflict: 'email,unit_id' })
+    .select()
+    .single();
     
-    if (error) return { success: false, error: error.message };
-    return { success: true, data };
-  } catch (err) {
-    return { success: false, error: err.message };
+  if (error) {
+    console.error('Save unit progress error:', error);
+    return null;
   }
-}
-
-export async function loadWeakWords(userId) {
-  try {
-    const { data, error } = await supabase
-      .from('weak_words')
-      .select('words')
-      .eq('user_id', userId)
-      .single();
-    
-    if (error) return { weakWords: [], error: error.message };
-    return { weakWords: data?.words || [], error: null };
-  } catch (err) {
-    return { weakWords: [], error: err.message };
-  }
+  
+  return data;
 }
 
 /**
- * Special Course Operations (Aya)
+ * Load unit progress
+ */
+export async function loadUnitProgress(email) {
+  const sb = initSupabase();
+  if (!sb) return [];
+  
+  const { data, error } = await sb
+    .from('unit_progress')
+    .select('*')
+    .eq('email', email);
+    
+  if (error) {
+    console.error('Load unit progress error:', error);
+    return [];
+  }
+  
+  return data;
+}
+
+/**
+ * Save weak words
+ */
+export async function saveWeakWords(email, weakWords) {
+  const sb = initSupabase();
+  if (!sb) return null;
+  
+  const { data, error } = await sb
+    .from('weak_words')
+    .upsert({ email, words: weakWords }, { onConflict: 'email' })
+    .select()
+    .single();
+    
+  if (error) {
+    console.error('Save weak words error:', error);
+    return null;
+  }
+  
+  return data;
+}
+
+/**
+ * Check if user has special course (Aya)
  */
 export async function checkSpecialCourse(email) {
-  try {
-    const { data, error } = await supabase
-      .from('special_courses')
-      .select('*')
-      .eq('email', email.toLowerCase())
-      .single();
+  const sb = initSupabase();
+  if (!sb) return null;
+  
+  const { data, error } = await sb
+    .from('special_courses')
+    .select('*')
+    .eq('email', email)
+    .single();
     
-    if (error) return { config: null, error: error.message };
-    return { config: data, error: null };
-  } catch (err) {
-    return { config: null, error: err.message };
+  if (error) {
+    return null;
   }
+  
+  return data;
 }
 
 /**
- * Push Subscription Operations
+ * Save focused session (Stage B)
  */
-export async function savePushSubscription(userId, subscription, preferredTime, timezone) {
-  try {
-    const { data, error } = await supabase
-      .from('push_subscriptions')
-      .upsert({ 
-        user_id: userId,
-        subscription: subscription,
-        preferred_time: preferredTime,
-        timezone: timezone,
-        updated_at: new Date().toISOString()
-      });
+export async function saveFocusedSession(email, sessionData) {
+  const sb = initSupabase();
+  if (!sb) return null;
+  
+  const { data, error } = await sb
+    .from('focused_sessions')
+    .insert({ email, ...sessionData })
+    .select()
+    .single();
     
-    if (error) return { success: false, error: error.message };
-    return { success: true, data };
-  } catch (err) {
-    return { success: false, error: err.message };
+  if (error) {
+    console.error('Save focused session error:', error);
+    return null;
   }
+  
+  return data;
 }
 
 /**
- * Checkpoint Operations
+ * Load focused sessions (Stage B)
  */
-export async function saveCheckpoint(userId, checkpoint) {
-  try {
-    const { data, error } = await supabase
-      .from('checkpoints')
-      .insert({ 
-        user_id: userId,
-        ...checkpoint,
-        created_at: new Date().toISOString()
-      });
+export async function loadFocusedSessions(email) {
+  const sb = initSupabase();
+  if (!sb) return [];
+  
+  const { data, error } = await sb
+    .from('focused_sessions')
+    .select('*')
+    .eq('email', email)
+    .order('completed_at', { ascending: false });
     
-    if (error) return { success: false, error: error.message };
-    return { success: true, data };
-  } catch (err) {
-    return { success: false, error: err.message };
+  if (error) {
+    console.error('Load focused sessions error:', error);
+    return [];
   }
-}
-
-export async function loadCheckpoints(userId) {
-  try {
-    const { data, error } = await supabase
-      .from('checkpoints')
-      .select('*')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false });
-    
-    if (error) return { checkpoints: [], error: error.message };
-    return { checkpoints: data || [], error: null };
-  } catch (err) {
-    return { checkpoints: [], error: err.message };
-  }
+  
+  return data;
 }
 
 /**
- * Focused Session Operations (Stage B)
+ * Save personal vocabulary (Stage C)
  */
-export async function saveFocusedSession(userId, contextId, score) {
-  try {
-    const { data, error } = await supabase
-      .from('focused_sessions')
-      .insert({ 
-        user_id: userId,
-        context_id: contextId,
-        score: score,
-        completed_at: new Date().toISOString()
-      });
+export async function savePersonalVocab(email, vocabData) {
+  const sb = initSupabase();
+  if (!sb) return null;
+  
+  const { data, error } = await sb
+    .from('personal_vocab')
+    .insert({ email, ...vocabData })
+    .select()
+    .single();
     
-    if (error) return { success: false, error: error.message };
-    return { success: true, data };
-  } catch (err) {
-    return { success: false, error: err.message };
+  if (error) {
+    console.error('Save personal vocab error:', error);
+    return null;
   }
-}
-
-export async function loadFocusedSessions(userId) {
-  try {
-    const { data, error } = await supabase
-      .from('focused_sessions')
-      .select('*')
-      .eq('user_id', userId)
-      .order('completed_at', { ascending: false });
-    
-    if (error) return { sessions: [], error: error.message };
-    return { sessions: data || [], error: null };
-  } catch (err) {
-    return { sessions: [], error: err.message };
-  }
+  
+  return data;
 }
 
 /**
- * Personal Vocabulary Operations (Stage C)
+ * Load personal vocabulary (Stage C)
  */
-export async function savePersonalVocab(userId, words) {
-  try {
-    const { data, error } = await supabase
-      .from('personal_vocab')
-      .upsert({ 
-        user_id: userId,
-        words: words,
-        updated_at: new Date().toISOString()
-      });
+export async function loadPersonalVocab(email) {
+  const sb = initSupabase();
+  if (!sb) return [];
+  
+  const { data, error } = await sb
+    .from('personal_vocab')
+    .select('*')
+    .eq('email', email)
+    .order('created_at', { ascending: false });
     
-    if (error) return { success: false, error: error.message };
-    return { success: true, data };
-  } catch (err) {
-    return { success: false, error: err.message };
+  if (error) {
+    console.error('Load personal vocab error:', error);
+    return [];
   }
+  
+  return data;
 }
 
-export async function loadPersonalVocab(userId) {
-  try {
-    const { data, error } = await supabase
-      .from('personal_vocab')
-      .select('words')
-      .eq('user_id', userId)
-      .single();
+/**
+ * Delete personal vocabulary item (Stage C)
+ */
+export async function deletePersonalVocab(email, vocabId) {
+  const sb = initSupabase();
+  if (!sb) return null;
+  
+  const { data, error } = await sb
+    .from('personal_vocab')
+    .delete()
+    .eq('id', vocabId)
+    .eq('email', email)
+    .select()
+    .single();
     
-    if (error) return { words: [], error: error.message };
-    return { words: data?.words || [], error: null };
-  } catch (err) {
-    return { words: [], error: err.message };
+  if (error) {
+    console.error('Delete personal vocab error:', error);
+    return null;
   }
+  
+  return data;
 }
 
-export async function toggleVocabPoolOptIn(userId, optedIn) {
-  try {
-    const { data, error } = await supabase
-      .from('profiles')
-      .update({ vocab_pool_opt_in: optedIn })
-      .eq('user_id', userId);
+/**
+ * Toggle vocabulary pool opt-in (Stage C)
+ */
+export async function toggleVocabPoolOptIn(email, optIn) {
+  const sb = initSupabase();
+  if (!sb) return null;
+  
+  const { data, error } = await sb
+    .from('profiles')
+    .update({ vocab_pool_opt_in: optIn })
+    .eq('email', email)
+    .select()
+    .single();
     
-    if (error) return { success: false, error: error.message };
-    return { success: true, data };
-  } catch (err) {
-    return { success: false, error: err.message };
+  if (error) {
+    console.error('Toggle vocab pool error:', error);
+    return null;
   }
+  
+  return data;
+}
+
+/**
+ * Save push subscription
+ */
+export async function savePushSubscription(email, subscriptionData) {
+  const sb = initSupabase();
+  if (!sb) return null;
+  
+  const { data, error } = await sb
+    .from('push_subscriptions')
+    .upsert({ email, ...subscriptionData }, { onConflict: 'email' })
+    .select()
+    .single();
+    
+  if (error) {
+    console.error('Save push subscription error:', error);
+    return null;
+  }
+  
+  return data;
 }
