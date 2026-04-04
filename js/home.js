@@ -234,7 +234,7 @@ function renderSettingsTab() {
         </div>
         <div class="settings-item">
           <label>Speaker Type</label>
-          <p>${AppState.profile.speakerType}</p>
+          <p>${AppState.profile.speaker_type}</p>
         </div>
         ${AppState.profile.dialect ? `
           <div class="settings-item">

@@ -51,7 +51,7 @@ function renderStep(container) {
       stepContent.querySelectorAll('.choice-btn').forEach(btn => {
         btn.style.cssText = 'padding:16px;border:1px solid #ddd;border-radius:8px;background:white;cursor:pointer;text-align:left;';
         btn.addEventListener('click', () => {
-          AppState.profile.speakerType = btn.dataset.value;
+          AppState.profile.speaker_type = btn.dataset.value;
           currentStep++;
           renderStep(container);
         });
@@ -97,7 +97,7 @@ function renderStep(container) {
       stepContent.innerHTML = `
         <h2>Ready to start!</h2>
         <p>Name: ${AppState.profile.name}</p>
-        <p>Type: ${AppState.profile.speakerType}</p>
+        <p>Type: ${AppState.profile.speaker_type}</p>
         <button class="btn-primary" id="finish-btn">Start Learning</button>
       `;
       stepContent.querySelector('#finish-btn').addEventListener('click', async () => {
