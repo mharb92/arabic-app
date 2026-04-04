@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arabic App - TDD Test Suite</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+        }
+        
+        h1 {
+            color: #4ec9b0;
+            border-bottom: 2px solid #4ec9b0;
+            padding-bottom: 10px;
+        }
+        
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            background: #252526;
+            border-left: 4px solid #007acc;
+            border-radius: 4px;
+        }
+        
+        .test-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #569cd6;
+            margin-bottom: 15px;
+        }
+        
+        .test-line {
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+        
+        .pass {
+            color: #4ec9b0;
+        }
+        
+        .fail {
+            color: #f48771;
+        }
+        
+        .info {
+            color: #ce9178;
+        }
+        
+        .fix {
+            background: #2d2d30;
+            padding: 10px;
+            margin: 10px 0;
+            border-left: 3px solid #f48771;
+            font-size: 14px;
+            color: #ce9178;
+        }
+        
+        .summary {
+            margin-top: 40px;
+            padding: 30px;
+            background: #252526;
+            border: 2px solid #4ec9b0;
+            border-radius: 8px;
+        }
+        
+        .summary.failed {
+            border-color: #f48771;
+        }
+        
+        .summary-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        
+        .summary-item {
+            margin: 10px 0;
+            font-size: 16px;
+        }
+        
+        .critical-bugs {
+            margin-top: 20px;
+            padding: 20px;
+            background: #2d2d30;
+            border-left: 4px solid #f48771;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #569cd6;
+        }
+        
+        .separator {
+            margin: 30px 0;
+            border-top: 1px solid #3c3c3c;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 COMPREHENSIVE TDD TEST SUITE</h1>
+    <div id="test-container">
+        <div class="loading">Loading modules and running tests...</div>
+    </div>
+
+    <script type="module">
+        const testResults = [];
+        const container = document.getElementById('test-container');
+        container.innerHTML = '';
+
+        // Utility to add test section
+        function addTestSection(title) {
+            const section = document.createElement('div');
+            section.className = 'test-section';
+            section.innerHTML = `<div class="test-title">${title}</div>`;
+            container.appendChild(section);
+            return section;
+        }
+
+        function addTestLine(section, text, type = 'info') {
+            const line = document.createElement('div');
+            line.className = `test-line ${type}`;
+            line.textContent = text;
+            section.appendChild(line);
+        }
+
+        function addFix(section, text) {
+            const fix = document.createElement('div');
+            fix.className = 'fix';
+            fix.textContent = text;
+            section.appendChild(fix);
+        }
+
+        // ========================================================================
+        // TEST 1: Import/Export Mismatch
+        // ========================================================================
+        async function test1_ImportExportMismatch() {
+            const section = addTestSection('📝 TEST 1: Import/Export Mismatch');
+            
+            try {
+                const appJsResponse = await fetch('./js/app.js');
+                const appJsText = await appJsResponse.text();
+                
+                const stateJsResponse = await fetch('./js/state.js');
+                const stateJsText = await stateJsResponse.text();
+                
+                const appImports = appJsText.match(/import.*from.*state\.js/);
+                const stateExports = stateJsText.match(/export async function (\w+)\(\)/g);
+                
+                addTestLine(section, `app.js imports: ${appImports ? appImports[0] : 'none'}`, 'info');
+                addTestLine(section, `state.js exports: ${stateExports ? stateExports.map(e => e.match(/function (\w+)/)[1]).join(', ') : 'none'}`, 'info');
+                
+                const hasLoadFromStorage = appJsText.includes('loadFromStorage');
+                const exportsLoad = stateExports && stateExports.some(e => e.includes('load'));
+                
+                const passed = !hasLoadFromStorage && exportsLoad;
+                
+                addTestLine(section, '', 'info');
+                addTestLine(section, 'Assertion: app.js should import "load", not "loadFromStorage"', 'info');
+                addTestLine(section, `Result: ${passed ? '✅ PASS' : '❌ FAIL'}`, passed ? 'pass' : 'fail');
+                
+                if (!passed) {
+                    addFix(section, 'Fix: Change line 6 in app.js from "loadFromStorage" → "load"');
+                }
+                
+                testResults.push({ test: 'Import/Export Mismatch', passed });
+                return passed;
+                
+            } catch (error) {
+                addTestLine(section, `Error: ${error.message}`, 'fail');
+                testResults.push({ test: 'Import/Export Mismatch', passed: false });
+                return false;
+            }
+        }
+
+        // ========================================================================
+        // TEST 2: Missing Auto-Initialization
+        // ========================================================================
+        async function test2_MissingAutoInit() {
+            const section = addTestSection('📝 TEST 2: Missing Auto-Initialization');
+            
+            try {
+                const appJsResponse = await fetch('./js/app.js');
+                const appJsText = await appJsResponse.text();
+                
+                const hasDOMContentLoaded = appJsText.includes('DOMContentLoaded');
+                const callsInitApp = appJsText.match(/initApp\(.*\)/g);
+                const hasAutoInit = hasDOMContentLoaded && callsInitApp && callsInitApp.length > 1;
+                
+                addTestLine(section, `Has DOMContentLoaded listener: ${hasDOMContentLoaded}`, 'info');
+                addTestLine(section, `Calls initApp: ${callsInitApp ? callsInitApp.length + ' times' : '0 times'}`, 'info');
+                
+                const passed = hasAutoInit;
+                
+                addTestLine(section, '', 'info');
+                addTestLine(section, 'Assertion: app.js should have DOMContentLoaded listener that calls initApp()', 'info');
+                addTestLine(section, `Result: ${passed ? '✅ PASS' : '❌ FAIL'}`, passed ? 'pass' : 'fail');
+                
+                if (!passed) {
+                    addFix(section, 'Fix: Add DOMContentLoaded listener at end of app.js');
+                }
+                
+                testResults.push({ test: 'Auto-Initialization', passed });
+                return passed;
+                
+            } catch (error) {
+                addTestLine(section, `Error: ${error.message}`, 'fail');
+                testResults.push({ test: 'Auto-Initialization', passed: false });
+                return false;
+            }
+        }
+
+        // ========================================================================
+        // TEST 3: Supabase API Key Format
+        // ========================================================================
+        async function test3_SupabaseKeyFormat() {
+            const section = addTestSection('📝 TEST 3: Supabase API Key Format');
+            
+            try {
+                const configJsResponse = await fetch('./js/config.js');
+                const configJsText = await configJsResponse.text();
+                
+                const keyMatch = configJsText.match(/SUPABASE_ANON_KEY\s*=\s*['"]([^'"]+)['"]/);
+                const key = keyMatch ? keyMatch[1] : null;
+                
+                addTestLine(section, `Current key format: ${key ? key.substring(0, 20) + '...' : 'not found'}`, 'info');
+                
+                const isPublishableFormat = key && key.startsWith('sb_publishable_');
+                const isJWT = key && key.startsWith('eyJ');
+                
+                addTestLine(section, `Is publishable format (sb_publishable_): ${isPublishableFormat}`, 'info');
+                addTestLine(section, `Is JWT format (legacy): ${isJWT}`, 'info');
+                
+                const passed = isPublishableFormat && !isJWT;
+                
+                addTestLine(section, '', 'info');
+                addTestLine(section, 'Assertion: Key should be publishable format (sb_publishable_...)', 'info');
+                addTestLine(section, `Result: ${passed ? '✅ PASS' : '❌ FAIL'}`, passed ? 'pass' : 'fail');
+                
+                if (!passed) {
+                    addFix(section, 'Fix: Change to sb_publishable_NtOLOeDOCn3w2faTU4m8Ow_4iUhcVkM');
+                }
+                
+                testResults.push({ test: 'Supabase Key Format', passed });
+                return passed;
+                
+            } catch (error) {
+                addTestLine(section, `Error: ${error.message}`, 'fail');
+                testResults.push({ test: 'Supabase Key Format', passed: false });
+                return false;
+            }
+        }
+
+        // ========================================================================
+        // TEST 4: HTML Container ID
+        // ========================================================================
+        async function test4_ContainerIDMatch() {
+            const section = addTestSection('📝 TEST 4: HTML Container ID');
+            
+            const htmlId = document.querySelector('main') ? document.querySelector('main').id : null;
+            
+            addTestLine(section, `HTML uses container ID: ${htmlId || 'not found'}`, 'info');
+            addTestLine(section, `Expected: app-root`, 'info');
+            
+            const passed = htmlId === 'app-root';
+            
+            addTestLine(section, '', 'info');
+            addTestLine(section, `Result: ${passed ? '✅ PASS' : '❌ FAIL'}`, passed ? 'pass' : 'fail');
+            
+            testResults.push({ test: 'Container ID Match', passed });
+            return passed;
+        }
+
+        // ========================================================================
+        // TEST 5: CSS File Exists
+        // ========================================================================
+        async function test5_CSSExists() {
+            const section = addTestSection('📝 TEST 5: CSS File Exists');
+            
+            try {
+                const cssResponse = await fetch('./css/styles.css');
+                const exists = cssResponse.ok;
+                
+                addTestLine(section, `css/styles.css exists: ${exists}`, 'info');
+                
+                if (exists) {
+                    const cssText = await cssResponse.text();
+                    const lineCount = cssText.split('\n').length;
+                    addTestLine(section, `Line count: ${lineCount}`, 'info');
+                    addTestLine(section, `Has content: ${lineCount > 10}`, 'info');
+                }
+                
+                const passed = exists;
+                
+                addTestLine(section, '', 'info');
+                addTestLine(section, `Result: ${passed ? '✅ PASS' : '❌ FAIL'}`, passed ? 'pass' : 'fail');
+                
+                testResults.push({ test: 'CSS File Exists', passed });
+                return passed;
+                
+            } catch (error) {
+                addTestLine(section, `Error: ${error.message}`, 'fail');
+                testResults.push({ test: 'CSS File Exists', passed: false });
+                return false;
+            }
+        }
+
+        // ========================================================================
+        // RUN ALL TESTS
+        // ========================================================================
+        async function runAllTests() {
+            await test1_ImportExportMismatch();
+            await test2_MissingAutoInit();
+            await test3_SupabaseKeyFormat();
+            await test4_ContainerIDMatch();
+            await test5_CSSExists();
+            
+            // Add separator
+            const separator = document.createElement('div');
+            separator.className = 'separator';
+            container.appendChild(separator);
+            
+            // Add summary
+            const allPassed = testResults.every(r => r.passed);
+            const failedCount = testResults.filter(r => !r.passed).length;
+            
+            const summary = document.createElement('div');
+            summary.className = `summary ${allPassed ? '' : 'failed'}`;
+            
+            let summaryHTML = '<div class="summary-title">';
+            summaryHTML += allPassed ? '✅ ALL TESTS PASSED' : `❌ ${failedCount} BUG${failedCount > 1 ? 'S' : ''} FOUND`;
+            summaryHTML += '</div>';
+            
+            testResults.forEach((result, i) => {
+                summaryHTML += `<div class="summary-item">${i + 1}. ${result.test}: ${result.passed ? '✅ PASS' : '❌ FAIL'}</div>`;
+            });
+            
+            if (!allPassed) {
+                summaryHTML += '<div class="critical-bugs">';
+                summaryHTML += '<div style="font-weight:bold; margin-bottom:10px;">CRITICAL BUGS TO FIX:</div>';
+                testResults.filter(r => !r.passed).forEach((result, i) => {
+                    summaryHTML += `<div>${i + 1}. ${result.test}</div>`;
+                });
+                summaryHTML += '</div>';
+            }
+            
+            summary.innerHTML = summaryHTML;
+            container.appendChild(summary);
+        }
+
+        // Run tests on load
+        runAllTests().catch(error => {
+            container.innerHTML = `<div class="fail">Error running tests: ${error.message}</div>`;
+        });
+    </script>
+</body>
+</html>
