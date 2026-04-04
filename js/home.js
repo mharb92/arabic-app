@@ -37,10 +37,9 @@ export function renderHomeScreen(container) {
     <div class="home-screen">
       <!-- Header -->
       <div class="home-header">
-        <h1>
-          <span style="float: left;">Hello ${AppState.profile.name}</span>
-          <span style="float: right;" dir="rtl">مرحبا ${AppState.isAya ? 'آية' : AppState.profile.name}</span>
-          <div style="clear: both;"></div>
+        <h1 style="display: flex; justify-content: space-between; align-items: center; margin: 0;">
+          <span>Hello ${AppState.profile.name}</span>
+          <span dir="rtl">مرحبا ${AppState.isAya ? 'آية' : AppState.profile.name}</span>
         </h1>
         ${AppState.isAya ? `<p class="countdown">${getCountdownMessage()}</p>` : ''}
       </div>
