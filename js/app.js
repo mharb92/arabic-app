@@ -45,20 +45,20 @@ export async function initApp(container) {
  * Handle post-authentication flow
  */
 function handlePostAuth() {
-  // Check if onboarding is complete
-  if (!isOnboardingComplete()) {
-    renderOnboardingScreen(appContainer);
-    return;
-  }
-  
-  // Check if Aya's course - handle special routing
+  // Check if Aya's course FIRST - she has custom onboarding
   if (AppState.isAya) {
     const route = handleAyaRouting();
     navigateTo(route);
     return;
   }
   
-  // Regular user - go to home
+  // For regular users, check if onboarding is complete
+  if (!isOnboardingComplete()) {
+    renderOnboardingScreen(appContainer);
+    return;
+  }
+  
+  // Regular user with complete onboarding - go to home
   navigateTo('home');
 }
 
