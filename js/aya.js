@@ -12,70 +12,118 @@ import { daysUntilJune5, getCountdownMessage } from './utils/date.js';
  * Render Aya's first-visit splash (3 screens)
  */
 export function renderAyaSplash(container, onComplete) {
-  let currentScreen = 0;
-  const screens = [
-    {
-      // Screen 1: Japanese line
-      content: '<p class="japanese-text">あやちゃん、アラビア語の勉強を始めましょう</p>',
-      duration: 5000
-    },
-    {
-      // Screen 2: Arabic reveal
-      content: '<p class="arabic-text" dir="rtl">تَفَضَّلِي</p><p class="subtitle">Please, come in</p>',
-      duration: 3000
-    },
-    {
-      // Screen 3: Marwan's letter
-      content: `
-        <div class="marwan-letter">
-          <h2>Welcome, Aya 💚</h2>
-          <p>I built this course just for you. It's designed around our trip to Palestine in June - every phrase, every lesson chosen with that visit in mind.</p>
-          <p>By the time we arrive, you'll be able to connect with my family in their language, understand the warmth in their greetings, and share in moments that matter.</p>
-          <p>Take your time, enjoy the journey, and know that I'm here if you need anything.</p>
-          <p class="signature">- Marwan</p>
+  container.innerHTML = `
+    <div class="aya-splash">
+      <div class="aya-splash-content">
+        <!-- Arabic reveal -->
+        <div class="aya-arabic-reveal">
+          <p class="aya-arabic-big" id="aya-arabic" dir="rtl">تَفَضَّلِي</p>
+          <p class="aya-roman" id="aya-roman">tafaDDAli</p>
+          <p class="aya-english" id="aya-english">welcome</p>
         </div>
-      `,
-      duration: null // User clicks to continue
-    }
-  ];
+        
+        <div class="aya-divider" id="aya-div-1"></div>
+        
+        <!-- Marwan's letter -->
+        <div class="aya-letter">
+          <p class="aya-line" id="aya-l-1">Hello, my love.</p>
+          
+          <div class="aya-divider" id="aya-div-2"></div>
+          
+          <p class="aya-line" id="aya-l-2">I built this for you.</p>
+          <p class="aya-line" id="aya-l-3">Not because you had to learn —</p>
+          <p class="aya-line" id="aya-l-4">but because you wanted to.</p>
+          
+          <div class="aya-divider" id="aya-div-3"></div>
+          
+          <p class="aya-line" id="aya-l-5">This course is built around a single goal:</p>
+          <p class="aya-line" id="aya-l-6">walking into my family's home</p>
+          <p class="aya-line" id="aya-l-7">and making them fall in love with you</p>
+          <p class="aya-line" id="aya-l-8">the way I did.</p>
+          
+          <div class="aya-divider" id="aya-div-4"></div>
+          
+          <p class="aya-line" id="aya-l-9">I've set some goals for you,</p>
+          <p class="aya-line" id="aya-l-10">but feel free to change them</p>
+          <p class="aya-line" id="aya-l-11">whenever you like.</p>
+          
+          <div class="aya-divider" id="aya-div-5"></div>
+          
+          <button class="btn-primary aya-begin-btn" id="aya-begin-btn">يلا نبدأ<br><span class="btn-subtitle">yalla nubda / let's begin</span></button>
+        </div>
+      </div>
+    </div>
+  `;
   
-  function showScreen(index) {
-    if (index >= screens.length) {
-      // Mark splash as seen
+  // Run animation sequence
+  runAyaSplashAnimation();
+  
+  // Handle button click
+  const beginBtn = container.querySelector('#aya-begin-btn');
+  if (beginBtn) {
+    beginBtn.addEventListener('click', () => {
       markAyaSplashSeen();
       if (onComplete) onComplete();
-      return;
-    }
-    
-    const screen = screens[index];
-    container.innerHTML = `
-      <div class="aya-splash-screen screen-${index}">
-        ${screen.content}
-        ${screen.duration === null ? `
-          <button class="btn-primary continue-btn" id="continue-btn">يلا نبدأ</button>
-        ` : ''}
-      </div>
-    `;
-    
-    if (screen.duration !== null) {
-      // Auto-advance after duration
-      setTimeout(() => {
-        currentScreen++;
-        showScreen(currentScreen);
-      }, screen.duration);
-    } else {
-      // Wait for user click
-      const continueBtn = container.querySelector('#continue-btn');
-      if (continueBtn) {
-        continueBtn.addEventListener('click', () => {
-          currentScreen++;
-          showScreen(currentScreen);
-        });
-      }
-    }
+    });
   }
+}
+
+function runAyaSplashAnimation() {
+  let t = 0;
+  const delay = (ms) => { t += ms; return t; };
   
-  showScreen(currentScreen);
+  const showEl = (id) => {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('shown');
+  };
+  
+  // Arabic
+  setTimeout(() => showEl('aya-arabic'), delay(500));
+  
+  // Roman
+  setTimeout(() => showEl('aya-roman'), delay(1500));
+  
+  // English
+  setTimeout(() => showEl('aya-english'), delay(2000));
+  
+  // Divider 1
+  setTimeout(() => showEl('aya-div-1'), delay(1200));
+  
+  // Hello my love
+  setTimeout(() => showEl('aya-l-1'), delay(600));
+  
+  // Divider 2
+  setTimeout(() => showEl('aya-div-2'), delay(900));
+  
+  // I built this for you
+  setTimeout(() => showEl('aya-l-2'), delay(600));
+  
+  // Not because / but because
+  setTimeout(() => showEl('aya-l-3'), delay(800));
+  setTimeout(() => showEl('aya-l-4'), delay(700));
+  
+  // Divider 3
+  setTimeout(() => showEl('aya-div-3'), delay(900));
+  
+  // This course lines
+  setTimeout(() => showEl('aya-l-5'), delay(600));
+  setTimeout(() => showEl('aya-l-6'), delay(700));
+  setTimeout(() => showEl('aya-l-7'), delay(700));
+  setTimeout(() => showEl('aya-l-8'), delay(700));
+  
+  // Divider 4
+  setTimeout(() => showEl('aya-div-4'), delay(900));
+  
+  // I've set some goals
+  setTimeout(() => showEl('aya-l-9'), delay(600));
+  setTimeout(() => showEl('aya-l-10'), delay(700));
+  setTimeout(() => showEl('aya-l-11'), delay(700));
+  
+  // Divider 5
+  setTimeout(() => showEl('aya-div-5'), delay(900));
+  
+  // Button
+  setTimeout(() => showEl('aya-begin-btn'), delay(700));
 }
 
 /**
@@ -258,16 +306,12 @@ export function renderCourseCompletion(container) {
  * Mark Aya's splash as seen
  */
 async function markAyaSplashSeen() {
-  if (!AppState.profile.ayaMeta) {
-    AppState.profile.ayaMeta = {};
-  }
-  AppState.profile.ayaMeta.splashSeen = true;
-  await save();
+  localStorage.setItem('aya_splash_seen', 'true');
 }
 
 /**
  * Check if Aya's splash has been seen
  */
 export function hasSeenAyaSplash() {
-  return AppState.profile.ayaMeta?.splashSeen === true;
+  return localStorage.getItem('aya_splash_seen') === 'true';
 }
