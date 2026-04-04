@@ -82,7 +82,7 @@ async function createAyaProfile() {
   if (!AppState.profile) AppState.profile = {};
   
   AppState.profile.name = AppState.ayaConfig?.name || AppState.ayaConfig?.config?.name || 'Aya';
-  AppState.profile.speakerType = 'beginner'; // Aya's custom course
+  AppState.profile.speaker_type = 'beginner'; // Aya's custom course - use snake_case for database
   AppState.profile.dialect = 'Palestinian';
   AppState.profile.goals = ['Meet the family', 'Basic conversation'];
   
