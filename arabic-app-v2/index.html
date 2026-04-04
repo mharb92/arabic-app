@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Marwan's Arabic Learning App</title>
+    <meta name="theme-color" content="#1a6b50">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Arabic">
+    <link id="manifest-link" rel="manifest">
+    <link rel="apple-touch-icon" href="https://mharb92.github.io/arabic-app/icon-192.png">
+    
+    <!-- External Dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Global Error Container -->
+    <div id="global-error" class="hidden"></div>
+    
+    <!-- Main App Container -->
+    <main id="app">
+        <div class="loading-screen" style="display:flex; align-items:center; justify-content:center; height:100vh; color:#1a6b50;">
+            مرحبا...
+        </div>
+    </main>
+
+    <!-- App Entry Point (ES6 Module) -->
+    <script type="module">
+        import { initApp } from './js/app.js';
+        
+        // Initialize app when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('app');
+            initApp(container);
+        });
+    </script>
+</body>
+</html>

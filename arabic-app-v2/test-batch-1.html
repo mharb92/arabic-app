@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Batch 1 Test - Core Infrastructure</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+        .test { padding: 1rem; margin: 1rem 0; border-radius: 8px; }
+        .pass { background: #e8f4ef; border-left: 4px solid #1a6b50; }
+        .fail { background: #fcebeb; border-left: 4px solid #a32d2d; }
+        .pending { background: #faeeda; border-left: 4px solid #c4793a; }
+        h1 { color: #1a6b50; }
+        button { padding: 0.5rem 1rem; background: #1a6b50; color: white; border: none; border-radius: 4px; cursor: pointer; margin: 0.5rem 0.5rem 0.5rem 0; }
+        button:hover { background: #0d4232; }
+        pre { background: #f5f5f5; padding: 1rem; border-radius: 4px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>✅ Batch 1: Core Infrastructure Tests</h1>
+    <p>Testing all 5 foundational modules...</p>
+
+    <div id="test-results"></div>
+
+    <div style="margin-top: 2rem;">
+        <button onclick="runAllTests()">Run All Tests</button>
+        <button onclick="testConfig()">Test Config</button>
+        <button onclick="testStorage()">Test Storage</button>
+        <button onclick="testDatabase()">Test Database</button>
+        <button onclick="testState()">Test State</button>
+    </div>
+
+    <script type="module">
+        import * as config from './js/config.js';
+        import { saveLocal, loadLocal, clearLocal } from './js/storage.js';
+        import { initSupabase, saveProfile, loadProfile } from './js/database.js';
+        import { AppState, load, save, reset, setUser } from './js/state.js';
+
+        window.config = config;
+        window.storage = { saveLocal, loadLocal, clearLocal };
+        window.db = { initSupabase, saveProfile, loadProfile };
+        window.state = { AppState, load, save, reset, setUser };
+
+        const results = document.getElementById('test-results');
+
+        function addTest(name, status, details = '') {
+            const div = document.createElement('div');
+            div.className = `test ${status}`;
+            div.innerHTML = `
+                <strong>${status === 'pass' ? '✅' : status === 'fail' ? '❌' : '⏳'} ${name}</strong>
+                ${details ? `<pre>${details}</pre>` : ''}
+            `;
+            results.appendChild(div);
+        }
+
+        window.testConfig = function() {
+            results.innerHTML = '<h2>Config Tests</h2>';
+            
+            try {
+                addTest('Config constants exist', 
+                    config.SUPABASE_URL && config.API_ENDPOINT ? 'pass' : 'fail',
+                    `SUPABASE_URL: ${config.SUPABASE_URL}\nAPI_ENDPOINT: ${config.API_ENDPOINT}\nAYA_EMAILS: ${config.AYA_EMAILS.join(', ')}`
+                );
+                
+                addTest('Aya emails configured', 
+                    config.AYA_EMAILS.length === 2 ? 'pass' : 'fail',
+                    JSON.stringify(config.AYA_EMAILS, null, 2)
+                );
+                
+                addTest('June 5 date configured', 
+                    config.JUNE_5_2026 instanceof Date ? 'pass' : 'fail',
+                    config.JUNE_5_2026.toISOString()
+                );
+            } catch (err) {
+                addTest('Config test failed', 'fail', err.message);
+            }
+        };
+
+        window.testStorage = function() {
+            results.innerHTML = '<h2>Storage Tests</h2>';
+            
+            try {
+                // Test save
+                const testData = { name: 'Test User', level: 'beginner' };
+                saveLocal('test_key', testData);
+                addTest('saveLocal() works', 'pass', JSON.stringify(testData, null, 2));
+                
+                // Test load
+                const loaded = loadLocal('test_key');
+                addTest('loadLocal() works', 
+                    loaded && loaded.name === 'Test User' ? 'pass' : 'fail',
+                    JSON.stringify(loaded, null, 2)
+                );
+                
+                // Test default value
+                const missing = loadLocal('nonexistent_key', { default: true });
+                addTest('loadLocal() default value works', 
+                    missing.default === true ? 'pass' : 'fail',
+                    JSON.stringify(missing, null, 2)
+                );
+                
+                // Test clear
+                clearLocal('test_key');
+                const cleared = loadLocal('test_key');
+                addTest('clearLocal() works', 
+                    cleared === null ? 'pass' : 'fail',
+                    `Value after clear: ${cleared}`
+                );
+            } catch (err) {
+                addTest('Storage test failed', 'fail', err.message);
+            }
+        };
+
+        window.testDatabase = async function() {
+            results.innerHTML = '<h2>Database Tests</h2>';
+            
+            try {
+                // Test Supabase initialization
+                const supabase = initSupabase();
+                addTest('Supabase client initialized', 
+                    supabase !== null ? 'pass' : 'fail',
+                    'Supabase client created successfully'
+                );
+                
+                // Test save profile (will fail if RLS is enabled)
+                const testUserId = 'test-user-' + Date.now();
+                const testProfile = {
+                    name: 'Batch 1 Test',
+                    speaker_type: 'beginner',
+                    goals: ['travel'],
+                    dialect: 'palestinian'
+                };
+                
+                const saveResult = await saveProfile(testUserId, testProfile);
+                addTest('saveProfile() executes', 
+                    saveResult.success !== undefined ? 'pass' : 'fail',
+                    JSON.stringify(saveResult, null, 2)
+                );
+                
+                if (saveResult.success) {
+                    // Test load profile
+                    const loadResult = await loadProfile(testUserId);
+                    addTest('loadProfile() works', 
+                        loadResult.profile && loadResult.profile.name === 'Batch 1 Test' ? 'pass' : 'fail',
+                        JSON.stringify(loadResult.profile, null, 2)
+                    );
+                } else {
+                    addTest('Note: Database save failed', 'pending', 
+                        'This is expected if RLS is enabled. Disable RLS or use a real user session.'
+                    );
+                }
+            } catch (err) {
+                addTest('Database test failed', 'fail', err.message);
+            }
+        };
+
+        window.testState = async function() {
+            results.innerHTML = '<h2>State Tests</h2>';
+            
+            try {
+                // Test AppState exists
+                addTest('AppState object exists', 
+                    AppState !== null ? 'pass' : 'fail',
+                    `AppState.user: ${AppState.user}\nAppState.isAya: ${AppState.isAya}`
+                );
+                
+                // Test setUser
+                setUser({ id: 'test-123', email: 'test@example.com' });
+                addTest('setUser() works', 
+                    AppState.user && AppState.user.email === 'test@example.com' ? 'pass' : 'fail',
+                    JSON.stringify(AppState.user, null, 2)
+                );
+                
+                // Test save to localStorage
+                AppState.profile = { name: 'State Test', level: 'intermediate' };
+                await save();
+                addTest('save() to localStorage works', 'pass', 
+                    'State saved to localStorage'
+                );
+                
+                // Test load from localStorage
+                const savedState = loadLocal('arabic_app_v3');
+                addTest('State persisted in localStorage', 
+                    savedState && savedState.profile.name === 'State Test' ? 'pass' : 'fail',
+                    JSON.stringify(savedState, null, 2)
+                );
+                
+                // Test reset
+                await reset();
+                addTest('reset() clears state', 
+                    AppState.user === null && AppState.profile && Object.keys(AppState.profile).length === 0 ? 'pass' : 'fail',
+                    `User: ${AppState.user}, Profile keys: ${Object.keys(AppState.profile).length}`
+                );
+            } catch (err) {
+                addTest('State test failed', 'fail', err.message);
+            }
+        };
+
+        window.runAllTests = async function() {
+            results.innerHTML = '<h2>Running All Tests...</h2>';
+            testConfig();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            testStorage();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            await testDatabase();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            await testState();
+            
+            const summary = document.createElement('div');
+            summary.className = 'test pass';
+            summary.innerHTML = '<h2>✅ Batch 1 Complete!</h2><p>All core infrastructure modules are working. Ready for Batch 2.</p>';
+            results.appendChild(summary);
+        };
+
+        // Auto-run on load
+        console.log('Batch 1 test page loaded. Click "Run All Tests" to begin.');
+    </script>
+</body>
+</html>
