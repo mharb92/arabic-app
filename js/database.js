@@ -148,6 +148,16 @@ export async function loadPhrasesMastery(email) {
   return { mastery: masteryObj };
 }
 
+export async function savePhrasesMastery(email, phraseId, masteryData) {
+  const sb = initSupabase();
+  if (!sb) return null;
+  const { data, error } = await sb.from('phrases_mastery')
+    .upsert({ email, phrase_id: phraseId, ...masteryData }, { onConflict: 'email,phrase_id' })
+    .select().single();
+  if (error) { console.error('Save mastery error:', error); return null; }
+  return data;
+}
+
 export async function updatePhraseMastery(email, phraseId, isCorrect) {
   const sb = initSupabase();
   if (!sb) return null;
