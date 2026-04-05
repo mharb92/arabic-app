@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>Minimal Test</title></head>
+<body>
+<h1>Minimal Import Test</h1>
+<pre id="output"></pre>
+<script>
+const output = document.getElementById('output');
+output.textContent = 'Starting test...\n\n';
+
+// Test importing with full error details
+import('./js/database.js')
+    .then(module => {
+        output.textContent += '✅ SUCCESS! Module loaded.\n';
+        output.textContent += `Exports: ${Object.keys(module).join(', ')}\n`;
+    })
+    .catch(error => {
+        output.textContent += '❌ FAILED!\n\n';
+        output.textContent += `Error Type: ${error.constructor.name}\n`;
+        output.textContent += `Message: ${error.message}\n\n`;
+        output.textContent += `Stack:\n${error.stack}\n`;
+        
+        // Show the actual source code around the error if available
+        if (error.message.includes('Unexpected token')) {
+            output.textContent += '\n\nThis is a parse error in the JavaScript file itself.\n';
+            output.textContent += 'The browser cannot parse the syntax.\n';
+        }
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>Character Test</title></head>
+<body>
+<h1>Character-by-Character Analysis</h1>
+<pre id="output"></pre>
+<script>
+const output = document.getElementById('output');
+
+async function test() {
+    const response = await fetch('./js/database.js');
+    const text = await response.text();
+    
+    output.textContent = `File size: ${text.length} characters\n\n`;
+    
+    // Show first and last characters
+    output.textContent += `First 10 chars (hex): `;
+    for (let i = 0; i < 10; i++) {
+        output.textContent += text.charCodeAt(i).toString(16).padStart(2, '0') + ' ';
+    }
+    output.textContent += '\n\n';
+    
+    output.textContent += `Last 10 chars (hex): `;
+    for (let i = text.length - 10; i < text.length; i++) {
+        output.textContent += text.charCodeAt(i).toString(16).padStart(2, '0') + ' ';
+    }
+    output.textContent += '\n\n';
+    
+    output.textContent += `First 200 chars:\n${text.substring(0, 200)}\n\n`;
+    output.textContent += `Last 200 chars:\n${text.substring(text.length - 200)}\n\n`;
+    
+    // Try to eval it
+    output.textContent += 'Attempting to import as blob...\n';
+    try {
+        const blob = new Blob([text], { type: 'application/javascript' });
+        const url = URL.createObjectURL(blob);
+        await import(url);
+        output.textContent += '✅ Blob import succeeded!\n';
+    } catch (e) {
+        output.textContent += `❌ Blob import failed: ${e.message}\n`;
+        output.textContent += `\nStack:\n${e.stack}\n`;
+    }
+}
+
+test();
+</script>
+</body>
+</html>
