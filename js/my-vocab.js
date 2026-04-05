@@ -52,10 +52,12 @@ function renderListView(container) {
       <!-- Actions -->
       <div class="vocab-actions">
         <button class="btn-primary" id="add-btn">+ Add Word</button>
+        <button class="btn-secondary" id="import-btn">Import CSV</button>
         ${personalVocab.length > 0 ? `
           <button class="btn-secondary" id="study-btn">Study Mode</button>
         ` : ''}
       </div>
+      <input type="file" id="csv-file-input" accept=".csv" style="display: none;" />
       
       <!-- Pool Opt-in -->
       <div class="vocab-pool-opt-in">
@@ -387,4 +389,235 @@ function completeStudySession(container) {
   showToast('Study session complete!');
   viewMode = 'list';
   renderListView(container);
+}
+
+/**
+ * Check if word already exists in vocab
+ */
+export async function checkVocabDuplicate(arabic) {
+  const { words } = await loadPersonalVocab(AppState.user.email);
+  return words.some(w => w.arabic === arabic);
+}
+
+/**
+ * Save word to My Vocab (called from lesson.js)
+ */
+export async function saveWordToVocab(phrase, unitTitle) {
+  try {
+    const category = inferCategory(unitTitle);
+    
+    const vocabData = {
+      arabic: phrase.ar || phrase.arabic,
+      romanization: phrase.rom || phrase.romanization || '',
+      english: phrase.en || phrase.english,
+      source: `Lesson: ${unitTitle}`,
+      category: category,
+      notes: phrase.context || ''
+    };
+    
+    await savePersonalVocab(AppState.user.email, vocabData);
+    showToast('Added to My Vocab!');
+  } catch (error) {
+    console.error('Error saving to vocab:', error);
+  }
+}
+
+/**
+ * Infer category from unit title
+ */
+function inferCategory(unitTitle) {
+  const title = unitTitle.toLowerCase();
+  
+  if (title.includes('greet') || title.includes('meeting')) return 'Greetings';
+  if (title.includes('family') || title.includes('relationship')) return 'Family';
+  if (title.includes('table') || title.includes('food')) return 'Food';
+  if (title.includes('love') || title.includes('gratitude') || title.includes('emotion')) return 'Emotions';
+  if (title.includes('stay') || title.includes('connect') || title.includes('travel')) return 'Travel';
+  
+  return 'General';
+}
+
+/**
+ * Handle CSV import
+ */
+export async function handleCSVImport(file) {
+  if (!window.Papa) {
+    showError('CSV parser not loaded');
+    return;
+  }
+  
+  window.Papa.parse(file, {
+    header: true,
+    complete: async (results) => {
+      const rows = results.data.filter(row => row.arabic && row.english);
+      
+      if (rows.length === 0) {
+        showError('No valid rows found in CSV');
+        return;
+      }
+      
+      // Import all rows
+      showLoading(`Importing ${rows.length} words...`);
+      
+      let imported = 0;
+      for (const row of rows) {
+        try {
+          const isDuplicate = await checkVocabDuplicate(row.arabic);
+          if (!isDuplicate) {
+            await savePersonalVocab(AppState.user.email, {
+              arabic: row.arabic,
+              romanization: row.romanization || '',
+              english: row.english,
+              category: row.category || 'General',
+              notes: row.notes || ''
+            });
+            imported++;
+          }
+        } catch (error) {
+          console.error('Import error:', error);
+        }
+      }
+      
+      hideLoading();
+      showToast(`Imported ${imported} words!`);
+      
+      // Reload vocab screen
+      const container = document.querySelector('#app-container');
+      if (container) {
+        renderMyVocabScreen(container);
+      }
+    },
+    error: (error) => {
+      showError('Failed to parse CSV');
+      console.error('CSV parse error:', error);
+    }
+  });
+}
+
+
+/**
+ * Handle CSV file import
+ */
+async function handleCSVImport(file, container) {
+  showLoading('Parsing CSV...');
+  
+  if (!window.Papa) {
+    showError('CSV parser not loaded. Please refresh the page.');
+    hideLoading();
+    return;
+  }
+  
+  Papa.parse(file, {
+    header: true,
+    complete: async (results) => {
+      hideLoading();
+      await showImportPreview(results.data, container);
+    },
+    error: (error) => {
+      hideLoading();
+      showError('Failed to parse CSV: ' + error.message);
+    }
+  });
+}
+
+/**
+ * Show import preview modal
+ */
+async function showImportPreview(rows, container) {
+  // Filter out empty rows
+  const validRows = rows.filter(row => row.arabic && row.english);
+  
+  if (validRows.length === 0) {
+    showError('No valid rows found. CSV must have "arabic" and "english" columns.');
+    return;
+  }
+  
+  // Show preview modal
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay';
+  modal.innerHTML = `
+    <div class="modal-content">
+      <h3>Import Preview</h3>
+      <p>Found ${validRows.length} valid words. Preview of first 10:</p>
+      
+      <div class="csv-preview">
+        <table>
+          <thead>
+            <tr>
+              <th>Arabic</th>
+              <th>Romanization</th>
+              <th>English</th>
+              <th>Category</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${validRows.slice(0, 10).map(row => `
+              <tr>
+                <td dir="rtl">${row.arabic || ''}</td>
+                <td>${row.romanization || '-'}</td>
+                <td>${row.english || ''}</td>
+                <td>${row.category || 'General'}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+        ${validRows.length > 10 ? `<p class="preview-more">...and ${validRows.length - 10} more</p>` : ''}
+      </div>
+      
+      <div class="modal-buttons">
+        <button class="btn-secondary" id="cancel-import">Cancel</button>
+        <button class="btn-primary" id="confirm-import">Import ${validRows.length} Words</button>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+  
+  modal.querySelector('#cancel-import').addEventListener('click', () => {
+    modal.remove();
+  });
+  
+  modal.querySelector('#confirm-import').addEventListener('click', async () => {
+    modal.remove();
+    await importWords(validRows, container);
+  });
+}
+
+/**
+ * Import words to database
+ */
+async function importWords(rows, container) {
+  showLoading(`Importing ${rows.length} words...`);
+  
+  let imported = 0;
+  let skipped = 0;
+  
+  for (const row of rows) {
+    // Check for duplicate
+    const phraseId = `${row.arabic}_${row.english}`;
+    const exists = personalVocab.some(w => `${w.arabic}_${w.english}` === phraseId);
+    
+    if (exists) {
+      skipped++;
+      continue;
+    }
+    
+    // Import
+    const vocabData = {
+      arabic: row.arabic,
+      romanization: row.romanization || '',
+      english: row.english,
+      category: row.category || 'General',
+      notes: row.notes || ''
+    };
+    
+    await savePersonalVocab(AppState.user.email, vocabData);
+    imported++;
+  }
+  
+  hideLoading();
+  showToast(`Imported ${imported} words! ${skipped > 0 ? `(${skipped} duplicates skipped)` : ''}`);
+  
+  // Refresh vocab list
+  renderMyVocabScreen(container);
 }

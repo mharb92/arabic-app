@@ -128,7 +128,147 @@ export async function toggleVocabPoolOptIn(email, optIn) {
 export async function savePushSubscription(email, subscriptionData) {
   const sb = initSupabase();
   if (!sb) return null;
-  const { data, error } = await sb.from('push_subscriptions').upsert({ email, ...subscriptionData }, { onConflict: 'email' }).select().single();
+  const { data, error} = await sb.from('push_subscriptions').upsert({ email, ...subscriptionData }, { onConflict: 'email' }).select().single();
   if (error) { console.error('Save push subscription error:', error); return null; }
+  return data;
+}
+
+// Mastery Score Functions
+export async function loadPhrasesMastery(email) {
+  const sb = initSupabase();
+  if (!sb) return { mastery: {} };
+  const { data, error } = await sb.from('phrases_mastery').select('*').eq('email', email);
+  if (error) { console.error('Load mastery error:', error); return { mastery: {} }; }
+  
+  // Convert array to object keyed by phrase_id
+  const masteryObj = {};
+  (data || []).forEach(item => {
+    masteryObj[item.phrase_id] = item;
+  });
+  return { mastery: masteryObj };
+}
+
+export async function updatePhraseMastery(email, phraseId, isCorrect) {
+  const sb = initSupabase();
+  if (!sb) return null;
+  
+  // Load existing mastery
+  const { data: existing } = await sb.from('phrases_mastery').select('*').eq('email', email).eq('phrase_id', phraseId).maybeSingle();
+  
+  let attempts = (existing?.attempts || 0) + 1;
+  let correct = (existing?.correct || 0) + (isCorrect ? 1 : 0);
+  let recentHistory = existing?.recent_history || [];
+  
+  // Add to recent history (max 5)
+  recentHistory.push(isCorrect);
+  if (recentHistory.length > 5) recentHistory.shift();
+  
+  // Calculate mastery
+  const baseMastery = (correct / attempts) * 100;
+  const recentCorrect = recentHistory.filter(x => x === true).length;
+  const recentMastery = (recentCorrect / recentHistory.length) * 100;
+  
+  // Time decay
+  const lastReviewed = existing?.last_reviewed ? new Date(existing.last_reviewed) : new Date();
+  const daysSince = Math.floor((new Date() - lastReviewed) / (1000 * 60 * 60 * 24));
+  const decayPenalty = Math.min(20, Math.floor(daysSince / 7));
+  
+  const mastery = Math.max(0, Math.min(100, Math.round((baseMastery * 0.4) + (recentMastery * 0.6) - decayPenalty)));
+  
+  // Update streak
+  const streak = isCorrect ? (existing?.streak || 0) + 1 : 0;
+  
+  // Upsert
+  const { data, error } = await sb.from('phrases_mastery').upsert({
+    email,
+    phrase_id: phraseId,
+    attempts,
+    correct,
+    mastery,
+    recent_history: recentHistory,
+    last_reviewed: new Date().toISOString(),
+    streak
+  }, { onConflict: 'email,phrase_id' }).select().single();
+  
+  if (error) { console.error('Update mastery error:', error); return null; }
+  return data;
+}
+
+export async function getMasteryBand(mastery) {
+  if (mastery >= 96) return { label: 'Mastered', emoji: '🏆', class: 'mastered' };
+  if (mastery >= 81) return { label: 'Strong', emoji: '💪', class: 'strong' };
+  if (mastery >= 50) return { label: 'Familiar', emoji: '👍', class: 'familiar' };
+  return { label: 'Weak', emoji: '⚠️', class: 'weak' };
+}
+
+/**
+ * BUILD 5: Mastery Score Functions
+ */
+
+export async function savePhrasesMastery(email, phraseId, masteryData) {
+  const sb = initSupabase();
+  if (!sb) return null;
+  const { data, error } = await sb.from('phrases_mastery')
+    .upsert({ email, phrase_id: phraseId, ...masteryData }, { onConflict: 'email,phrase_id' })
+    .select().single();
+  if (error) { console.error('Save mastery error:', error); return null; }
+  return data;
+}
+
+export async function loadPhrasesMastery(email) {
+  const sb = initSupabase();
+  if (!sb) return { mastery: {} };
+  const { data, error} = await sb.from('phrases_mastery').select('*').eq('email', email);
+  if (error) { console.error('Load mastery error:', error); return { mastery: {} }; }
+  
+  // Convert array to object keyed by phrase_id
+  const masteryObj = {};
+  (data || []).forEach(item => {
+    masteryObj[item.phrase_id] = item;
+  });
+  return { mastery: masteryObj };
+}
+
+export async function updatePhraseMastery(email, phraseId, isCorrect) {
+  const sb = initSupabase();
+  if (!sb) return null;
+  
+  // Load current mastery
+  const { data: existing } = await sb.from('phrases_mastery')
+    .select('*').eq('email', email).eq('phrase_id', phraseId).maybeSingle();
+  
+  // Calculate new mastery
+  const attempts = (existing?.attempts || 0) + 1;
+  const correct = (existing?.correct || 0) + (isCorrect ? 1 : 0);
+  const recentHistory = [...(existing?.recent_history || []), isCorrect].slice(-5);
+  const streak = isCorrect ? (existing?.streak || 0) + 1 : 0;
+  
+  // Calculate mastery score
+  const baseMastery = (correct / attempts) * 100;
+  const recentCorrect = recentHistory.filter(x => x === true).length;
+  const recentMastery = (recentCorrect / recentHistory.length) * 100;
+  
+  // Time decay
+  const lastReviewed = existing?.last_reviewed ? new Date(existing.last_reviewed) : new Date();
+  const daysSince = Math.floor((Date.now() - lastReviewed.getTime()) / (1000 * 60 * 60 * 24));
+  const weeksSince = Math.floor(daysSince / 7);
+  const decayPenalty = Math.min(20, weeksSince);
+  
+  // Final mastery
+  const mastery = Math.max(0, Math.min(100, Math.round((baseMastery * 0.4) + (recentMastery * 0.6) - decayPenalty)));
+  
+  // Save
+  const { data, error } = await sb.from('phrases_mastery').upsert({
+    email,
+    phrase_id: phraseId,
+    attempts,
+    correct,
+    mastery,
+    recent_history: recentHistory,
+    last_reviewed: new Date().toISOString(),
+    streak
+  }, { onConflict: 'email,phrase_id' }).select().single();
+  
+  if (error) { console.error('Update mastery error:', error); return null; }
   return data;
 }

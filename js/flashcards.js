@@ -12,15 +12,25 @@ import { showError, showToast } from './utils/ui.js';
 let flashcardDeck = [];
 let currentCardIndex = 0;
 let isFlipped = false;
+let studyMode = 'weak_to_strong'; // 'weak_only', 'weak_to_strong', 'all', 'mastered'
 
 /**
  * Render flashcards screen
  */
 export function renderFlashcardsScreen(container) {
+  // Show mode selector first
+  if (!studyMode) {
+    renderModeSelector(container);
+    return;
+  }
+  
   const units = AppState.isAya ? AYA_UNITS : UNITS;
   const weakWords = AppState.profile.weakWords || [];
   
-  // Build deck from weak words
+  // Build deck based on study mode
+  flashcardDeck = buildDeck(units, studyMode);
+  
+  // OLD: Build deck from weak words
   flashcardDeck = [];
   for (const phraseId of weakWords) {
     const phrase = getPhraseById(phraseId, units);
@@ -47,6 +57,89 @@ export function renderFlashcardsScreen(container) {
   isFlipped = false;
   
   renderCard(container);
+}
+
+/**
+ * Render study mode selector
+ */
+function renderModeSelector(container) {
+  container.innerHTML = `
+    <div class="flashcards-screen">
+      <div class="flashcards-header">
+        <button class="btn-back" id="back-btn">← Back</button>
+        <h2>Choose Study Mode</h2>
+      </div>
+      
+      <div class="study-modes">
+        <button class="study-mode-btn" data-mode="weak_only">
+          <h3>⚠️ Weak Words Only</h3>
+          <p>Focus on struggling phrases (0-49% mastery)</p>
+        </button>
+        
+        <button class="study-mode-btn recommended" data-mode="weak_to_strong">
+          <h3>💪 Weak → Strong</h3>
+          <p>Prioritize weak, include familiar/strong (0-95%)</p>
+          <span class="recommended-badge">Recommended</span>
+        </button>
+        
+        <button class="study-mode-btn" data-mode="all">
+          <h3>📚 All Words</h3>
+          <p>Full review of all phrases</p>
+        </button>
+        
+        <button class="study-mode-btn" data-mode="mastered">
+          <h3>🏆 Mastered Only</h3>
+          <p>Maintenance review (96-100% mastery)</p>
+        </button>
+      </div>
+    </div>
+  `;
+  
+  // Attach listeners
+  container.querySelector('#back-btn')?.addEventListener('click', () => {
+    import('./router.js').then(({ navigateTo }) => navigateTo('home'));
+  });
+  
+  container.querySelectorAll('.study-mode-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      studyMode = btn.dataset.mode;
+      renderFlashcardsScreen(container);
+    });
+  });
+}
+
+/**
+ * Build deck based on study mode
+ */
+async function buildDeck(units, mode) {
+  const { mastery } = await import('./database.js').then(m => m.loadPhrasesMastery(AppState.user.email));
+  
+  let allPhrases = [];
+  units.forEach((unit, unitIdx) => {
+    unit.phrases.forEach((phrase, phraseIdx) => {
+      const phraseId = `unit${unitIdx + 1}_phrase${phraseIdx}`;
+      const masteryScore = mastery[phraseId]?.mastery || 0;
+      allPhrases.push({ ...phrase, phraseId, mastery: masteryScore });
+    });
+  });
+  
+  // Filter based on mode
+  if (mode === 'weak_only') {
+    allPhrases = allPhrases.filter(p => p.mastery < 50);
+  } else if (mode === 'weak_to_strong') {
+    allPhrases = allPhrases.filter(p => p.mastery < 96);
+    allPhrases.sort((a, b) => a.mastery - b.mastery); // Weak first
+  } else if (mode === 'mastered') {
+    allPhrases = allPhrases.filter(p => p.mastery >= 96);
+  }
+  // 'all' mode uses all phrases
+  
+  // Shuffle if not weak_to_strong
+  if (mode !== 'weak_to_strong') {
+    allPhrases = allPhrases.sort(() => Math.random() - 0.5);
+  }
+  
+  return allPhrases;
 }
 
 /**

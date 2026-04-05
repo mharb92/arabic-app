@@ -41,6 +41,7 @@ export const AppState = {
   unitProgress: {},        // {unitId: {stage, consec, mastered, ...}}
   weakWords: [],           // Array of phrase IDs
   checkpoints: [],         // Array of checkpoint objects
+  phrasesMastery: {},      // {phraseId: {attempts, correct, mastery, ...}}
   
   // Stage B: Focused Study
   focusedSessions: [],     // Array of session objects
