@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Simple Module Test</title>
+    <style>
+        body { font-family: monospace; padding: 20px; }
+        .pass { color: green; }
+        .fail { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Testing All Modules</h1>
+    <div id="results"></div>
+    
+    <script type="module">
+        const results = document.getElementById('results');
+        
+        const modules = [
+            'config.js',
+            'database.js', 
+            'state.js',
+            'lesson.js',
+            'flashcards.js',
+            'my-vocab.js'
+        ];
+        
+        for (const mod of modules) {
+            try {
+                const m = await import(`./js/${mod}`);
+                results.innerHTML += `<p class="pass">✓ ${mod} OK (${Object.keys(m).length} exports)</p>`;
+            } catch (e) {
+                results.innerHTML += `<p class="fail">✗ ${mod} FAILED: ${e.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
