@@ -195,10 +195,10 @@ export async function updatePhraseMastery(email, phraseId, isCorrect) {
 }
 
 export async function getMasteryBand(mastery) {
-  if (mastery >= 96) return { label: 'Mastered', emoji: '🏆', class: 'mastered' };
-  if (mastery >= 81) return { label: 'Strong', emoji: '💪', class: 'strong' };
-  if (mastery >= 50) return { label: 'Familiar', emoji: '👍', class: 'familiar' };
-  return { label: 'Weak', emoji: '⚠️', class: 'weak' };
+  if (mastery >= 96) return { label: 'Mastered', emoji: '\u{1F3C6}', class: 'mastered' };
+  if (mastery >= 81) return { label: 'Strong', emoji: '\u{1F4AA}', class: 'strong' };
+  if (mastery >= 50) return { label: 'Familiar', emoji: '\u{1F44D}', class: 'familiar' };
+  return { label: 'Weak', emoji: '\u26A0\uFE0F', class: 'weak' };
 }
 
 /**
