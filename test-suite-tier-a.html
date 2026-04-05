@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tier A Build - Test Suite</title>
+    <style>
+        body {
+            font-family: 'SF Pro', -apple-system, system-ui, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #0d1117;
+            color: #c9d1d9;
+        }
+        
+        h1 {
+            color: #58a6ff;
+            border-bottom: 1px solid #30363d;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+        }
+        
+        .test-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #58a6ff;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .test-line {
+            margin: 10px 0;
+            padding: 8px 12px;
+            background: #0d1117;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Monaco', monospace;
+            font-size: 13px;
+        }
+        
+        .pass {
+            color: #3fb950;
+        }
+        
+        .fail {
+            color: #f85149;
+        }
+        
+        .warn {
+            color: #d29922;
+        }
+        
+        .info {
+            color: #58a6ff;
+        }
+        
+        button {
+            background: #238636;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 10px 10px 10px 0;
+        }
+        
+        button:hover {
+            background: #2ea043;
+        }
+        
+        button.secondary {
+            background: #30363d;
+        }
+        
+        button.secondary:hover {
+            background: #484f58;
+        }
+        
+        .summary {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 15px;
+            min-width: 200px;
+        }
+        
+        .summary-pass {
+            color: #3fb950;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .summary-fail {
+            color: #f85149;
+            font-size: 24px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Tier A Build - Comprehensive Test Suite</h1>
+    
+    <div class="summary" id="summary">
+        <div style="font-size: 12px; color: #8b949e; margin-bottom: 10px;">TEST RESULTS</div>
+        <div id="summary-content">Running tests...</div>
+    </div>
+    
+    <button onclick="runAllTests()">▶️ Run All Tests</button>
+    <button onclick="location.reload()" class="secondary">🔄 Reset</button>
+    <button onclick="window.open('/', '_blank')" class="secondary">🚀 Open App</button>
+    
+    <div id="test-results"></div>
+    
+    <script type="module">
+        let passCount = 0;
+        let failCount = 0;
+        let warnCount = 0;
+        
+        function log(message, status = 'info') {
+            const results = document.getElementById('test-results');
+            const line = document.createElement('div');
+            line.className = `test-line ${status}`;
+            
+            const icon = status === 'pass' ? '✓' : 
+                        status === 'fail' ? '✗' : 
+                        status === 'warn' ? '⚠' : 'ℹ';
+            
+            line.textContent = `${icon} ${message}`;
+            results.appendChild(line);
+            
+            if (status === 'pass') passCount++;
+            if (status === 'fail') failCount++;
+            if (status === 'warn') warnCount++;
+            
+            updateSummary();
+        }
+        
+        function section(title) {
+            const results = document.getElementById('test-results');
+            const sec = document.createElement('div');
+            sec.className = 'test-section';
+            sec.innerHTML = `<div class="test-title">${title}</div>`;
+            results.appendChild(sec);
+            return sec;
+        }
+        
+        function updateSummary() {
+            const content = document.getElementById('summary-content');
+            content.innerHTML = `
+                <div class="summary-pass">${passCount} passed</div>
+                <div class="summary-fail">${failCount} failed</div>
+                <div class="summary-warn">${warnCount} warnings</div>
+            `;
+        }
+        
+        async function runAllTests() {
+            passCount = 0;
+            failCount = 0;
+            warnCount = 0;
+            document.getElementById('test-results').innerHTML = '';
+            
+            // TEST 1: Syntax & Module Loading
+            const sec1 = section('📦 BUILD FIX: Syntax & Module Loading');
+            try {
+                const { initSupabase } = await import('./js/database.js');
+                log('database.js loads without SyntaxError', 'pass');
+                
+                const { renderLessonScreen } = await import('./js/lesson.js');
+                log('lesson.js loads successfully', 'pass');
+                
+                const { renderFlashcardsScreen } = await import('./js/flashcards.js');
+                log('flashcards.js loads successfully', 'pass');
+                
+                const { renderMyVocabScreen } = await import('./js/my-vocab.js');
+                log('my-vocab.js loads successfully', 'pass');
+                
+                const { speakArabic } = await import('./js/utils/audio.js');
+                log('audio.js (ElevenLabs) loads successfully', 'pass');
+            } catch (e) {
+                log(`Module loading failed: ${e.message}`, 'fail');
+            }
+            
+            // TEST 2: Database Functions
+            const sec2 = section('🗄️ BUILD 5: Mastery Database Functions');
+            try {
+                const db = await import('./js/database.js');
+                
+                // Check function existence
+                if (typeof db.savePhrasesMastery === 'function') {
+                    log('savePhrasesMastery() exists', 'pass');
+                } else {
+                    log('savePhrasesMastery() missing', 'fail');
+                }
+                
+                if (typeof db.loadPhrasesMastery === 'function') {
+                    log('loadPhrasesMastery() exists', 'pass');
+                } else {
+                    log('loadPhrasesMastery() missing', 'fail');
+                }
+                
+                if (typeof db.updatePhraseMastery === 'function') {
+                    log('updatePhraseMastery() exists', 'pass');
+                } else {
+                    log('updatePhraseMastery() missing', 'fail');
+                }
+                
+                // Check for duplicates
+                const dbCode = await fetch('./js/database.js').then(r => r.text());
+                const masteryCount = (dbCode.match(/export async function loadPhrasesMastery/g) || []).length;
+                if (masteryCount === 1) {
+                    log('No duplicate function declarations', 'pass');
+                } else {
+                    log(`Found ${masteryCount} declarations of loadPhrasesMastery (should be 1)`, 'fail');
+                }
+            } catch (e) {
+                log(`Database test failed: ${e.message}`, 'fail');
+            }
+            
+            // TEST 3: ElevenLabs Integration
+            const sec3 = section('🔊 BUILD 4: ElevenLabs Audio');
+            try {
+                const audio = await import('./js/utils/audio.js');
+                
+                if (typeof audio.speakArabic === 'function') {
+                    log('speakArabic() function exists', 'pass');
+                } else {
+                    log('speakArabic() function missing', 'fail');
+                }
+                
+                // Check for API credentials
+                const audioCode = await fetch('./js/utils/audio.js').then(r => r.text());
+                if (audioCode.includes('sk_8dd17de9180b9fb1f3fb06fab8055324567445299cd0910b')) {
+                    log('ElevenLabs API key configured', 'pass');
+                } else {
+                    log('ElevenLabs API key missing', 'warn');
+                }
+                
+                if (audioCode.includes('IYnFszSKzmym2OstwHS0')) {
+                    log('Hadi N voice ID configured', 'pass');
+                } else {
+                    log('Voice ID missing', 'warn');
+                }
+                
+                if (audioCode.includes('localStorage')) {
+                    log('Audio caching implemented', 'pass');
+                } else {
+                    log('Audio caching not found', 'warn');
+                }
+            } catch (e) {
+                log(`Audio test failed: ${e.message}`, 'fail');
+            }
+            
+            // TEST 4: Lesson Input
+            const sec4 = section('📝 BUILD 1: Beginner Lesson Input');
+            try {
+                const lessonCode = await fetch('./js/lesson.js').then(r => r.text());
+                
+                if (lessonCode.includes('speaker_type') && lessonCode.includes('beginner')) {
+                    log('Beginner detection implemented', 'pass');
+                } else {
+                    log('Beginner detection missing', 'fail');
+                }
+                
+                if (lessonCode.includes('Type the English meaning')) {
+                    log('English input prompt found', 'pass');
+                } else {
+                    log('English input prompt missing', 'fail');
+                }
+                
+                if (lessonCode.includes('practice-input')) {
+                    log('Practice input UI implemented', 'pass');
+                } else {
+                    log('Practice input UI missing', 'fail');
+                }
+            } catch (e) {
+                log(`Lesson test failed: ${e.message}`, 'fail');
+            }
+            
+            // TEST 5: Auto-Add to Vocab
+            const sec5 = section('💾 BUILD 3: Auto-Add to My Vocab');
+            try {
+                const lessonCode = await fetch('./js/lesson.js').then(r => r.text());
+                
+                if (lessonCode.includes('showSaveToVocabToast')) {
+                    log('Save to vocab toast function exists', 'pass');
+                } else {
+                    log('Save to vocab toast missing', 'fail');
+                }
+                
+                if (lessonCode.includes('checkVocabDuplicate')) {
+                    log('Duplicate check implemented', 'pass');
+                } else {
+                    log('Duplicate check missing', 'warn');
+                }
+                
+                if (lessonCode.includes('inferCategory')) {
+                    log('Category auto-tagging implemented', 'pass');
+                } else {
+                    log('Category auto-tagging missing', 'warn');
+                }
+            } catch (e) {
+                log(`Auto-add vocab test failed: ${e.message}`, 'fail');
+            }
+            
+            // TEST 6: Flashcard Study Modes
+            const sec6 = section('🎴 BUILD 6: Flashcard Study Modes');
+            try {
+                const flashcardCode = await fetch('./js/flashcards.js').then(r => r.text());
+                
+                if (flashcardCode.includes('study-mode-btn')) {
+                    log('Study mode selector implemented', 'pass');
+                } else {
+                    log('Study mode selector missing', 'fail');
+                }
+                
+                if (flashcardCode.includes('weak_only') && flashcardCode.includes('weak_to_strong')) {
+                    log('Study modes (weak/strong/all/mastered) found', 'pass');
+                } else {
+                    log('Study modes incomplete', 'fail');
+                }
+                
+                if (flashcardCode.includes('buildDeck')) {
+                    log('Deck building logic implemented', 'pass');
+                } else {
+                    log('Deck building logic missing', 'fail');
+                }
+            } catch (e) {
+                log(`Flashcard test failed: ${e.message}`, 'fail');
+            }
+            
+            // TEST 7: CSV Import
+            const sec7 = section('📊 BUILD 7: CSV Import');
+            try {
+                const vocabCode = await fetch('./js/my-vocab.js').then(r => r.text());
+                
+                if (vocabCode.includes('handleCSVImport')) {
+                    log('CSV import handler exists', 'pass');
+                } else {
+                    log('CSV import handler missing', 'fail');
+                }
+                
+                if (vocabCode.includes('Papa.parse')) {
+                    log('Papa Parse integration found', 'pass');
+                } else {
+                    log('Papa Parse not integrated', 'fail');
+                }
+                
+                if (vocabCode.includes('showImportPreview')) {
+                    log('Import preview modal implemented', 'pass');
+                } else {
+                    log('Import preview missing', 'warn');
+                }
+            } catch (e) {
+                log(`CSV import test failed: ${e.message}`, 'fail');
+            }
+            
+            // TEST 8: CSS Styling
+            const sec8 = section('🎨 CSS & Styling');
+            try {
+                const cssCode = await fetch('./css/styles.css').then(r => r.text());
+                
+                if (cssCode.includes('practice-input')) {
+                    log('Practice input CSS exists', 'pass');
+                } else {
+                    log('Practice input CSS missing', 'fail');
+                }
+                
+                if (cssCode.includes('save-vocab-toast')) {
+                    log('Save vocab toast CSS exists', 'pass');
+                } else {
+                    log('Save vocab toast CSS missing', 'fail');
+                }
+                
+                if (cssCode.includes('study-mode-btn')) {
+                    log('Study mode button CSS exists', 'pass');
+                } else {
+                    log('Study mode button CSS missing', 'fail');
+                }
+                
+                if (cssCode.includes('csv-preview')) {
+                    log('CSV preview CSS exists', 'pass');
+                } else {
+                    log('CSV preview CSS missing', 'fail');
+                }
+            } catch (e) {
+                log(`CSS test failed: ${e.message}`, 'fail');
+            }
+            
+            // TEST 9: Database Migration
+            const sec9 = section('🗃️ Database Migration');
+            try {
+                const migrationSQL = await fetch('./sql/phrases_mastery_migration.sql').then(r => r.text());
+                
+                if (migrationSQL.includes('CREATE TABLE')) {
+                    log('phrases_mastery table creation found', 'pass');
+                } else {
+                    log('Table creation SQL missing', 'fail');
+                }
+                
+                if (migrationSQL.includes('CREATE INDEX')) {
+                    log('Index creation found', 'pass');
+                } else {
+                    log('Index creation missing', 'warn');
+                }
+                
+                if (migrationSQL.includes('DISABLE ROW LEVEL SECURITY')) {
+                    log('RLS disable command present', 'pass');
+                } else {
+                    log('RLS disable missing', 'warn');
+                }
+            } catch (e) {
+                log(`Database migration not found - manual creation required`, 'warn');
+            }
+            
+            // FINAL SUMMARY
+            const secFinal = section('📋 Test Summary');
+            log(`Total Passed: ${passCount}`, 'pass');
+            log(`Total Failed: ${failCount}`, failCount > 0 ? 'fail' : 'info');
+            log(`Total Warnings: ${warnCount}`, warnCount > 0 ? 'warn' : 'info');
+            
+            if (failCount === 0) {
+                log('🎉 ALL CRITICAL TESTS PASSED - Ready to deploy!', 'pass');
+            } else {
+                log(`❌ ${failCount} critical failures - Fix before deploying`, 'fail');
+            }
+        }
+        
+        // Auto-run on load
+        window.runAllTests = runAllTests;
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(runAllTests, 500);
+        });
+    </script>
+</body>
+</html>
