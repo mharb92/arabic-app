@@ -200,5 +200,3 @@ export async function getMasteryBand(mastery) {
   if (mastery >= 50) return { label: 'Familiar', emoji: '\uD83D\uDC4D', class: 'familiar' };
   return { label: 'Weak', emoji: '\u26A0\uFE0F', class: 'weak' };
 }
-
-/**
