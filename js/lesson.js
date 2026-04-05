@@ -137,40 +137,22 @@ function attachLessonListeners(container, unit, phrase) {
     const feedbackDiv = container.querySelector('#feedback');
     
     if (checkBtn && answerInput) {
-      const handleCheck = async () => {
+      const handleCheck = () => {
         const userAnswer = answerInput.value.trim().toLowerCase();
         const correctAnswer = (phrase.en || phrase.english).toLowerCase();
-        const isCorrect = userAnswer === correctAnswer;
         
-        // Update mastery score
-        const phraseId = `unit${currentUnitIndex + 1}_phrase${currentPhraseIndex + 1}`;
-        const { updatePhraseMastery } = await import('./database.js');
-        await updatePhraseMastery(AppState.user.email, phraseId, isCorrect);
-        
-        if (isCorrect) {
+        if (userAnswer === correctAnswer) {
           feedbackDiv.innerHTML = '<span style="color: #059669;">✓ Correct!</span>';
           feedbackDiv.style.display = 'block';
           
-          // Check if word already in vocab
-          const { checkVocabDuplicate, saveWordToVocab } = await import('./my-vocab.js');
-          const phraseAr = phrase.ar || phrase.arabic;
-          const isDuplicate = await checkVocabDuplicate(phraseAr);
+          // Update mastery
+          const phraseId = `unit${currentUnitIndex + 1}_phrase${currentPhraseIndex}`;
+          import('./database.js').then(m => m.updatePhraseMastery(AppState.user.email, phraseId, true));
           
-          if (!isDuplicate) {
-            // Show save prompt
-            feedbackDiv.innerHTML += '<div style="margin-top: 0.5rem;"><button id="save-vocab-btn" class="btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">Save to My Vocab?</button></div>';
-            
-            const saveBtn = feedbackDiv.querySelector('#save-vocab-btn');
-            if (saveBtn) {
-              saveBtn.addEventListener('click', async () => {
-                await saveWordToVocab(phrase, unit.title);
-                saveBtn.textContent = '✓ Saved!';
-                saveBtn.disabled = true;
-              });
-            }
-          }
+          // Save to vocab prompt
+          showSaveToVocabToast(phrase, unit.title);
           
-          // Auto-advance after 2 seconds (longer to allow save)
+          // Auto-advance after 1 second
           setTimeout(() => {
             if (currentPhraseIndex < unit.phrases.length - 1) {
               currentPhraseIndex++;
@@ -180,9 +162,9 @@ function attachLessonListeners(container, unit, phrase) {
               showToast('Unit complete! Great work!');
               import('./router.js').then(({ navigateTo }) => navigateTo('home'));
             }
-          }, 2000);
+          }, 1000);
         } else {
-          // Update mastery score
+          // Update mastery
           const phraseId = `unit${currentUnitIndex + 1}_phrase${currentPhraseIndex}`;
           import('./database.js').then(m => m.updatePhraseMastery(AppState.user.email, phraseId, false));
           
@@ -203,69 +185,6 @@ function attachLessonListeners(container, unit, phrase) {
       // Auto-focus input
       setTimeout(() => answerInput.focus(), 100);
     }
-  }
-  
-  // Show save to vocab toast after correct answer
-  async function showSaveToVocabToast(phrase, unitTitle) {
-    const phraseId = `${phrase.ar}_${phrase.en}`;
-    
-    // Check if already in vocab
-    const exists = await checkVocabDuplicate(phraseId);
-    if (exists) return;
-    
-    // Show toast with Yes/No buttons
-    const toast = document.createElement('div');
-    toast.className = 'save-vocab-toast';
-    toast.innerHTML = `
-      <p>Save to My Vocab?</p>
-      <div class="toast-buttons">
-        <button class="btn-yes">Yes</button>
-        <button class="btn-no">No</button>
-      </div>
-    `;
-    document.body.appendChild(toast);
-    
-    toast.querySelector('.btn-yes').addEventListener('click', async () => {
-      await saveToMyVocab(phrase, unitTitle);
-      toast.remove();
-      showToast('Added to My Vocab!');
-    });
-    
-    toast.querySelector('.btn-no').addEventListener('click', () => {
-      toast.remove();
-    });
-    
-    // Auto-remove after 5 seconds
-    setTimeout(() => toast.remove(), 5000);
-  }
-  
-  async function checkVocabDuplicate(phraseId) {
-    const { words } = await import('./database.js').then(m => m.loadPersonalVocab(AppState.user.email));
-    return words.some(w => `${w.arabic}_${w.english}` === phraseId);
-  }
-  
-  async function saveToMyVocab(phrase, unitTitle) {
-    const category = inferCategory(unitTitle);
-    const vocabData = {
-      arabic: phrase.ar || phrase.arabic,
-      romanization: phrase.rom || phrase.romanization || '',
-      english: phrase.en || phrase.english,
-      source: `Lesson: ${unitTitle}`,
-      category: category,
-      notes: phrase.context || ''
-    };
-    
-    const { savePersonalVocab } = await import('./database.js');
-    await savePersonalVocab(AppState.user.email, vocabData);
-  }
-  
-  function inferCategory(unitTitle) {
-    if (unitTitle.includes('Meeting') || unitTitle.includes('Greetings')) return 'Greetings';
-    if (unitTitle.includes('Family')) return 'Family';
-    if (unitTitle.includes('Table') || unitTitle.includes('Food')) return 'Food';
-    if (unitTitle.includes('Love') || unitTitle.includes('Gratitude')) return 'Emotions';
-    if (unitTitle.includes('Connected')) return 'Travel';
-    return 'General';
   }
   
   // Previous button
@@ -302,6 +221,68 @@ function attachLessonListeners(container, unit, phrase) {
 /**
  * Get current unit index (for quiz to access)
  */
+
+// BUILD 3: Save to vocab functionality
+async function showSaveToVocabToast(phrase, unitTitle) {
+  const phraseId = `${phrase.ar}_${phrase.en}`;
+  const exists = await checkVocabDuplicate(phraseId);
+  if (exists) return;
+  
+  const toast = document.createElement('div');
+  toast.className = 'save-vocab-toast';
+  toast.innerHTML = `
+    <p>Save to My Vocab?</p>
+    <div class="toast-buttons">
+      <button class="btn-yes">Yes</button>
+      <button class="btn-no">No</button>
+    </div>
+  `;
+  document.body.appendChild(toast);
+  
+  toast.querySelector('.btn-yes').addEventListener('click', async () => {
+    await saveToMyVocab(phrase, unitTitle);
+    toast.remove();
+    import('./utils/ui.js').then(m => m.showToast('Added to My Vocab!'));
+  });
+  
+  toast.querySelector('.btn-no').addEventListener('click', () => {
+    toast.remove();
+  });
+  
+  setTimeout(() => toast.remove(), 5000);
+}
+
+async function checkVocabDuplicate(phraseId) {
+  const db = await import('./database.js');
+  const { words } = await db.loadPersonalVocab(AppState.user.email);
+  return words.some(w => `${w.arabic}_${w.english}` === phraseId);
+}
+
+async function saveToMyVocab(phrase, unitTitle) {
+  const category = inferCategory(unitTitle);
+  const vocabData = {
+    arabic: phrase.ar || phrase.arabic,
+    romanization: phrase.rom || phrase.romanization || '',
+    english: phrase.en || phrase.english,
+    source: `Lesson: ${unitTitle}`,
+    category: category,
+    notes: phrase.context || ''
+  };
+  
+  const db = await import('./database.js');
+  await db.savePersonalVocab(AppState.user.email, vocabData);
+}
+
+function inferCategory(unitTitle) {
+  if (unitTitle.includes('Meeting') || unitTitle.includes('Greetings')) return 'Greetings';
+  if (unitTitle.includes('Family')) return 'Family';
+  if (unitTitle.includes('Table') || unitTitle.includes('Food')) return 'Food';
+  if (unitTitle.includes('Love') || unitTitle.includes('Gratitude')) return 'Emotions';
+  if (unitTitle.includes('Connected')) return 'Travel';
+  return 'General';
+}
+
+
 export function getCurrentUnitIndex() {
   return currentUnitIndex;
 }
