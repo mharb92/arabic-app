@@ -53,6 +53,23 @@ export function renderLessonScreen(container) {
 }
 
 /**
+ * Get current unit index (for quiz.js)
+ */
+export function getCurrentUnitIndex() {
+  const units = AppState.isAya ? AYA_UNITS : UNITS;
+  const progress = AppState.unitProgress || {};
+  
+  for (let i = 0; i < units.length; i++) {
+    const unitId = units[i].id;
+    if (!progress[unitId] || progress[unitId].stage !== 'mastered') {
+      return i;
+    }
+  }
+  
+  return 0; // Default to first unit
+}
+
+/**
  * TEACH PHASE: Show flashcards for the cycle's 3 phrases
  * User just observes and clicks "Got it" to acknowledge
  */

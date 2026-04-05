@@ -8,6 +8,7 @@ import { AppState, save } from './state.js';
 import { saveAITutorHistory, loadAITutorHistory } from './database.js';
 import { speakArabic } from './utils/audio.js';
 import { showError, showToast, showLoading, hideLoading } from './utils/ui.js';
+import { SUPABASE_ANON_KEY, EDGE_FUNCTION_URL } from './config.js';
 
 // Chat state
 let chatHistory = []; // Array of {role: 'user' | 'assistant', content: string, timestamp: string}
@@ -366,11 +367,11 @@ function getWeakAreas() {
  * Call Claude API via Supabase Edge Function
  */
 async function callClaudeAPI(systemPrompt, userMessage) {
-  const response = await fetch('https://xkhulybdrxdzakarivvi.supabase.co/functions/v1/claude', {
+  const response = await fetch(EDGE_FUNCTION_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${window.supabaseAnonKey}`
+      'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
     },
     body: JSON.stringify({
       system: systemPrompt,

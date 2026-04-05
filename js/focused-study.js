@@ -8,6 +8,7 @@ import { FOCUSED_CONTEXTS } from './data/focused-contexts.js';
 import { saveFocusedSession, loadFocusedSessions } from './database.js';
 import { speakArabic } from './utils/audio.js';
 import { showError, showToast, showLoading, hideLoading } from './utils/ui.js';
+import { SUPABASE_ANON_KEY, EDGE_FUNCTION_URL } from './config.js';
 
 let currentContext = null;
 let currentPhraseIndex = 0;
@@ -114,11 +115,11 @@ async function generateCustomContext(container, topic) {
   
   try {
     // Call Supabase Edge Function (which proxies to Claude API)
-    const response = await fetch('https://xkhulybdrxdzakarivvi.supabase.co/functions/v1/claude', {
+    const response = await fetch(EDGE_FUNCTION_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${window.supabaseAnonKey}`
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
       },
       body: JSON.stringify({
         prompt: `Generate 8 useful Palestinian Arabic phrases for the topic: "${topic}". 
