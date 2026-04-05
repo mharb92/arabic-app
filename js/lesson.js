@@ -65,32 +65,46 @@ function renderPhrase(container, unit) {
           <button class="audio-btn" id="audio-btn">🔊</button>
         </div>
         
-        <!-- Romanization (Aya only, Stage 1) -->
-        ${isAya && (!AppState.profile.unitProgress || AppState.profile.unitProgress[`unit${currentUnitIndex + 1}`]?.stage === 1) ? `
+        <!-- Romanization (for beginners) -->
+        ${AppState.profile.speaker_type === 'beginner' ? `
           <div class="phrase-romanization">${phrase.rom || phrase.romanization || ''}</div>
         ` : ''}
         
-        <!-- English -->
-        <div class="phrase-english">${phrase.en || phrase.english}</div>
-        
-        <!-- Context (if available) -->
+        <!-- Context -->
         ${phrase.context ? `
           <div class="phrase-context">
             <strong>Context:</strong> ${phrase.context}
           </div>
         ` : ''}
         
-        <!-- Example (if available) -->
-        ${phrase.example ? `
-          <div class="phrase-example">
-            <strong>Example:</strong>
-            <p dir="rtl">${phrase.example.ar || phrase.example.arabic}</p>
-            <p>${phrase.example.en || phrase.example.english}</p>
+        <!-- Beginner: Show input field -->
+        ${AppState.profile.speaker_type === 'beginner' ? `
+          <div class="practice-section">
+            <label for="answer-input">Type the English meaning:</label>
+            <input type="text" id="answer-input" class="practice-input" placeholder="Type here..." autocomplete="off" />
+            <button class="btn-primary" id="check-btn">Check Answer</button>
+            <div id="feedback" class="feedback-message"></div>
           </div>
-        ` : ''}
+        ` : `
+          <!-- Non-beginner: Show English directly -->
+          <div class="phrase-english">${phrase.en || phrase.english}</div>
+        `}
       </div>
       
-      <!-- Navigation -->
+      <!-- Navigation (only for non-beginners, beginners auto-advance) -->
+      ${AppState.profile.speaker_type !== 'beginner' ? `
+      <div class="lesson-nav">
+        ${currentPhraseIndex > 0 ? `
+          <button class="btn-secondary" id="prev-btn">← Previous</button>
+        ` : '<div></div>'}
+        
+        ${currentPhraseIndex < unit.phrases.length - 1 ? `
+          <button class="btn-primary" id="next-btn">Next →</button>
+        ` : `
+          <button class="btn-primary" id="finish-btn">Start Quiz</button>
+        `}
+      </div>
+      ` : ''}
       <div class="lesson-nav">
         ${currentPhraseIndex > 0 ? `
           <button class="btn-secondary" id="prev-btn">← Previous</button>
@@ -113,6 +127,11 @@ function renderPhrase(container, unit) {
  */
 function attachLessonListeners(container, unit, phrase) {
   const isBeginner = AppState.profile.speaker_type === 'beginner';
+  
+  // Attach beginner listeners if needed
+  if (isBeginner) {
+    attachBeginnerListeners(container, unit);
+  }
   
   // Back button
   const backBtn = container.querySelector('#back-btn');
@@ -145,13 +164,6 @@ function attachLessonListeners(container, unit, phrase) {
           feedbackDiv.innerHTML = '<span style="color: #059669;">✓ Correct!</span>';
           feedbackDiv.style.display = 'block';
           
-          // Update mastery
-          const phraseId = `unit${currentUnitIndex + 1}_phrase${currentPhraseIndex}`;
-          import('./database.js').then(m => m.updatePhraseMastery(AppState.user.email, phraseId, true));
-          
-          // Save to vocab prompt
-          showSaveToVocabToast(phrase, unit.title);
-          
           // Auto-advance after 1 second
           setTimeout(() => {
             if (currentPhraseIndex < unit.phrases.length - 1) {
@@ -164,11 +176,7 @@ function attachLessonListeners(container, unit, phrase) {
             }
           }, 1000);
         } else {
-          // Update mastery
-          const phraseId = `unit${currentUnitIndex + 1}_phrase${currentPhraseIndex}`;
-          import('./database.js').then(m => m.updatePhraseMastery(AppState.user.email, phraseId, false));
-          
-          feedbackDiv.innerHTML = `<span style="color: #DC2626;">✗ Not quite. The answer is: "${phrase.en || phrase.english}"</span>`;
+          feedbackDiv.innerHTML = "<span style=\"color: #DC2626;\">✗ Not quite. The answer is: \"" + (phrase.en || phrase.english) + "\"</span>";
           feedbackDiv.style.display = 'block';
           answerInput.value = '';
           answerInput.focus();
@@ -221,68 +229,47 @@ function attachLessonListeners(container, unit, phrase) {
 /**
  * Get current unit index (for quiz to access)
  */
-
-// BUILD 3: Save to vocab functionality
-async function showSaveToVocabToast(phrase, unitTitle) {
-  const phraseId = `${phrase.ar}_${phrase.en}`;
-  const exists = await checkVocabDuplicate(phraseId);
-  if (exists) return;
-  
-  const toast = document.createElement('div');
-  toast.className = 'save-vocab-toast';
-  toast.innerHTML = `
-    <p>Save to My Vocab?</p>
-    <div class="toast-buttons">
-      <button class="btn-yes">Yes</button>
-      <button class="btn-no">No</button>
-    </div>
-  `;
-  document.body.appendChild(toast);
-  
-  toast.querySelector('.btn-yes').addEventListener('click', async () => {
-    await saveToMyVocab(phrase, unitTitle);
-    toast.remove();
-    import('./utils/ui.js').then(m => m.showToast('Added to My Vocab!'));
-  });
-  
-  toast.querySelector('.btn-no').addEventListener('click', () => {
-    toast.remove();
-  });
-  
-  setTimeout(() => toast.remove(), 5000);
-}
-
-async function checkVocabDuplicate(phraseId) {
-  const db = await import('./database.js');
-  const { words } = await db.loadPersonalVocab(AppState.user.email);
-  return words.some(w => `${w.arabic}_${w.english}` === phraseId);
-}
-
-async function saveToMyVocab(phrase, unitTitle) {
-  const category = inferCategory(unitTitle);
-  const vocabData = {
-    arabic: phrase.ar || phrase.arabic,
-    romanization: phrase.rom || phrase.romanization || '',
-    english: phrase.en || phrase.english,
-    source: `Lesson: ${unitTitle}`,
-    category: category,
-    notes: phrase.context || ''
-  };
-  
-  const db = await import('./database.js');
-  await db.savePersonalVocab(AppState.user.email, vocabData);
-}
-
-function inferCategory(unitTitle) {
-  if (unitTitle.includes('Meeting') || unitTitle.includes('Greetings')) return 'Greetings';
-  if (unitTitle.includes('Family')) return 'Family';
-  if (unitTitle.includes('Table') || unitTitle.includes('Food')) return 'Food';
-  if (unitTitle.includes('Love') || unitTitle.includes('Gratitude')) return 'Emotions';
-  if (unitTitle.includes('Connected')) return 'Travel';
-  return 'General';
-}
-
-
 export function getCurrentUnitIndex() {
   return currentUnitIndex;
+}
+
+// BUILD 1: Beginner answer checking
+function attachBeginnerListeners(container, unit) {
+  const phrase = unit.phrases[currentPhraseIndex];
+  const checkBtn = container.querySelector('#check-btn');
+  const answerInput = container.querySelector('#answer-input');
+  const feedbackDiv = container.querySelector('#feedback');
+  
+  if (!checkBtn || !answerInput) return;
+  
+  const handleCheck = () => {
+    const userAnswer = answerInput.value.trim().toLowerCase();
+    const correctAnswer = (phrase.en || phrase.english).toLowerCase();
+    
+    if (userAnswer === correctAnswer) {
+      feedbackDiv.innerHTML = '<span style="color: #059669;">✓ Correct!</span>';
+      feedbackDiv.style.display = 'block';
+      
+      setTimeout(() => {
+        if (currentPhraseIndex < unit.phrases.length - 1) {
+          currentPhraseIndex++;
+          renderPhrase(container, unit);
+        } else {
+          import('./router.js').then(m => m.navigateTo('home'));
+        }
+      }, 1000);
+    } else {
+      feedbackDiv.innerHTML = "<span style='color: #DC2626;'>✗ Not quite. The answer is: \"" + correctAnswer + "\"</span>";
+      feedbackDiv.style.display = 'block';
+      answerInput.value = '';
+      answerInput.focus();
+    }
+  };
+  
+  checkBtn.addEventListener('click', handleCheck);
+  answerInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') handleCheck();
+  });
+  
+  answerInput.focus();
 }
