@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>Test Each Module</title></head>
+<body>
+<h1>Testing Each Module Individually</h1>
+<pre id="output"></pre>
+<script>
+const output = document.getElementById('output');
+
+async function testModule(path, name) {
+    output.textContent += `\nTesting ${name}...\n`;
+    try {
+        const module = await import(path);
+        output.textContent += `  ✅ SUCCESS - ${Object.keys(module).length} exports\n`;
+        return true;
+    } catch (e) {
+        output.textContent += `  ❌ FAILED: ${e.message}\n`;
+        if (e.stack) {
+            output.textContent += `  Stack: ${e.stack.split('\n')[0]}\n`;
+        }
+        return false;
+    }
+}
+
+async function runTests() {
+    output.textContent = 'Testing all modules in order...\n';
+    output.textContent += '='​.repeat(50) + '\n';
+    
+    await testModule('./js/config.js', 'config.js');
+    await testModule('./js/storage.js', 'storage.js');
+    await testModule('./js/database.js', 'database.js');
+    await testModule('./js/state.js', 'state.js');
+    await testModule('./js/utils/audio.js', 'utils/audio.js');
+    await testModule('./js/lesson.js', 'lesson.js');
+    await testModule('./js/flashcards.js', 'flashcards.js');
+    await testModule('./js/my-vocab.js', 'my-vocab.js');
+    
+    output.textContent += '\n' + '='​.repeat(50) + '\n';
+    output.textContent += 'Test complete!\n';
+}
+
+runTests();
+</script>
+</body>
+</html>
