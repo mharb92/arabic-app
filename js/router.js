@@ -15,6 +15,7 @@ import { renderAyaSplash, renderAyaReturnSplash, renderPhonicsScreen, renderCult
 import { renderFocusedStudyScreen } from './focused-study.js';
 import { renderMyVocabScreen } from './my-vocab.js';
 import { renderPushPromptScreen } from './push.js';
+import { renderAITutorPage } from './ai-tutor.js';
 
 let currentRoute = null;
 let appContainer = null;
@@ -76,6 +77,10 @@ export function navigateTo(route, params = {}) {
       
     case 'my-vocab':
       renderMyVocabScreen(appContainer);
+      break;
+      
+    case 'ai-tutor':
+      renderAITutorPage(appContainer);
       break;
       
     // Aya's routes

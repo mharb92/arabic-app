@@ -1,7 +1,7 @@
 /**
  * aya-course.js - Aya's Complete Bespoke Course
  * Hand-crafted for meeting Marwan's family in Palestine (June 5, 2026)
- * 5 units, 74 phrases, phonics, cultural cards, Marwan's personal notes
+ * 5 units, 60 phrases (12 per unit), phonics, cultural cards, Marwan's personal notes
  */
 
 export const AYA_UNITS = [
@@ -19,13 +19,10 @@ export const AYA_UNITS = [
       { ar: 'كيف حالك؟', rom: 'kayf halak?', en: 'how are you? (to a man)', context: 'Use with baba Basem' },
       { ar: 'الحمد لله', rom: 'alhamdulillah', en: 'praise God / I\'m fine', context: 'The standard response - always appropriate' },
       { ar: 'تمام', rom: 'tamam', en: 'good/fine', context: 'Casual response' },
-      { ar: 'بخير', rom: 'bi-khayr', en: 'I\'m well', context: 'Another good response' },
       { ar: 'شكراً', rom: 'shukran', en: 'thank you', context: 'You will use this constantly' },
       { ar: 'شكراً كتير', rom: 'shukran kteer', en: 'thank you very much', context: 'Extra gratitude' },
-      { ar: 'عفواً', rom: 'afwan', en: 'you\'re welcome', context: 'Response to thank you' },
-      { ar: 'لا شكر على واجب', rom: 'la shukr \'ala wajib', en: 'no thanks necessary', context: 'Humble response' },
-      { ar: 'تسلم', rom: 'tislam', en: 'thank you (may you be safe)', context: 'Casual thanks to a man' },
-      { ar: 'تسلمي', rom: 'tislami', en: 'thank you (may you be safe)', context: 'Casual thanks to a woman' }
+      { ar: 'عفواً', rom: 'afwan', en: 'you\'re welcome', context: 'Response to thank you' }
+      // Trimmed: بخير, لا شكر على واجب, تسلم, تسلمي (less essential for first impressions)
     ]
   },
   
@@ -65,9 +62,8 @@ export const AYA_UNITS = [
       { ar: 'كمان شوي', rom: 'kaman shway', en: 'a little more', context: 'They will offer - this means yes' },
       { ar: 'بس هيك', rom: 'bass hayk', en: 'just this much', context: 'Trying to say no more' },
       { ar: 'زيتون فلسطيني', rom: 'zaytoon Falasteen', en: 'Palestinian olives', context: 'Pride of the table' },
-      { ar: 'زعتر', rom: 'za\'tar', en: 'thyme mix', context: 'The breakfast staple' },
-      { ar: 'المسخن', rom: 'al-musakhan', en: 'musakhan (chicken dish)', context: 'Traditional Palestinian dish' },
-      { ar: 'المقلوبة', rom: 'al-ma\'loubeh', en: 'maqluba (upside-down rice)', context: 'Another classic' }
+      { ar: 'زعتر', rom: 'za\'tar', en: 'thyme mix', context: 'The breakfast staple' }
+      // Trimmed: المسخن, المقلوبة (can learn dish names naturally at the table)
     ]
   },
   
@@ -97,7 +93,7 @@ export const AYA_UNITS = [
     subtitle: 'For the journey ahead',
     phrases: [
       { ar: 'رح أرجع', rom: 'rah arja\'', en: 'I will come back', context: 'Promise to return' },
-      { ar: 'ان شاء الله نتشوف قريب', rom: 'in sha allah nitshawwaf \'areeب', en: 'God willing we\'ll see each other soon' },
+      { ar: 'ان شاء الله نتشوف قريب', rom: 'in sha allah nitshawwaf \'areeb', en: 'God willing we\'ll see each other soon' },
       { ar: 'اشتقتلكم', rom: 'ishta\'tilkom', en: 'I miss you all', context: 'After you leave' },
       { ar: 'رح أحكي معكم', rom: 'rah ahki ma\'kom', en: 'I will talk with you', context: 'Stay in touch' },
       { ar: 'رح أبعتلكم صور', rom: 'rah ab\'atlkom suwar', en: 'I will send you photos' },
@@ -106,10 +102,9 @@ export const AYA_UNITS = [
       { ar: 'مع السلامة', rom: 'ma\'a as-salama', en: 'goodbye (with peace)', context: 'Formal goodbye' },
       { ar: 'الله معكم', rom: 'allah ma\'kom', en: 'God be with you', context: 'Parting blessing' },
       { ar: 'رح أشتاقلكم', rom: 'rah ashta\'ilkom', en: 'I will miss you', context: 'Before parting' },
-      { ar: 'سلامات', rom: 'salamat', en: 'bye (peace)', context: 'Casual goodbye' },
-      { ar: 'نشوفكم قريب ان شاء الله', rom: 'nshufkom \'areeb in sha allah', en: 'we\'ll see you soon God willing', context: 'Future promise' },
       { ar: 'تعلمت كتير منكم', rom: 'ta\'alamt kteer minkom', en: 'I learned a lot from you', context: 'Gratitude for teaching' },
       { ar: 'حبيت فلسطين', rom: 'habbayt Falasteen', en: 'I loved Palestine', context: 'From the heart' }
+      // Trimmed: سلامات, نشوفكم قريب ان شاء الله (redundant with other goodbyes)
     ]
   }
 ];

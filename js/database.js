@@ -210,3 +210,207 @@ export async function getMasteryBand(mastery) {
   if (mastery >= 50) return { label: 'Familiar', emoji: '\uD83D\uDC4D', class: 'familiar' };
   return { label: 'Weak', emoji: '\u26A0\uFE0F', class: 'weak' };
 }
+
+// ============================================================================
+// NEW TABLES - Placement, AI Tutor, Preferences, Stats, Production, Interleaving
+// ============================================================================
+
+// PLACEMENT TEST RESULTS
+export async function savePlacementResults(userId, results) {
+  const sb = initSupabase();
+  if (!sb || !results) return null;
+  
+  const { data, error } = await sb
+    .from('placement_test_results')
+    .upsert({
+      email: userId,
+      level: results.level,
+      score: results.score,
+      test_data: results.testData,
+      completed_at: results.completedAt || new Date().toISOString()
+    }, { onConflict: 'email' })
+    .select()
+    .single();
+  
+  if (error) { console.error('Save placement error:', error); return null; }
+  return data;
+}
+
+export async function loadPlacementResults(userId) {
+  const sb = initSupabase();
+  if (!sb) return { results: null };
+  
+  const { data, error } = await sb
+    .from('placement_test_results')
+    .select('*')
+    .eq('email', userId)
+    .maybeSingle();
+  
+  if (error) { console.error('Load placement error:', error); return { results: null }; }
+  return { results: data };
+}
+
+// AI TUTOR SESSIONS
+export async function saveAITutorHistory(userId, messages) {
+  const sb = initSupabase();
+  if (!sb || !messages || messages.length === 0) return null;
+  
+  const { data, error} = await sb
+    .from('ai_tutor_sessions')
+    .upsert({
+      email: userId,
+      messages: messages,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'email' })
+    .select()
+    .single();
+  
+  if (error) { console.error('Save AI tutor error:', error); return null; }
+  return data;
+}
+
+export async function loadAITutorHistory(userId) {
+  const sb = initSupabase();
+  if (!sb) return { messages: [] };
+  
+  const { data, error } = await sb
+    .from('ai_tutor_sessions')
+    .select('*')
+    .eq('email', userId)
+    .maybeSingle();
+  
+  if (error) { console.error('Load AI tutor error:', error); return { messages: [] }; }
+  return { messages: data ? data.messages : [] };
+}
+
+// USER PREFERENCES
+export async function saveUserPreferences(userId, preferences) {
+  const sb = initSupabase();
+  if (!sb || !preferences) return null;
+  
+  const { data, error } = await sb
+    .from('user_preferences')
+    .upsert({
+      email: userId,
+      ...preferences,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'email' })
+    .select()
+    .single();
+  
+  if (error) { console.error('Save preferences error:', error); return null; }
+  return data;
+}
+
+export async function loadUserPreferences(userId) {
+  const sb = initSupabase();
+  if (!sb) return { preferences: {} };
+  
+  const { data, error } = await sb
+    .from('user_preferences')
+    .select('*')
+    .eq('email', userId)
+    .maybeSingle();
+  
+  if (error) { console.error('Load preferences error:', error); return { preferences: {} }; }
+  return { preferences: data || {} };
+}
+
+// USER STATS
+export async function saveUserStats(userId, stats) {
+  const sb = initSupabase();
+  if (!sb || !stats) return null;
+  
+  const { data, error } = await sb
+    .from('user_stats')
+    .upsert({
+      email: userId,
+      ...stats,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'email' })
+    .select()
+    .single();
+  
+  if (error) { console.error('Save stats error:', error); return null; }
+  return data;
+}
+
+export async function loadUserStats(userId) {
+  const sb = initSupabase();
+  if (!sb) return { stats: {} };
+  
+  const { data, error } = await sb
+    .from('user_stats')
+    .select('*')
+    .eq('email', userId)
+    .maybeSingle();
+  
+  if (error) { console.error('Load stats error:', error); return { stats: {} }; }
+  return { stats: data || {} };
+}
+
+// PRODUCTION PROGRESS
+export async function saveProductionProgress(userId, progress) {
+  const sb = initSupabase();
+  if (!sb || !progress) return null;
+  
+  const { data, error } = await sb
+    .from('production_progress')
+    .upsert({
+      email: userId,
+      ...progress,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'email' })
+    .select()
+    .single();
+  
+  if (error) { console.error('Save production progress error:', error); return null; }
+  return data;
+}
+
+export async function loadProductionProgress(userId) {
+  const sb = initSupabase();
+  if (!sb) return { progress: null };
+  
+  const { data, error } = await sb
+    .from('production_progress')
+    .select('*')
+    .eq('email', userId)
+    .maybeSingle();
+  
+  if (error) { console.error('Load production progress error:', error); return { progress: null }; }
+  return { progress: data };
+}
+
+// INTERLEAVING CONFIG
+export async function saveInterleavingConfig(userId, config) {
+  const sb = initSupabase();
+  if (!sb || !config) return null;
+  
+  const { data, error } = await sb
+    .from('interleaving_config')
+    .upsert({
+      email: userId,
+      ...config,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'email' })
+    .select()
+    .single();
+  
+  if (error) { console.error('Save interleaving config error:', error); return null; }
+  return data;
+}
+
+export async function loadInterleavingConfig(userId) {
+  const sb = initSupabase();
+  if (!sb) return { config: null };
+  
+  const { data, error } = await sb
+    .from('interleaving_config')
+    .select('*')
+    .eq('email', userId)
+    .maybeSingle();
+  
+  if (error) { console.error('Load interleaving config error:', error); return { config: null }; }
+  return { config: data };
+}

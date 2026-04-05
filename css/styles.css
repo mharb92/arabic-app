@@ -444,12 +444,15 @@ textarea[dir="rtl"] {
 
 .home-screen {
   min-height: 100vh;
-  min-height: 100dvh;
+  min-height: 100dvh; /* Dynamic viewport height (accounts for mobile browser chrome) */
   display: flex;
   flex-direction: column;
   padding: 1rem;
+  padding-bottom: calc(1rem + env(safe-area-inset-bottom)); /* iOS safe area */
   background: var(--bg-dark);
   color: var(--text-light);
+  overflow-y: auto; /* Enable scrolling */
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
 }
 
 .home-header {
@@ -529,7 +532,19 @@ textarea[dir="rtl"] {
   border: 1px solid rgba(78, 205, 196, 0.4);
 }
 
-/* Primary Action Card (Placement Test / Today's Practice) */
+.card-orange {
+  background: rgba(230, 126, 34, 0.15) !important;
+  border: 1px solid rgba(230, 126, 34, 0.4);
+}
+
+/* Primary Cards (Full Width) */
+.card-primary {
+  padding: 1.25rem;
+  border-radius: var(--radius-lg);
+  margin-bottom: 0.75rem;
+}
+
+/* Legacy support */
 .primary-action-card {
   padding: 1.25rem;
   border-radius: var(--radius-lg);
@@ -567,6 +582,15 @@ textarea[dir="rtl"] {
 }
 
 /* Secondary Actions Grid */
+/* Cards Grid - Adaptive 2x2 layout */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+/* Legacy support */
 .secondary-actions {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -589,12 +613,18 @@ textarea[dir="rtl"] {
   text-decoration: none;
   border: none;
   min-height: 80px;
+  position: relative;
 }
 
-.action-card:hover,
-.action-card:active {
+.action-card:hover:not(:disabled),
+.action-card:active:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.action-card:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .action-icon {
@@ -605,6 +635,21 @@ textarea[dir="rtl"] {
   font-size: 0.85rem;
   font-weight: 500;
   text-align: center;
+}
+
+/* Coming Soon Badge */
+.coming-soon-badge {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--text-light);
+  font-size: 0.65rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 /* Tab Bar */
@@ -2113,3 +2158,1345 @@ textarea[dir="rtl"] {
   color: var(--text-muted);
   font-style: italic;
 }
+
+/* ============================================================================
+   LESSON TEACHING FLOW - Flashcards, Practice, Self-Assessment
+   ============================================================================ */
+
+/* Cycle Progress Dots */
+.cycle-progress {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem 0;
+  margin-bottom: 1.5rem;
+}
+
+.cycle-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--border-light);
+  transition: all 0.3s ease;
+}
+
+.cycle-dot.active {
+  background: var(--olive);
+  transform: scale(1.3);
+}
+
+.cycle-dot.completed {
+  background: var(--terracotta);
+}
+
+/* Flashcard Container */
+.flashcard-container {
+  perspective: 1000px;
+  margin: 2rem auto;
+  max-width: 500px;
+  min-height: 400px;
+  cursor: pointer;
+}
+
+.flashcard {
+  position: relative;
+  width: 100%;
+  min-height: 400px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  transition: transform 0.3s ease;
+}
+
+.flashcard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.15);
+}
+
+.flashcard-front,
+.flashcard-back {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  min-height: 400px;
+}
+
+.flashcard-label {
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+.flashcard-arabic {
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--olive);
+  margin-bottom: 2rem;
+  text-align: center;
+  line-height: 1.3;
+}
+
+.flashcard-english {
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--dark-text);
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.flashcard-romanization {
+  font-size: 1.25rem;
+  color: var(--text-muted);
+  font-style: italic;
+  margin-bottom: 1.5rem;
+}
+
+.flashcard-context {
+  background: var(--sand);
+  padding: 1rem;
+  border-radius: 8px;
+  margin: 1rem 0;
+  max-width: 400px;
+  text-align: left;
+}
+
+.flashcard-context strong {
+  color: var(--terracotta);
+}
+
+.audio-btn-large {
+  background: var(--olive);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 50px;
+  font-size: 1.125rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 1rem;
+}
+
+.audio-btn-large:hover {
+  background: var(--olive-dark);
+  transform: scale(1.05);
+}
+
+.flashcard-instructions {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 1rem;
+  margin: 1rem 0;
+}
+
+/* Practice Phase */
+.practice-progress {
+  text-align: center;
+  font-size: 1.125rem;
+  color: var(--text-muted);
+  margin-bottom: 2rem;
+}
+
+.practice-card {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 600px;
+  margin: 0 auto;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.practice-arabic {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--olive);
+  text-align: center;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.practice-romanization {
+  font-size: 1.25rem;
+  color: var(--text-muted);
+  text-align: center;
+  font-style: italic;
+  margin-bottom: 2rem;
+}
+
+.practice-input-section {
+  margin: 2rem 0;
+}
+
+.practice-input-section label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--dark-text);
+}
+
+.practice-input-section input {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1.125rem;
+  border: 2px solid var(--border-light);
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.practice-input-section input:focus {
+  outline: none;
+  border-color: var(--olive);
+}
+
+/* Feedback */
+.feedback-correct {
+  background: rgba(106, 133, 102, 0.1);
+  border: 2px solid var(--olive);
+  border-radius: 8px;
+  padding: 1.5rem;
+  font-size: 1.125rem;
+  color: var(--olive);
+  font-weight: 600;
+  text-align: center;
+}
+
+.feedback-incorrect {
+  background: rgba(174, 98, 73, 0.1);
+  border: 2px solid var(--terracotta);
+  border-radius: 8px;
+  padding: 1.5rem;
+  font-size: 1.125rem;
+  color: var(--terracotta);
+  font-weight: 600;
+  text-align: center;
+}
+
+.context-reminder {
+  font-size: 0.875rem;
+  font-weight: 400;
+  margin-top: 0.5rem;
+  font-style: italic;
+}
+
+.hint {
+  background: var(--sand);
+  padding: 1rem;
+  border-radius: 8px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.hint-section {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+/* Self-Assessment */
+.self-assessment {
+  max-width: 600px;
+  margin: 4rem auto;
+  text-align: center;
+  padding: 2rem;
+}
+
+.self-assessment h2 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  color: var(--dark-text);
+}
+
+.self-assessment p {
+  font-size: 1.125rem;
+  color: var(--text-muted);
+  margin-bottom: 2rem;
+}
+
+.confidence-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.confidence-btn {
+  background: white;
+  border: 2px solid var(--border-light);
+  border-radius: 12px;
+  padding: 1.5rem;
+  font-size: 1.25rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.confidence-btn:hover {
+  border-color: var(--olive);
+  background: rgba(106, 133, 102, 0.05);
+  transform: translateX(4px);
+}
+
+.confidence-btn[data-rating="low"]:hover {
+  border-color: var(--terracotta);
+  background: rgba(174, 98, 73, 0.05);
+}
+
+.confidence-btn[data-rating="high"]:hover {
+  border-color: var(--olive);
+  background: rgba(106, 133, 102, 0.1);
+}
+
+/* Lesson Complete */
+.lesson-complete {
+  max-width: 600px;
+  margin: 4rem auto;
+  text-align: center;
+  padding: 2rem;
+}
+
+.lesson-complete h1 {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+}
+
+.lesson-complete h2 {
+  font-size: 1.5rem;
+  color: var(--olive);
+  margin-bottom: 1rem;
+}
+
+.lesson-complete p {
+  font-size: 1.125rem;
+  color: var(--text-muted);
+  margin-bottom: 2rem;
+}
+
+.completion-stats {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  margin: 3rem 0;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stat-number {
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--olive);
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.btn-large {
+  padding: 1.25rem 3rem;
+  font-size: 1.25rem;
+}
+
+/* Phase Indicator */
+.phase-indicator {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+/* Mobile Responsive */
+@media (max-width: 640px) {
+  .flashcard-arabic {
+    font-size: 2rem;
+  }
+  
+  .flashcard-english {
+    font-size: 1.5rem;
+  }
+  
+  .practice-arabic {
+    font-size: 2rem;
+  }
+  
+  .confidence-buttons {
+    gap: 0.75rem;
+  }
+  
+  .confidence-btn {
+    padding: 1rem;
+    font-size: 1rem;
+  }
+  
+  .completion-stats {
+    gap: 2rem;
+  }
+  
+  .stat-number {
+    font-size: 2rem;
+  }
+}
+
+/* ============================================================================
+   FOCUSED STUDY - Custom Topic Input + Improved Cards
+   ============================================================================ */
+
+.focused-study-screen {
+  padding: 1rem;
+}
+
+.focused-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.focused-header h2 {
+  font-size: 1.5rem;
+  color: var(--text-light);
+  margin: 0;
+}
+
+.focused-description {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+}
+
+.focused-description p {
+  color: var(--text-muted);
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+/* Custom Topic Section */
+.custom-topic-section {
+  background: rgba(106, 133, 102, 0.1);
+  border: 1px solid rgba(106, 133, 102, 0.3);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.custom-topic-section h3 {
+  font-size: 1.125rem;
+  color: var(--primary-green);
+  margin: 0 0 0.5rem 0;
+}
+
+.custom-topic-hint {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin: 0 0 1rem 0;
+}
+
+.custom-topic-input-wrapper {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.custom-topic-input-wrapper input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: var(--text-light);
+  font-size: 1rem;
+}
+
+.custom-topic-input-wrapper input::placeholder {
+  color: var(--text-muted);
+}
+
+.custom-topic-input-wrapper input:focus {
+  outline: none;
+  border-color: var(--primary-green);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.custom-topic-input-wrapper button {
+  white-space: nowrap;
+  padding: 0.75rem 1.5rem;
+}
+
+/* Section Divider */
+.section-divider {
+  text-align: center;
+  margin: 2rem 0 1.5rem;
+  position: relative;
+}
+
+.section-divider::before,
+.section-divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 40%;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.section-divider::before {
+  left: 0;
+}
+
+.section-divider::after {
+  right: 0;
+}
+
+.section-divider span {
+  background: var(--bg-dark);
+  padding: 0 1rem;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+/* Context Grid */
+.context-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+.context-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.context-card:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--primary-green);
+  transform: translateY(-2px);
+}
+
+.context-icon {
+  font-size: 2rem;
+  margin-bottom: 0.25rem;
+}
+
+.context-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-light);
+}
+
+.context-count {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* Focused Session Screen */
+.focused-session-screen {
+  padding: 1rem;
+}
+
+.session-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.session-title {
+  flex: 1;
+}
+
+.session-title h3 {
+  font-size: 1.125rem;
+  color: var(--text-light);
+  margin: 0 0 0.25rem 0;
+}
+
+.session-title p {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.focused-flashcard {
+  perspective: 1000px;
+  margin: 2rem auto;
+  max-width: 500px;
+  min-height: 400px;
+  cursor: pointer;
+}
+
+.session-navigation {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 2rem;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.session-navigation button {
+  flex: 1;
+}
+
+/* Mobile Responsive - Focused Study */
+@media (max-width: 640px) {
+  .context-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .custom-topic-input-wrapper {
+    flex-direction: column;
+  }
+  
+  .custom-topic-input-wrapper button {
+    width: 100%;
+  }
+}
+
+/* ============================================================================
+   MY VOCABULARY - Improved Styling + Pool Prompt Modal
+   ============================================================================ */
+
+.my-vocab-screen {
+  padding: 1rem;
+}
+
+.vocab-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.vocab-header h2 {
+  font-size: 1.5rem;
+  color: var(--text-light);
+  margin: 0;
+}
+
+.vocab-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.vocab-actions button {
+  flex: 1;
+  min-width: 120px;
+}
+
+/* Pool Opt-in Section */
+.vocab-pool-opt-in {
+  background: rgba(106, 133, 102, 0.1);
+  border: 1px solid rgba(106, 133, 102, 0.3);
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: var(--text-light);
+}
+
+.toggle-label input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.toggle-description {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 0.5rem 0 0 0;
+  padding-left: 2rem;
+}
+
+/* Vocab List */
+.vocab-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.vocab-item {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.vocab-content {
+  flex: 1;
+}
+
+.vocab-arabic {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--primary-green);
+  margin-bottom: 0.25rem;
+}
+
+.vocab-english {
+  font-size: 1rem;
+  color: var(--text-light);
+  margin-bottom: 0.25rem;
+}
+
+.vocab-romanization {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.vocab-notes {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Pool Prompt Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.pool-prompt-modal {
+  background: var(--bg-dark);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  padding: 2rem;
+  max-width: 500px;
+  width: 100%;
+}
+
+.pool-prompt-modal h2 {
+  font-size: 1.5rem;
+  color: var(--text-light);
+  margin: 0 0 1rem 0;
+}
+
+.pool-prompt-modal > p {
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+.pool-prompt-benefits {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.benefit {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: rgba(106, 133, 102, 0.1);
+  border-radius: 8px;
+}
+
+.benefit-icon {
+  font-size: 1.5rem;
+}
+
+.benefit-text {
+  color: var(--text-light);
+  font-size: 0.95rem;
+}
+
+.pool-prompt-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.pool-prompt-actions button {
+  flex: 1;
+}
+
+.pool-prompt-note {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-muted);
+}
+
+.empty-state p {
+  margin: 0.5rem 0;
+}
+
+.empty-hint {
+  font-size: 0.875rem;
+}
+
+/* Mobile Responsive - My Vocab */
+@media (max-width: 640px) {
+  .vocab-actions {
+    flex-direction: column;
+  }
+  
+  .vocab-actions button {
+    width: 100%;
+  }
+  
+  .pool-prompt-modal {
+    padding: 1.5rem;
+  }
+  
+  .pool-prompt-actions {
+    flex-direction: column;
+  }
+}
+
+/* ============================================================================
+   PHONICS PAGE - Improved Styling for Aya
+   ============================================================================ */
+
+.phonics-screen {
+  padding: 1rem;
+}
+
+.phonics-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.phonics-header h2 {
+  font-size: 1.5rem;
+  color: var(--text-light);
+  margin: 0;
+}
+
+.phonics-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.phonics-item {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: all 0.3s ease;
+}
+
+.phonics-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--primary-green);
+}
+
+.phonic-sound {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary-green);
+  min-width: 60px;
+  text-align: center;
+  background: rgba(106, 133, 102, 0.1);
+  padding: 0.75rem;
+  border-radius: 8px;
+}
+
+.phonic-details {
+  flex: 1;
+}
+
+.phonic-arabic {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-light);
+  margin-bottom: 0.25rem;
+  line-height: 1.4;
+}
+
+.phonic-romanization {
+  font-size: 1rem;
+  color: var(--text-muted);
+  font-style: italic;
+  margin-bottom: 0.25rem;
+}
+
+.phonic-meaning {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.phonics-item .audio-btn {
+  background: rgba(106, 133, 102, 0.2);
+  border: 1px solid rgba(106, 133, 102, 0.4);
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.phonics-item .audio-btn:hover {
+  background: rgba(106, 133, 102, 0.3);
+  transform: scale(1.1);
+}
+
+/* Mobile Responsive - Phonics */
+@media (max-width: 640px) {
+  .phonics-item {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .phonic-sound {
+    width: 100%;
+  }
+  
+  .phonic-details {
+    width: 100%;
+  }
+  
+  .phonics-item .audio-btn {
+    width: 100%;
+    border-radius: 8px;
+    height: 44px;
+  }
+}
+
+/* ============================================================================
+   AI TUTOR - Floating Button, Modal, Dedicated Page, Chat UI
+   ============================================================================ */
+
+/* Floating Button (Always Visible) */
+.ai-tutor-floating-btn {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
+  border: none;
+  font-size: 1.75rem;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ai-tutor-floating-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+}
+
+.ai-tutor-floating-btn:active {
+  transform: scale(0.95);
+}
+
+/* AI Tutor Modal Overlay */
+.ai-tutor-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 1000;
+  padding: 0;
+}
+
+.ai-tutor-modal-content {
+  background: var(--bg-dark);
+  border-radius: 16px 16px 0 0;
+  width: 100%;
+  max-width: 600px;
+  height: 60vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.3);
+}
+
+/* Modal Header */
+.ai-tutor-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ai-tutor-modal-header h3 {
+  font-size: 1.25rem;
+  color: var(--text-light);
+  margin: 0;
+}
+
+.ai-tutor-header-actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: var(--primary-green);
+  font-size: 0.875rem;
+  cursor: pointer;
+  text-decoration: none;
+  padding: 0;
+}
+
+.btn-link:hover {
+  text-decoration: underline;
+}
+
+.btn-close {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: var(--text-light);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.btn-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Chat Messages Container */
+.ai-tutor-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.ai-tutor-messages-full {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-height: calc(100vh - 200px);
+}
+
+/* Welcome Screen */
+.ai-tutor-welcome {
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+.ai-tutor-welcome h3 {
+  font-size: 1.5rem;
+  color: var(--text-light);
+  margin: 0 0 0.5rem 0;
+}
+
+.ai-tutor-welcome p {
+  color: var(--text-muted);
+  margin: 0 0 1.5rem 0;
+}
+
+.ai-tutor-suggestions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.suggestion-btn {
+  background: rgba(106, 133, 102, 0.1);
+  border: 1px solid rgba(106, 133, 102, 0.3);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  color: var(--text-light);
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+}
+
+.suggestion-btn:hover {
+  background: rgba(106, 133, 102, 0.2);
+  border-color: var(--primary-green);
+}
+
+/* Chat Messages */
+.chat-message {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 80%;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.chat-message-user {
+  align-self: flex-end;
+}
+
+.chat-message-assistant {
+  align-self: flex-start;
+}
+
+.message-content {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  color: var(--text-light);
+  line-height: 1.6;
+}
+
+.chat-message-user .message-content {
+  background: rgba(106, 133, 102, 0.2);
+  border-color: rgba(106, 133, 102, 0.4);
+}
+
+.message-timestamp {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  padding: 0 0.5rem;
+}
+
+/* Arabic Audio Buttons */
+.arabic-audio-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.arabic-audio-btn {
+  background: rgba(106, 133, 102, 0.2);
+  border: 1px solid rgba(106, 133, 102, 0.4);
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  color: var(--text-light);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.arabic-audio-btn:hover {
+  background: rgba(106, 133, 102, 0.3);
+  transform: scale(1.05);
+}
+
+/* Typing Indicator */
+.typing-dots {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.5rem;
+}
+
+.typing-dots span {
+  width: 8px;
+  height: 8px;
+  background: var(--text-muted);
+  border-radius: 50%;
+  animation: typingBounce 1.4s infinite;
+}
+
+.typing-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typingBounce {
+  0%, 60%, 100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Input Wrapper */
+.ai-tutor-input-wrapper {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--bg-dark);
+}
+
+.ai-tutor-input-wrapper-full {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--bg-dark);
+  position: sticky;
+  bottom: 0;
+}
+
+.ai-tutor-input-wrapper input,
+.ai-tutor-input-wrapper-full input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: var(--text-light);
+  font-size: 1rem;
+}
+
+.ai-tutor-input-wrapper input::placeholder,
+.ai-tutor-input-wrapper-full input::placeholder {
+  color: var(--text-muted);
+}
+
+.ai-tutor-input-wrapper input:focus,
+.ai-tutor-input-wrapper-full input:focus {
+  outline: none;
+  border-color: var(--primary-green);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.ai-tutor-input-wrapper button,
+.ai-tutor-input-wrapper-full button {
+  padding: 0.75rem 1.5rem;
+  white-space: nowrap;
+}
+
+/* AI Tutor Dedicated Page */
+.ai-tutor-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  background: var(--bg-dark);
+  padding: 1rem;
+}
+
+.ai-tutor-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ai-tutor-page-header h2 {
+  flex: 1;
+  font-size: 1.5rem;
+  color: var(--text-light);
+  margin: 0;
+}
+
+.btn-small {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+}
+
+/* Mobile Responsive - AI Tutor */
+@media (max-width: 640px) {
+  .ai-tutor-floating-btn {
+    bottom: 1rem;
+    right: 1rem;
+    width: 56px;
+    height: 56px;
+  }
+  
+  .ai-tutor-modal-content {
+    height: 70vh;
+  }
+  
+  .chat-message {
+    max-width: 90%;
+  }
+  
+  .ai-tutor-page-header {
+    flex-wrap: wrap;
+  }
+  
+  .ai-tutor-suggestions {
+    padding: 0;
+  }
+}
+
+
+
+
+

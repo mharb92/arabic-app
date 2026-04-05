@@ -3,11 +3,12 @@
  * Initializes the app, handles auth flow, and sets up routing
  */
 
-import { AppState, load } from './state.js';
+import { AppState, load, initAutoSync } from './state.js';
 import { initAuth, renderLoginScreen } from './auth.js';
 import { renderOnboardingScreen } from './onboarding.js';
 import { initRouter, navigateTo, handleAyaRouting } from './router.js';
 import { hasSeenAyaSplash } from './aya.js';
+import { initAITutor } from './ai-tutor.js';
 
 let appContainer = null;
 
@@ -17,11 +18,17 @@ let appContainer = null;
 export async function initApp(container) {
   appContainer = container;
   
-  // Load state from localStorage
+  // Load state from localStorage + Supabase
   await load();
+  
+  // Start auto-sync (saves every 30 seconds)
+  initAutoSync();
   
   // Initialize router
   initRouter(container);
+  
+  // Initialize AI Tutor (floating button)
+  initAITutor();
   
   // Show splash screen first if never seen
   if (!hasSeenWelcome()) {

@@ -25,6 +25,14 @@ export async function renderMyVocabScreen(container) {
     
     if (viewMode === 'list') {
       renderListView(container);
+      
+      // Show pool prompt modal on first visit (non-beginners only)
+      const isBeginner = AppState.profile.speaker_type === 'beginner';
+      const hasSeenPoolPrompt = localStorage.getItem('vocab_pool_prompted');
+      
+      if (!isBeginner && !hasSeenPoolPrompt) {
+        showPoolPromptModal(container);
+      }
     } else {
       renderStudyView(container);
     }
@@ -40,6 +48,7 @@ export async function renderMyVocabScreen(container) {
  */
 function renderListView(container) {
   const poolOptIn = AppState.profile.vocabPoolOptIn || false;
+  const isBeginner = AppState.profile.speaker_type === 'beginner';
   
   container.innerHTML = `
     <div class="my-vocab-screen">
@@ -59,14 +68,16 @@ function renderListView(container) {
       </div>
       <input type="file" id="csv-file-input" accept=".csv" style="display: none;" />
       
-      <!-- Pool Opt-in -->
-      <div class="vocab-pool-opt-in">
-        <label class="toggle-label">
-          <input type="checkbox" id="pool-toggle" ${poolOptIn ? 'checked' : ''} />
-          <span>Share my words with the community pool</span>
-        </label>
-        <p class="toggle-description">Help other learners by sharing your vocabulary (anonymous)</p>
-      </div>
+      <!-- Pool Opt-in (Hidden for beginners) -->
+      ${!isBeginner ? `
+        <div class="vocab-pool-opt-in">
+          <label class="toggle-label">
+            <input type="checkbox" id="pool-toggle" ${poolOptIn ? 'checked' : ''} />
+            <span>Share my words with the community pool</span>
+          </label>
+          <p class="toggle-description">Help other learners by sharing your vocabulary (anonymous)</p>
+        </div>
+      ` : ''}
       
       <!-- Vocabulary List -->
       ${personalVocab.length === 0 ? `
@@ -494,3 +505,88 @@ export async function handleCSVImport(file) {
   });
 }
 
+/**
+ * Show pool prompt modal (first visit only)
+ */
+function showPoolPromptModal(container) {
+  const modalHtml = `
+    <div class="modal-overlay" id="pool-prompt-modal">
+      <div class="modal-content pool-prompt-modal">
+        <h2>Help Other Learners?</h2>
+        <p>Share your vocabulary anonymously with the community pool to help other students discover useful words and phrases.</p>
+        
+        <div class="pool-prompt-benefits">
+          <div class="benefit">
+            <span class="benefit-icon">🌍</span>
+            <span class="benefit-text">Help the community</span>
+          </div>
+          <div class="benefit">
+            <span class="benefit-icon">🔒</span>
+            <span class="benefit-text">Completely anonymous</span>
+          </div>
+          <div class="benefit">
+            <span class="benefit-icon">⚙️</span>
+            <span class="benefit-text">Change anytime in settings</span>
+          </div>
+        </div>
+        
+        <div class="pool-prompt-actions">
+          <button class="btn-primary" id="pool-yes-btn">Yes, Share</button>
+          <button class="btn-secondary" id="pool-no-btn">No Thanks</button>
+        </div>
+        
+        <p class="pool-prompt-note">You can change this preference anytime in Settings</p>
+      </div>
+    </div>
+  `;
+  
+  // Append modal to container
+  const modalDiv = document.createElement('div');
+  modalDiv.innerHTML = modalHtml;
+  container.appendChild(modalDiv.firstElementChild);
+  
+  // Attach listeners
+  const modal = document.getElementById('pool-prompt-modal');
+  const yesBtn = document.getElementById('pool-yes-btn');
+  const noBtn = document.getElementById('pool-no-btn');
+  
+  if (yesBtn) {
+    yesBtn.addEventListener('click', async () => {
+      // Opt in to pool
+      await toggleVocabPoolOptIn(AppState.user.email, true);
+      AppState.profile.vocabPoolOptIn = true;
+      await save();
+      
+      // Mark as prompted
+      localStorage.setItem('vocab_pool_prompted', 'true');
+      
+      // Close modal
+      if (modal) modal.remove();
+      
+      showToast('✓ Sharing with community pool');
+      
+      // Refresh view
+      renderMyVocabScreen(container);
+    });
+  }
+  
+  if (noBtn) {
+    noBtn.addEventListener('click', () => {
+      // Mark as prompted (don't show again)
+      localStorage.setItem('vocab_pool_prompted', 'true');
+      
+      // Close modal
+      if (modal) modal.remove();
+    });
+  }
+  
+  // Close on overlay click
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        localStorage.setItem('vocab_pool_prompted', 'true');
+        modal.remove();
+      }
+    });
+  }
+}

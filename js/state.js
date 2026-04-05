@@ -16,7 +16,20 @@ import {
   checkSpecialCourse,
   loadCheckpoints as dbLoadCheckpoints,
   loadFocusedSessions as dbLoadFocusedSessions,
-  loadPersonalVocab as dbLoadPersonalVocab
+  loadPersonalVocab as dbLoadPersonalVocab,
+  // NEW: All comprehensive persistence functions
+  savePlacementResults,
+  loadPlacementResults,
+  saveAITutorHistory,
+  loadAITutorHistory,
+  saveUserPreferences,
+  loadUserPreferences,
+  saveUserStats,
+  loadUserStats,
+  saveProductionProgress,
+  loadProductionProgress,
+  saveInterleavingConfig,
+  loadInterleavingConfig
 } from './database.js';
 
 import { saveLocal, loadLocal, clearLocal } from './storage.js';
@@ -48,6 +61,14 @@ export const AppState = {
   
   // Stage C: My Vocabulary
   personalVocab: [],       // Array of custom words
+  
+  // NEW: Comprehensive persistence
+  placementResults: null,  // Placement test data
+  aiTutorHistory: [],      // AI conversation messages
+  preferences: {},         // User UI/UX preferences
+  stats: {},               // Learning streaks, study time, achievements
+  productionProgress: null,// Current output stage (recognition/multiple/etc)
+  interleavingConfig: null,// Interleaving settings and thresholds
   
   // App state
   currentPage: 'loading',
@@ -129,11 +150,41 @@ export async function load() {
   const { words } = await dbLoadPersonalVocab(userId);
   AppState.personalVocab = words;
   
-  // Load placement status from localStorage (cached)
-  const placementScores = loadLocal('arabic_pscores');
-  if (placementScores) {
+  // NEW: Load comprehensive persistence data
+  const { results: placementData } = await loadPlacementResults(userId);
+  if (placementData) {
+    AppState.placementResults = placementData;
     AppState.hasCompletedPlacement = true;
   }
+  
+  const { messages } = await loadAITutorHistory(userId);
+  AppState.aiTutorHistory = messages || [];
+  
+  const { preferences } = await loadUserPreferences(userId);
+  AppState.preferences = preferences || {};
+  
+  const { stats } = await loadUserStats(userId);
+  AppState.stats = stats || {};
+  
+  const { progress: productionData } = await loadProductionProgress(userId);
+  AppState.productionProgress = productionData || { current_stage: 'recognition', lessons_in_stage: 0 };
+  
+  const { config: interleavingData } = await loadInterleavingConfig(userId);
+  AppState.interleavingConfig = interleavingData || { enabled: false, threshold_lessons: 5, threshold_mastery: 0.65 };
+  
+  // Cache to localStorage for offline access
+  saveLocal('arabic_app_v3', {
+    profile: AppState.profile,
+    unitProgress: AppState.unitProgress,
+    weakWords: AppState.weakWords,
+    hasCompletedPlacement: AppState.hasCompletedPlacement,
+    placementResults: AppState.placementResults,
+    aiTutorHistory: AppState.aiTutorHistory,
+    preferences: AppState.preferences,
+    stats: AppState.stats,
+    productionProgress: AppState.productionProgress,
+    interleavingConfig: AppState.interleavingConfig
+  });
 }
 
 /**
@@ -146,7 +197,13 @@ export async function save() {
     profile: AppState.profile,
     unitProgress: AppState.unitProgress,
     weakWords: AppState.weakWords,
-    hasCompletedPlacement: AppState.hasCompletedPlacement
+    hasCompletedPlacement: AppState.hasCompletedPlacement,
+    placementResults: AppState.placementResults,
+    aiTutorHistory: AppState.aiTutorHistory,
+    preferences: AppState.preferences,
+    stats: AppState.stats,
+    productionProgress: AppState.productionProgress,
+    interleavingConfig: AppState.interleavingConfig
   });
   
   // If guest, don't save to Supabase
@@ -154,7 +211,7 @@ export async function save() {
     return;
   }
   
-  // Save to Supabase
+  // Save to Supabase (comprehensive persistence)
   const userId = AppState.user.id;
   
   // Save profile
@@ -170,6 +227,31 @@ export async function save() {
   // Save weak words
   if (AppState.weakWords && AppState.weakWords.length > 0) {
     await dbSaveWeakWords(userId, AppState.weakWords);
+  }
+  
+  // NEW: Save all comprehensive persistence data
+  if (AppState.placementResults) {
+    await savePlacementResults(userId, AppState.placementResults);
+  }
+  
+  if (AppState.aiTutorHistory && AppState.aiTutorHistory.length > 0) {
+    await saveAITutorHistory(userId, AppState.aiTutorHistory);
+  }
+  
+  if (AppState.preferences && Object.keys(AppState.preferences).length > 0) {
+    await saveUserPreferences(userId, AppState.preferences);
+  }
+  
+  if (AppState.stats && Object.keys(AppState.stats).length > 0) {
+    await saveUserStats(userId, AppState.stats);
+  }
+  
+  if (AppState.productionProgress) {
+    await saveProductionProgress(userId, AppState.productionProgress);
+  }
+  
+  if (AppState.interleavingConfig) {
+    await saveInterleavingConfig(userId, AppState.interleavingConfig);
   }
 }
 
@@ -190,11 +272,21 @@ export async function reset() {
   AppState.currentPage = 'auth';
   AppState.hasCompletedPlacement = false;
   
+  // NEW: Reset all new state properties
+  AppState.placementResults = null;
+  AppState.aiTutorHistory = [];
+  AppState.preferences = {};
+  AppState.stats = {};
+  AppState.productionProgress = null;
+  AppState.interleavingConfig = null;
+  AppState.phrasesMastery = {};
+  
   // Clear localStorage
   clearLocal('arabic_app_v3');
   clearLocal('arabic_app_email');
   clearLocal('arabic_pscores');
   clearLocal('arabic_placement_state');
+  clearLocal('ai_tutor_history');
 }
 
 /**
@@ -218,4 +310,66 @@ export function isAya() {
 
 export function hasCompletedPlacement() {
   return AppState.hasCompletedPlacement;
+}
+
+// ============================================================================
+// AUTO-SYNC SYSTEM
+// ============================================================================
+
+let autoSaveTimer = null;
+
+/**
+ * Start automatic syncing to Supabase every 30 seconds
+ */
+export function startAutoSync() {
+  if (autoSaveTimer) return; // Already running
+  
+  autoSaveTimer = setInterval(async () => {
+    if (AppState.user && !AppState.isGuest) {
+      await save();
+      console.log('[AutoSync] State synced to Supabase');
+    }
+  }, 30000); // 30 seconds
+  
+  console.log('[AutoSync] Started - syncing every 30 seconds');
+}
+
+/**
+ * Stop automatic syncing
+ */
+export function stopAutoSync() {
+  if (autoSaveTimer) {
+    clearInterval(autoSaveTimer);
+    autoSaveTimer = null;
+    console.log('[AutoSync] Stopped');
+  }
+}
+
+/**
+ * Initialize auto-sync when DOM is ready
+ * Called from app.js
+ */
+export function initAutoSync() {
+  // Start auto-sync
+  startAutoSync();
+  
+  // Save on page unload (best-effort)
+  window.addEventListener('beforeunload', async () => {
+    if (AppState.user && !AppState.isGuest) {
+      // Use sendBeacon for reliable save on page close
+      const stateSnapshot = {
+        profile: AppState.profile,
+        unitProgress: AppState.unitProgress,
+        weakWords: AppState.weakWords,
+        placementResults: AppState.placementResults,
+        preferences: AppState.preferences,
+        stats: AppState.stats,
+        productionProgress: AppState.productionProgress,
+        interleavingConfig: AppState.interleavingConfig
+      };
+      
+      // Save to localStorage immediately (synchronous)
+      saveLocal('arabic_app_v3', stateSnapshot);
+    }
+  });
 }

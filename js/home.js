@@ -1,6 +1,7 @@
 /**
- * home.js - Main landing screen with tabs
- * Shows: Continue lesson card, phrase of the day, stats, practice options
+ * home.js - Main landing screen with adaptive cards
+ * Adaptive card system: Different cards for beginners vs heritage speakers
+ * Foundation for AI Tutor, Speed Training, and other advanced features
  */
 
 import { AppState, save } from './state.js';
@@ -16,13 +17,13 @@ let currentTab = 'home';
  */
 export function renderHomeScreen(container) {
   const units = AppState.isAya ? AYA_UNITS : UNITS;
-  const progress = AppState.profile.unitProgress || {};
+  const progress = AppState.unitProgress || {};
   
   // Find current unit
   let currentUnitIndex = 0;
   for (let i = 0; i < units.length; i++) {
-    const unitId = `unit${i + 1}`;
-    if (!progress[unitId] || progress[unitId].stage < 3 || !progress[unitId].mastered) {
+    const unitId = units[i].id;
+    if (!progress[unitId] || progress[unitId].stage !== 'mastered') {
       currentUnitIndex = i;
       break;
     }
@@ -30,8 +31,8 @@ export function renderHomeScreen(container) {
   }
   
   const currentUnit = units[currentUnitIndex];
-  const currentUnitId = `unit${currentUnitIndex + 1}`;
-  const unitProgress = progress[currentUnitId] || { stage: 1, consec: 0, mastered: false };
+  const unitId = currentUnit.id;
+  const unitProgress = progress[unitId] || { stage: 'new', mastered: false };
   
   container.innerHTML = `
     <div class="home-screen">
@@ -55,7 +56,7 @@ export function renderHomeScreen(container) {
       <div class="tab-content">
         <!-- Home Tab -->
         <div id="home-tab-home" class="tab-pane active">
-          ${renderHomeTab(currentUnit, currentUnitId, unitProgress, units)}
+          ${renderHomeTab(currentUnit, unitId, unitProgress, units)}
         </div>
         
         <!-- Progress Tab -->
@@ -71,139 +72,216 @@ export function renderHomeScreen(container) {
     </div>
   `;
   
-  attachHomeListeners(container);
-  currentTab = 'home';
+  attachEventListeners(container, currentUnit, unitId);
 }
 
 /**
- * Render Home tab content
+ * Render Home Tab with Adaptive Card System
  */
-function renderHomeTab(currentUnit, currentUnitId, unitProgress, units) {
-  const hasPlacementScore = AppState.profile.placementLevel !== undefined;
-  const isBeginner = AppState.profile.speaker_type === 'beginner' || AppState.isAya;
+function renderHomeTab(currentUnit, unitId, unitProgress, units) {
+  const profile = AppState.profile;
+  const isBeginner = profile.speaker_type === 'beginner' || AppState.isAya;
+  const hasPlacementScore = profile.placementLevel !== undefined;
   const needsPlacement = !isBeginner && !hasPlacementScore;
   const canAccessLesson = isBeginner || hasPlacementScore;
   
+  // Get adaptive cards based on user type
+  const adaptiveCards = getAdaptiveCards(profile);
+  
   return `
-    ${canAccessLesson ? `
-      <!-- Continue Learning Card (GREEN) -->
-      <div class="continue-card card card-green">
-        <h3>${unitProgress.mastered ? '🎉 Unit Complete!' : 'Continue Learning'}</h3>
-        <p class="unit-title">${currentUnit.title}</p>
-        <p class="unit-subtitle">${currentUnit.subtitle || ''}</p>
-        <div class="progress-bar">
-          <div class="progress-fill" style="width: ${(unitProgress.stage / 3) * 100}%"></div>
-        </div>
-        <p class="progress-text">Stage ${unitProgress.stage}/3 • ${unitProgress.consec} consecutive correct</p>
-        <button class="btn-primary btn-green" id="continue-btn">
-          ${unitProgress.mastered ? 'Next Unit' : 'Continue'}
-        </button>
-      </div>
-    ` : ''}
+    <!-- Primary Action Card (Full Width) -->
+    ${canAccessLesson ? renderContinueLearningCard(currentUnit, unitId, unitProgress) : ''}
+    ${needsPlacement ? renderPlacementCard() : renderTodaysPracticeCard()}
     
-    ${needsPlacement ? `
-      <!-- Placement Test (GOLD, LARGEST) -->
-      <div class="primary-action-card card-gold">
-        <div class="primary-action-content">
-          <h2>🎯 Take Placement Test</h2>
-          <p>Find your starting level with our adaptive placement test</p>
-        </div>
-        <button class="btn-primary btn-gold btn-large" id="placement-btn">
-          Start Placement Test
-        </button>
-      </div>
-    ` : `
-      <!-- Today's Practice (GOLD, LARGEST) -->
-      <div class="primary-action-card card-gold">
-        <div class="primary-action-content">
-          <h2>🎯 Today's Practice</h2>
-          <p>Reinforce what you've learned</p>
-        </div>
-        <button class="btn-primary btn-gold btn-large" id="practice-btn">
-          Start Practice
-        </button>
-      </div>
-    `}
-    
-    <!-- Secondary Actions Grid -->
-    <div class="secondary-actions">
-      <!-- My Vocabulary (PURPLE) -->
-      <button class="action-card card-purple" id="vocab-btn">
-        <span class="action-icon">📝</span>
-        <span class="action-label">My Vocabulary</span>
-      </button>
-      
-      <!-- Focused Practice (DEEP BLUE) -->
-      <button class="action-card card-blue" id="focused-btn">
-        <span class="action-icon">⚡</span>
-        <span class="action-label">Focused Practice</span>
-      </button>
-      
-      <!-- Browse Units (TEAL) -->
-      <button class="action-card card-teal" id="units-btn">
-        <span class="action-icon">📚</span>
-        <span class="action-label">Browse Units</span>
-      </button>
-      
-      ${isBeginner ? `
-        <!-- Alphabet/Phonics (TEAL) -->
-        <button class="action-card card-teal" id="${AppState.isAya ? 'phonics' : 'alphabet'}-btn">
-          <span class="action-icon">🔤</span>
-          <span class="action-label">${AppState.isAya ? 'Phonics Review' : 'Arabic Alphabet'}</span>
-        </button>
-      ` : ''}
+    <!-- Secondary Cards Grid (2x2) -->
+    <div class="cards-grid">
+      ${adaptiveCards.map(card => renderCard(card)).join('')}
     </div>
   `;
 }
 
 /**
- * Render Progress tab content
+ * Get adaptive cards based on user profile
+ */
+function getAdaptiveCards(profile) {
+  const isBeginner = profile.speaker_type === 'beginner' || AppState.isAya;
+  
+  // Base cards for all users
+  const baseCards = [
+    {
+      id: 'vocab',
+      icon: '📝',
+      label: 'My Vocabulary',
+      color: 'purple',
+      route: 'my-vocab'
+    },
+    {
+      id: 'focused',
+      icon: '⚡',
+      label: 'Focused Study',
+      color: 'blue',
+      route: 'focused-study'
+    }
+  ];
+  
+  // Adaptive third card
+  if (isBeginner) {
+    baseCards.push({
+      id: 'phonics',
+      icon: '🔤',
+      label: AppState.isAya ? 'Arabic Phonics' : 'Alphabet',
+      color: 'teal',
+      route: AppState.isAya ? 'aya-phonics' : 'alphabet'
+    });
+  } else {
+    // Heritage/Intermediate/Advanced get Speed Training (placeholder for now)
+    baseCards.push({
+      id: 'speed',
+      icon: '⚡',
+      label: 'Speed Training',
+      color: 'orange',
+      route: 'speed-training',
+      comingSoon: true
+    });
+  }
+  
+  // Fourth card: AI Tutor placeholder (will be built in Batch 2)
+  baseCards.push({
+    id: 'ai-tutor',
+    icon: '💬',
+    label: 'AI Tutor',
+    color: 'green',
+    route: 'ai-tutor',
+    comingSoon: true
+  });
+  
+  return baseCards;
+}
+
+/**
+ * Render Continue Learning Card
+ */
+function renderContinueLearningCard(unit, unitId, progress) {
+  return `
+    <div class="card-primary card-green">
+      <h3>${progress.mastered ? '🎉 Unit Complete!' : 'Continue Learning'}</h3>
+      <p class="unit-title">${unit.title}</p>
+      <p class="unit-subtitle">${unit.subtitle || ''}</p>
+      ${!progress.mastered ? `
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: ${calculateProgress(progress)}%"></div>
+        </div>
+        <p class="progress-text">${getProgressText(progress)}</p>
+      ` : ''}
+      <button class="btn-primary btn-green" id="continue-btn">
+        ${progress.mastered ? 'Next Unit →' : 'Continue Lesson →'}
+      </button>
+    </div>
+  `;
+}
+
+/**
+ * Render Placement Test Card
+ */
+function renderPlacementCard() {
+  return `
+    <div class="card-primary card-gold">
+      <h2>🎯 Take Placement Test</h2>
+      <p>Find your starting level with our adaptive placement test</p>
+      <button class="btn-primary btn-gold btn-large" id="placement-btn">
+        Start Placement Test
+      </button>
+    </div>
+  `;
+}
+
+/**
+ * Render Today's Practice Card
+ */
+function renderTodaysPracticeCard() {
+  return `
+    <div class="card-primary card-gold">
+      <h2>🎯 Today's Practice</h2>
+      <p>Reinforce what you've learned</p>
+      <button class="btn-primary btn-gold btn-large" id="practice-btn">
+        Start Practice
+      </button>
+    </div>
+  `;
+}
+
+/**
+ * Render individual card
+ */
+function renderCard(card) {
+  return `
+    <button 
+      class="action-card card-${card.color} ${card.comingSoon ? 'coming-soon' : ''}" 
+      id="${card.id}-btn"
+      ${card.comingSoon ? 'disabled' : ''}
+    >
+      <span class="action-icon">${card.icon}</span>
+      <span class="action-label">${card.label}</span>
+      ${card.comingSoon ? '<span class="coming-soon-badge">Soon</span>' : ''}
+    </button>
+  `;
+}
+
+/**
+ * Calculate progress percentage
+ */
+function calculateProgress(progress) {
+  if (progress.mastered) return 100;
+  // Simplified: assume 4 cycles per lesson
+  const stageProgress = progress.stage || 'new';
+  if (stageProgress === 'new') return 0;
+  if (stageProgress === 'in_progress') return 50;
+  if (stageProgress === 'mastered') return 100;
+  return 25;
+}
+
+/**
+ * Get progress text
+ */
+function getProgressText(progress) {
+  if (progress.mastered) return 'Unit complete!';
+  const cyclesCompleted = progress.cyclesCompleted || 0;
+  return `Cycle ${cyclesCompleted}/4`;
+}
+
+/**
+ * Render Progress Tab
  */
 function renderProgressTab(units, progress) {
-  const totalPhrases = units.reduce((sum, u) => sum + u.phrases.length, 0);
-  const masteredUnits = Object.values(progress).filter(p => p.mastered).length;
-  const weakWords = AppState.profile.weakWords || [];
+  const totalUnits = units.length;
+  const completedUnits = Object.values(progress).filter(p => p.mastered).length;
+  const percentComplete = Math.round((completedUnits / totalUnits) * 100);
   
   return `
-    <div class="progress-content">
+    <div class="progress-tab">
       <h2>Your Progress</h2>
       
-      <!-- Stats Grid -->
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-value">${masteredUnits}</div>
-          <div class="stat-label">Units Mastered</div>
+      <!-- Overall Progress -->
+      <div class="overall-progress">
+        <h3>${completedUnits} of ${totalUnits} units complete</h3>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: ${percentComplete}%"></div>
         </div>
-        <div class="stat-card">
-          <div class="stat-value">${units.length}</div>
-          <div class="stat-label">Total Units</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value">${totalPhrases}</div>
-          <div class="stat-label">Total Phrases</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value">${weakWords.length}</div>
-          <div class="stat-label">Review Needed</div>
-        </div>
+        <p>${percentComplete}% complete</p>
       </div>
       
       <!-- Unit List -->
-      <h3>Units Overview</h3>
-      <div class="unit-list">
+      <div class="units-list">
         ${units.map((unit, i) => {
-          const unitId = `unit${i + 1}`;
-          const p = progress[unitId] || { stage: 0, consec: 0, mastered: false };
+          const unitProgress = progress[unit.id] || { stage: 'new', mastered: false };
           return `
-            <div class="unit-row ${p.mastered ? 'mastered' : ''}">
+            <div class="unit-item ${unitProgress.mastered ? 'completed' : ''}">
               <div class="unit-info">
-                <div class="unit-number">${i + 1}</div>
-                <div class="unit-details">
-                  <div class="unit-name">${unit.title}</div>
-                  <div class="unit-status">
-                    ${p.mastered ? '✅ Mastered' : `Stage ${p.stage}/3`}
-                  </div>
-                </div>
+                <h4>${unit.title}</h4>
+                <p>${unit.subtitle || ''}</p>
+              </div>
+              <div class="unit-status">
+                ${unitProgress.mastered ? '✅' : unitProgress.stage !== 'new' ? '🔄' : '⭕'}
               </div>
             </div>
           `;
@@ -214,49 +292,65 @@ function renderProgressTab(units, progress) {
 }
 
 /**
- * Render Settings tab content
+ * Render Settings Tab
  */
 function renderSettingsTab() {
+  const preferences = AppState.preferences || {};
+  
   return `
-    <div class="settings-content">
+    <div class="settings-tab">
       <h2>Settings</h2>
       
-      <!-- Profile -->
+      <!-- User Info -->
       <div class="settings-section">
-        <h3>Profile</h3>
+        <h3>Account</h3>
         <div class="settings-item">
-          <label>Name</label>
-          <p>${AppState.profile.name}</p>
+          <span class="label">Name:</span>
+          <span class="value">${AppState.profile.name}</span>
         </div>
         <div class="settings-item">
-          <label>Email</label>
-          <p>${AppState.user?.email || 'Guest'}</p>
+          <span class="label">Email:</span>
+          <span class="value">${AppState.user?.email || 'Not logged in'}</span>
         </div>
         <div class="settings-item">
-          <label>Speaker Type</label>
-          <p>${AppState.profile.speaker_type}</p>
+          <span class="label">Level:</span>
+          <span class="value">${AppState.profile.speaker_type || 'beginner'}</span>
         </div>
-        ${AppState.profile.dialect ? `
-          <div class="settings-item">
-            <label>Dialect</label>
-            <p>${AppState.profile.dialect}</p>
-          </div>
-        ` : ''}
       </div>
       
-      <!-- Course Info -->
-      ${AppState.isAya ? `
-        <div class="settings-section">
-          <h3>Course Information</h3>
-          <p>You're enrolled in Aya's personalized course</p>
-          <p>Days until visit: ${daysUntilJune5()}</p>
+      <!-- Preferences -->
+      <div class="settings-section">
+        <h3>Preferences</h3>
+        
+        <div class="settings-item">
+          <label for="harakat-toggle">
+            <span>Show Harakat (Vowel Marks)</span>
+            <input 
+              type="checkbox" 
+              id="harakat-toggle" 
+              ${preferences.harakat_enabled !== false ? 'checked' : ''}
+            />
+          </label>
         </div>
-      ` : ''}
+        
+        <div class="settings-item">
+          <label for="audio-autoplay">
+            <span>Autoplay Audio</span>
+            <input 
+              type="checkbox" 
+              id="audio-autoplay" 
+              ${preferences.audio_autoplay ? 'checked' : ''}
+            />
+          </label>
+        </div>
+      </div>
       
       <!-- Actions -->
       <div class="settings-section">
-        <h3>Account</h3>
-        <button class="btn-secondary" id="sign-out-btn">Sign Out</button>
+        <h3>Actions</h3>
+        <button class="btn-secondary btn-full-width" id="sign-out-btn">
+          Sign Out
+        </button>
       </div>
     </div>
   `;
@@ -265,17 +359,17 @@ function renderSettingsTab() {
 /**
  * Attach event listeners
  */
-function attachHomeListeners(container) {
+function attachEventListeners(container, currentUnit, unitId) {
   // Tab switching
   const tabBtns = container.querySelectorAll('.tab-btn');
   tabBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       const tab = btn.dataset.tab;
-      switchTab(tab, container);
+      switchTab(container, tab);
     });
   });
   
-  // Continue button
+  // Continue learning button
   const continueBtn = container.querySelector('#continue-btn');
   if (continueBtn) {
     continueBtn.addEventListener('click', () => {
@@ -283,14 +377,7 @@ function attachHomeListeners(container) {
     });
   }
   
-  // Quick actions
-  const practiceBtn = container.querySelector('#practice-btn');
-  if (practiceBtn) {
-    practiceBtn.addEventListener('click', () => {
-      import('./router.js').then(({ navigateTo }) => navigateTo('enrichment'));
-    });
-  }
-  
+  // Placement test button
   const placementBtn = container.querySelector('#placement-btn');
   if (placementBtn) {
     placementBtn.addEventListener('click', () => {
@@ -298,28 +385,15 @@ function attachHomeListeners(container) {
     });
   }
   
-  const unitsBtn = container.querySelector('#units-btn');
-  if (unitsBtn) {
-    unitsBtn.addEventListener('click', () => {
-      import('./router.js').then(({ navigateTo }) => navigateTo('unit-overview'));
+  // Practice button
+  const practiceBtn = container.querySelector('#practice-btn');
+  if (practiceBtn) {
+    practiceBtn.addEventListener('click', () => {
+      import('./router.js').then(({ navigateTo }) => navigateTo('flashcards'));
     });
   }
   
-  const alphabetBtn = container.querySelector('#alphabet-btn');
-  if (alphabetBtn) {
-    alphabetBtn.addEventListener('click', () => {
-      import('./router.js').then(({ navigateTo }) => navigateTo('alphabet'));
-    });
-  }
-  
-  const phonicsBtn = container.querySelector('#phonics-btn');
-  if (phonicsBtn) {
-    phonicsBtn.addEventListener('click', () => {
-      import('./router.js').then(({ navigateTo }) => navigateTo('aya-phonics'));
-    });
-  }
-  
-  // My Vocabulary
+  // My Vocabulary button
   const vocabBtn = container.querySelector('#vocab-btn');
   if (vocabBtn) {
     vocabBtn.addEventListener('click', () => {
@@ -327,7 +401,7 @@ function attachHomeListeners(container) {
     });
   }
   
-  // Focused Practice
+  // Focused Study button
   const focusedBtn = container.querySelector('#focused-btn');
   if (focusedBtn) {
     focusedBtn.addEventListener('click', () => {
@@ -335,23 +409,76 @@ function attachHomeListeners(container) {
     });
   }
   
-  // Sign out
+  // Phonics button (for Aya)
+  const phonicsBtn = container.querySelector('#phonics-btn');
+  if (phonicsBtn) {
+    phonicsBtn.addEventListener('click', () => {
+      import('./router.js').then(({ navigateTo }) => navigateTo('aya-phonics'));
+    });
+  }
+  
+  // AI Tutor button (placeholder - coming in Batch 2)
+  const aiTutorBtn = container.querySelector('#ai-tutor-btn');
+  if (aiTutorBtn && !aiTutorBtn.disabled) {
+    aiTutorBtn.addEventListener('click', () => {
+      import('./router.js').then(({ navigateTo }) => navigateTo('ai-tutor'));
+    });
+  }
+  
+  // Speed Training button (placeholder - coming in Batch 3)
+  const speedBtn = container.querySelector('#speed-btn');
+  if (speedBtn && !speedBtn.disabled) {
+    speedBtn.addEventListener('click', () => {
+      import('./router.js').then(({ navigateTo }) => navigateTo('speed-training'));
+    });
+  }
+  
+  // Settings: Harakat toggle
+  const harakatToggle = container.querySelector('#harakat-toggle');
+  if (harakatToggle) {
+    harakatToggle.addEventListener('change', async (e) => {
+      if (!AppState.preferences) AppState.preferences = {};
+      AppState.preferences.harakat_enabled = e.target.checked;
+      await save();
+      showToast(e.target.checked ? 'Harakat enabled' : 'Harakat disabled');
+    });
+  }
+  
+  // Settings: Audio autoplay toggle
+  const audioToggle = container.querySelector('#audio-autoplay');
+  if (audioToggle) {
+    audioToggle.addEventListener('change', async (e) => {
+      if (!AppState.preferences) AppState.preferences = {};
+      AppState.preferences.audio_autoplay = e.target.checked;
+      await save();
+      showToast(e.target.checked ? 'Audio autoplay enabled' : 'Audio autoplay disabled');
+    });
+  }
+  
+  // Sign out button
   const signOutBtn = container.querySelector('#sign-out-btn');
   if (signOutBtn) {
-    signOutBtn.addEventListener('click', handleSignOut);
+    signOutBtn.addEventListener('click', async () => {
+      if (confirm('Are you sure you want to sign out?')) {
+        import('./state.js').then(async ({ reset }) => {
+          await reset();
+          import('./router.js').then(({ navigateTo }) => navigateTo('auth'));
+        });
+      }
+    });
   }
 }
 
 /**
- * Switch between tabs
+ * Switch tabs
  */
-function switchTab(tab, container) {
-  currentTab = tab;
+function switchTab(container, tabName) {
+  currentTab = tabName;
   
-  // Update button states
+  // Update tab buttons
   const tabBtns = container.querySelectorAll('.tab-btn');
   tabBtns.forEach(btn => {
-    if (btn.dataset.tab === tab) {
+    if (btn.dataset.tab === tabName) {
       btn.classList.add('active');
     } else {
       btn.classList.remove('active');
@@ -359,36 +486,12 @@ function switchTab(tab, container) {
   });
   
   // Update tab panes
-  const panes = container.querySelectorAll('.tab-pane');
-  panes.forEach(pane => {
-    if (pane.id === `home-tab-${tab}`) {
+  const tabPanes = container.querySelectorAll('.tab-pane');
+  tabPanes.forEach(pane => {
+    if (pane.id === `home-tab-${tabName}`) {
       pane.classList.add('active');
     } else {
       pane.classList.remove('active');
     }
   });
-}
-
-/**
- * Handle sign out
- */
-async function handleSignOut() {
-  if (confirm('Are you sure you want to sign out?')) {
-    // Clear state using proper reset function
-    const { reset } = await import('./state.js');
-    await reset();
-    
-    // Navigate to login
-    import('./router.js').then(({ navigateTo }) => navigateTo('login'));
-  }
-}
-
-/**
- * Get random phrase from units
- */
-function getRandomPhrase(units) {
-  const allPhrases = units.flatMap(u => u.phrases);
-  if (allPhrases.length === 0) return 'مرحبا';
-  const phrase = allPhrases[Math.floor(Math.random() * allPhrases.length)];
-  return phrase.ar || phrase.arabic || 'مرحبا';
 }
