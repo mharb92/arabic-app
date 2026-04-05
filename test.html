@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arabic App - Comprehensive Test Suite</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #1a1917;
+      color: #e8e5de;
+      padding: 2rem;
+      line-height: 1.6;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      color: #6a8566;
+    }
+    
+    .subtitle {
+      color: #9b9890;
+      margin-bottom: 2rem;
+    }
+    
+    .test-section {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .test-section h2 {
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+      color: #6a8566;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .test-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 0.75rem;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 8px;
+      margin-bottom: 0.75rem;
+    }
+    
+    .status {
+      min-width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.875rem;
+      flex-shrink: 0;
+    }
+    
+    .status.pending {
+      background: rgba(155, 152, 144, 0.3);
+      color: #9b9890;
+    }
+    
+    .status.pass {
+      background: rgba(106, 133, 102, 0.3);
+      color: #6a8566;
+    }
+    
+    .status.fail {
+      background: rgba(184, 66, 45, 0.3);
+      color: #b8422d;
+    }
+    
+    .test-content {
+      flex: 1;
+    }
+    
+    .test-name {
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+    
+    .test-description {
+      font-size: 0.875rem;
+      color: #9b9890;
+    }
+    
+    .error-details {
+      background: rgba(184, 66, 45, 0.1);
+      border: 1px solid rgba(184, 66, 45, 0.3);
+      border-radius: 6px;
+      padding: 0.75rem;
+      margin-top: 0.5rem;
+      font-family: 'Courier New', monospace;
+      font-size: 0.8rem;
+      color: #b8422d;
+      overflow-x: auto;
+    }
+    
+    .summary {
+      display: flex;
+      gap: 2rem;
+      margin-bottom: 2rem;
+      padding: 1.5rem;
+      background: rgba(106, 133, 102, 0.1);
+      border: 1px solid rgba(106, 133, 102, 0.3);
+      border-radius: 12px;
+    }
+    
+    .summary-item {
+      text-align: center;
+    }
+    
+    .summary-number {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #6a8566;
+    }
+    
+    .summary-label {
+      font-size: 0.875rem;
+      color: #9b9890;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    
+    .run-button {
+      background: linear-gradient(135deg, #6a8566, #5a634c);
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 2rem;
+      transition: transform 0.2s;
+    }
+    
+    .run-button:hover {
+      transform: translateY(-2px);
+    }
+    
+    .run-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .progress {
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-bottom: 2rem;
+    }
+    
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #6a8566, #8b9677);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧪 Arabic App Test Suite</h1>
+    <p class="subtitle">Comprehensive validation of all app functionality</p>
+    
+    <button class="run-button" id="run-tests">Run All Tests</button>
+    
+    <div class="progress" id="progress" style="display: none;">
+      <div class="progress-bar" id="progress-bar"></div>
+    </div>
+    
+    <div class="summary" id="summary" style="display: none;">
+      <div class="summary-item">
+        <div class="summary-number" id="total-tests">0</div>
+        <div class="summary-label">Total Tests</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-number" id="passed-tests" style="color: #6a8566;">0</div>
+        <div class="summary-label">Passed</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-number" id="failed-tests" style="color: #b8422d;">0</div>
+        <div class="summary-label">Failed</div>
+      </div>
+    </div>
+    
+    <!-- Test Sections -->
+    <div class="test-section">
+      <h2>📦 Module Loading</h2>
+      <div id="module-tests"></div>
+    </div>
+    
+    <div class="test-section">
+      <h2>🔧 Core Functionality</h2>
+      <div id="core-tests"></div>
+    </div>
+    
+    <div class="test-section">
+      <h2>🗄️ Database & State</h2>
+      <div id="database-tests"></div>
+    </div>
+    
+    <div class="test-section">
+      <h2>🎨 UI Components</h2>
+      <div id="ui-tests"></div>
+    </div>
+    
+    <div class="test-section">
+      <h2>🤖 AI Features</h2>
+      <div id="ai-tests"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    // Test suite
+    const tests = {
+      moduleLoading: [
+        {
+          name: 'Config module loads',
+          description: 'Verify config.js exports required constants',
+          test: async () => {
+            const config = await import('./js/config.js');
+            if (!config.SUPABASE_URL) throw new Error('SUPABASE_URL not found');
+            if (!config.SUPABASE_ANON_KEY) throw new Error('SUPABASE_ANON_KEY not found');
+            if (!config.EDGE_FUNCTION_URL) throw new Error('EDGE_FUNCTION_URL not found');
+            return true;
+          }
+        },
+        {
+          name: 'State module loads',
+          description: 'Verify state.js exports AppState and functions',
+          test: async () => {
+            const state = await import('./js/state.js');
+            if (!state.AppState) throw new Error('AppState not found');
+            if (!state.load) throw new Error('load function not found');
+            if (!state.save) throw new Error('save function not found');
+            if (!state.initAutoSync) throw new Error('initAutoSync function not found');
+            return true;
+          }
+        },
+        {
+          name: 'Database module loads',
+          description: 'Verify database.js exports all CRUD functions',
+          test: async () => {
+            const db = await import('./js/database.js');
+            if (!db.saveProfile) throw new Error('saveProfile not found');
+            if (!db.loadProfile) throw new Error('loadProfile not found');
+            if (!db.saveAITutorHistory) throw new Error('saveAITutorHistory not found');
+            if (!db.loadAITutorHistory) throw new Error('loadAITutorHistory not found');
+            return true;
+          }
+        },
+        {
+          name: 'Lesson module loads',
+          description: 'Verify lesson.js exports required functions',
+          test: async () => {
+            const lesson = await import('./js/lesson.js');
+            if (!lesson.renderLessonScreen) throw new Error('renderLessonScreen not found');
+            if (!lesson.getCurrentUnitIndex) throw new Error('getCurrentUnitIndex not found');
+            return true;
+          }
+        },
+        {
+          name: 'Home module loads',
+          description: 'Verify home.js exports renderHomeScreen',
+          test: async () => {
+            const home = await import('./js/home.js');
+            if (!home.renderHomeScreen) throw new Error('renderHomeScreen not found');
+            return true;
+          }
+        },
+        {
+          name: 'AI Tutor module loads',
+          description: 'Verify ai-tutor.js exports required functions',
+          test: async () => {
+            const aiTutor = await import('./js/ai-tutor.js');
+            if (!aiTutor.initAITutor) throw new Error('initAITutor not found');
+            if (!aiTutor.renderAITutorPage) throw new Error('renderAITutorPage not found');
+            return true;
+          }
+        },
+        {
+          name: 'Focused Study module loads',
+          description: 'Verify focused-study.js exports renderFocusedStudyScreen',
+          test: async () => {
+            const focused = await import('./js/focused-study.js');
+            if (!focused.renderFocusedStudyScreen) throw new Error('renderFocusedStudyScreen not found');
+            return true;
+          }
+        },
+        {
+          name: 'Router module loads',
+          description: 'Verify router.js exports navigation functions',
+          test: async () => {
+            const router = await import('./js/router.js');
+            if (!router.initRouter) throw new Error('initRouter not found');
+            if (!router.navigateTo) throw new Error('navigateTo not found');
+            return true;
+          }
+        }
+      ],
+      
+      coreFunctionality: [
+        {
+          name: 'AppState initializes',
+          description: 'Verify AppState has correct structure',
+          test: async () => {
+            const { AppState } = await import('./js/state.js');
+            if (typeof AppState !== 'object') throw new Error('AppState is not an object');
+            if (!('user' in AppState)) throw new Error('user property missing');
+            if (!('profile' in AppState)) throw new Error('profile property missing');
+            if (!('aiTutorHistory' in AppState)) throw new Error('aiTutorHistory property missing');
+            if (!('preferences' in AppState)) throw new Error('preferences property missing');
+            return true;
+          }
+        },
+        {
+          name: 'Supabase client initializes',
+          description: 'Verify Supabase is available globally',
+          test: async () => {
+            if (!window.supabase) throw new Error('window.supabase not found');
+            if (typeof window.supabase.createClient !== 'function') {
+              throw new Error('supabase.createClient is not a function');
+            }
+            return true;
+          }
+        },
+        {
+          name: 'getCurrentUnitIndex works',
+          description: 'Verify lesson.js getCurrentUnitIndex returns a number',
+          test: async () => {
+            const { getCurrentUnitIndex } = await import('./js/lesson.js');
+            const { AppState } = await import('./js/state.js');
+            AppState.isAya = false;
+            AppState.unitProgress = {};
+            const index = getCurrentUnitIndex();
+            if (typeof index !== 'number') throw new Error('getCurrentUnitIndex did not return a number');
+            if (index !== 0) throw new Error(`Expected 0, got ${index}`);
+            return true;
+          }
+        },
+        {
+          name: 'Aya course data loads',
+          description: 'Verify aya-course.js has 60 phrases',
+          test: async () => {
+            const { AYA_UNITS } = await import('./js/data/aya-course.js');
+            if (!Array.isArray(AYA_UNITS)) throw new Error('AYA_UNITS is not an array');
+            const totalPhrases = AYA_UNITS.reduce((sum, unit) => sum + unit.phrases.length, 0);
+            if (totalPhrases !== 60) throw new Error(`Expected 60 phrases, got ${totalPhrases}`);
+            return true;
+          }
+        }
+      ],
+      
+      databaseState: [
+        {
+          name: 'Config exports correct values',
+          description: 'Verify config.js has valid Supabase credentials',
+          test: async () => {
+            const config = await import('./js/config.js');
+            if (!config.SUPABASE_URL.startsWith('https://')) {
+              throw new Error('SUPABASE_URL invalid');
+            }
+            if (!config.SUPABASE_ANON_KEY.startsWith('eyJ')) {
+              throw new Error('SUPABASE_ANON_KEY invalid format');
+            }
+            if (!config.EDGE_FUNCTION_URL.includes('/functions/v1/')) {
+              throw new Error('EDGE_FUNCTION_URL invalid');
+            }
+            return true;
+          }
+        },
+        {
+          name: 'Database functions exist',
+          description: 'Verify all new database functions are present',
+          test: async () => {
+            const db = await import('./js/database.js');
+            const requiredFunctions = [
+              'savePlacementResults', 'loadPlacementResults',
+              'saveAITutorHistory', 'loadAITutorHistory',
+              'saveUserPreferences', 'loadUserPreferences',
+              'saveUserStats', 'loadUserStats',
+              'saveProductionProgress', 'loadProductionProgress',
+              'saveInterleavingConfig', 'loadInterleavingConfig'
+            ];
+            
+            for (const fn of requiredFunctions) {
+              if (typeof db[fn] !== 'function') {
+                throw new Error(`${fn} not found or not a function`);
+              }
+            }
+            return true;
+          }
+        }
+      ],
+      
+      uiComponents: [
+        {
+          name: 'Home screen renders',
+          description: 'Verify home.js can render without errors',
+          test: async () => {
+            const { renderHomeScreen } = await import('./js/home.js');
+            const { AppState } = await import('./js/state.js');
+            
+            AppState.profile = { name: 'Test User', speaker_type: 'beginner' };
+            AppState.unitProgress = {};
+            
+            const container = document.createElement('div');
+            renderHomeScreen(container);
+            
+            if (!container.innerHTML) throw new Error('Home screen did not render');
+            if (!container.innerHTML.includes('Hello Test User')) {
+              throw new Error('User name not in home screen');
+            }
+            return true;
+          }
+        },
+        {
+          name: 'AI Tutor floating button initializes',
+          description: 'Verify initAITutor adds floating button to DOM',
+          test: async () => {
+            const { initAITutor } = await import('./js/ai-tutor.js');
+            const { AppState } = await import('./js/state.js');
+            
+            AppState.aiTutorHistory = [];
+            
+            // Remove existing button if present
+            const existing = document.getElementById('ai-tutor-float-btn');
+            if (existing) existing.remove();
+            
+            initAITutor();
+            
+            const button = document.getElementById('ai-tutor-float-btn');
+            if (!button) throw new Error('AI Tutor button not added to DOM');
+            if (!button.classList.contains('ai-tutor-floating-btn')) {
+              throw new Error('AI Tutor button missing correct class');
+            }
+            
+            return true;
+          }
+        }
+      ],
+      
+      aiFeatures: [
+        {
+          name: 'AI Tutor uses correct API key',
+          description: 'Verify AI Tutor imports SUPABASE_ANON_KEY from config',
+          test: async () => {
+            // Check the source code has the correct import
+            const response = await fetch('./js/ai-tutor.js');
+            const code = await response.text();
+            
+            if (!code.includes("import { SUPABASE_ANON_KEY")) {
+              throw new Error('AI Tutor does not import SUPABASE_ANON_KEY from config.js');
+            }
+            
+            if (code.includes('window.supabaseAnonKey')) {
+              throw new Error('AI Tutor still uses window.supabaseAnonKey (should use imported constant)');
+            }
+            
+            return true;
+          }
+        },
+        {
+          name: 'Focused Study uses correct API key',
+          description: 'Verify Focused Study imports SUPABASE_ANON_KEY from config',
+          test: async () => {
+            const response = await fetch('./js/focused-study.js');
+            const code = await response.text();
+            
+            if (!code.includes("import { SUPABASE_ANON_KEY")) {
+              throw new Error('Focused Study does not import SUPABASE_ANON_KEY from config.js');
+            }
+            
+            if (code.includes('window.supabaseAnonKey')) {
+              throw new Error('Focused Study still uses window.supabaseAnonKey');
+            }
+            
+            return true;
+          }
+        }
+      ]
+    };
+
+    // Test runner
+    let totalTests = 0;
+    let passedTests = 0;
+    let failedTests = 0;
+
+    function createTestItem(name, description) {
+      const item = document.createElement('div');
+      item.className = 'test-item';
+      item.innerHTML = `
+        <div class="status pending">⏳</div>
+        <div class="test-content">
+          <div class="test-name">${name}</div>
+          <div class="test-description">${description}</div>
+        </div>
+      `;
+      return item;
+    }
+
+    async function runTest(testItem, test) {
+      const statusEl = testItem.querySelector('.status');
+      const contentEl = testItem.querySelector('.test-content');
+      
+      try {
+        await test.test();
+        statusEl.className = 'status pass';
+        statusEl.textContent = '✓';
+        passedTests++;
+        return true;
+      } catch (error) {
+        statusEl.className = 'status fail';
+        statusEl.textContent = '✗';
+        
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-details';
+        errorDiv.textContent = error.message;
+        contentEl.appendChild(errorDiv);
+        
+        failedTests++;
+        return false;
+      }
+    }
+
+    async function runAllTests() {
+      const runButton = document.getElementById('run-tests');
+      const progress = document.getElementById('progress');
+      const progressBar = document.getElementById('progress-bar');
+      const summary = document.getElementById('summary');
+      
+      runButton.disabled = true;
+      progress.style.display = 'block';
+      summary.style.display = 'flex';
+      
+      totalTests = 0;
+      passedTests = 0;
+      failedTests = 0;
+      
+      // Count total tests
+      Object.values(tests).forEach(section => {
+        totalTests += section.length;
+      });
+      
+      let completedTests = 0;
+      
+      // Module Loading Tests
+      const moduleContainer = document.getElementById('module-tests');
+      moduleContainer.innerHTML = '';
+      for (const test of tests.moduleLoading) {
+        const item = createTestItem(test.name, test.description);
+        moduleContainer.appendChild(item);
+        await runTest(item, test);
+        completedTests++;
+        progressBar.style.width = `${(completedTests / totalTests) * 100}%`;
+        updateSummary();
+      }
+      
+      // Core Functionality Tests
+      const coreContainer = document.getElementById('core-tests');
+      coreContainer.innerHTML = '';
+      for (const test of tests.coreFunctionality) {
+        const item = createTestItem(test.name, test.description);
+        coreContainer.appendChild(item);
+        await runTest(item, test);
+        completedTests++;
+        progressBar.style.width = `${(completedTests / totalTests) * 100}%`;
+        updateSummary();
+      }
+      
+      // Database Tests
+      const dbContainer = document.getElementById('database-tests');
+      dbContainer.innerHTML = '';
+      for (const test of tests.databaseState) {
+        const item = createTestItem(test.name, test.description);
+        dbContainer.appendChild(item);
+        await runTest(item, test);
+        completedTests++;
+        progressBar.style.width = `${(completedTests / totalTests) * 100}%`;
+        updateSummary();
+      }
+      
+      // UI Tests
+      const uiContainer = document.getElementById('ui-tests');
+      uiContainer.innerHTML = '';
+      for (const test of tests.uiComponents) {
+        const item = createTestItem(test.name, test.description);
+        uiContainer.appendChild(item);
+        await runTest(item, test);
+        completedTests++;
+        progressBar.style.width = `${(completedTests / totalTests) * 100}%`;
+        updateSummary();
+      }
+      
+      // AI Tests
+      const aiContainer = document.getElementById('ai-tests');
+      aiContainer.innerHTML = '';
+      for (const test of tests.aiFeatures) {
+        const item = createTestItem(test.name, test.description);
+        aiContainer.appendChild(item);
+        await runTest(item, test);
+        completedTests++;
+        progressBar.style.width = `${(completedTests / totalTests) * 100}%`;
+        updateSummary();
+      }
+      
+      runButton.disabled = false;
+      runButton.textContent = 'Run Tests Again';
+    }
+
+    function updateSummary() {
+      document.getElementById('total-tests').textContent = totalTests;
+      document.getElementById('passed-tests').textContent = passedTests;
+      document.getElementById('failed-tests').textContent = failedTests;
+    }
+
+    // Auto-run on load
+    document.getElementById('run-tests').addEventListener('click', runAllTests);
+    
+    // Auto-run tests on page load
+    window.addEventListener('load', () => {
+      setTimeout(runAllTests, 500);
+    });
+  </script>
+</body>
+</html>
