@@ -19,7 +19,7 @@ export async function renderMyVocabScreen(container) {
   showLoading('Loading your vocabulary...');
   
   try {
-    const { words } = await loadPersonalVocab(AppState.email);
+    const { words } = await loadPersonalVocab(AppState.user.email);
     personalVocab = words;
     hideLoading();
     
@@ -133,7 +133,7 @@ function attachListViewListeners(container) {
   if (poolToggle) {
     poolToggle.addEventListener('change', async (e) => {
       try {
-        await toggleVocabPoolOptIn(AppState.email, e.target.checked);
+        await toggleVocabPoolOptIn(AppState.user.email, e.target.checked);
         AppState.profile.vocabPoolOptIn = e.target.checked;
         await save();
         showToast(e.target.checked ? 'Sharing enabled' : 'Sharing disabled');
@@ -161,7 +161,7 @@ function attachListViewListeners(container) {
       
       if (confirm(`Delete "${word.english}"?`)) {
         try {
-          await deletePersonalVocab(AppState.email, word.id);
+          await deletePersonalVocab(AppState.user.email, word.id);
           personalVocab.splice(index, 1);
           showToast('Word deleted');
           renderListView(container);
@@ -251,7 +251,7 @@ function attachAddFormListeners(container) {
           createdAt: new Date().toISOString()
         };
         
-        const savedWord = await savePersonalVocab(AppState.email, newWord);
+        const savedWord = await savePersonalVocab(AppState.user.email, newWord);
         personalVocab.push(savedWord);
         
         hideLoading();
@@ -482,7 +482,7 @@ export async function handleCSVImport(file) {
       showToast(`Imported ${imported} words!`);
       
       // Reload vocab screen
-      const container = document.querySelector('#app-container');
+      const container = document.querySelector('#app-root');
       if (container) {
         renderMyVocabScreen(container);
       }

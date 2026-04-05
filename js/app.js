@@ -71,7 +71,7 @@ function isOnboardingComplete() {
   // Required fields for onboarding completion
   return profile && 
          profile.name && 
-         profile.speakerType && 
+         profile.speaker_type && 
          profile.goals && 
          profile.goals.length > 0;
 }
@@ -139,7 +139,7 @@ export function onOnboardingComplete() {
   } else {
     // Check if user should take placement test
     if (AppState.profile.placementLevel === undefined && 
-        (AppState.profile.speakerType === 'heritage' || AppState.profile.speakerType === 'intermediate')) {
+        (AppState.profile.speaker_type === 'heritage' || AppState.profile.speaker_type === 'intermediate')) {
       // Suggest placement test but don't force it
       navigateTo('home');
     } else {

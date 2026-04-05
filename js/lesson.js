@@ -105,17 +105,6 @@ function renderPhrase(container, unit) {
         `}
       </div>
       ` : ''}
-      <div class="lesson-nav">
-        ${currentPhraseIndex > 0 ? `
-          <button class="btn-secondary" id="prev-btn">← Previous</button>
-        ` : '<div></div>'}
-        
-        ${currentPhraseIndex < unit.phrases.length - 1 ? `
-          <button class="btn-primary" id="next-btn">Next →</button>
-        ` : `
-          <button class="btn-primary" id="finish-btn">Start Quiz</button>
-        `}
-      </div>
     </div>
   `;
   
@@ -125,7 +114,9 @@ function renderPhrase(container, unit) {
 /**
  * Attach event listeners
  */
-function attachLessonListeners(container, unit, phrase) {
+function attachLessonListeners(container, unit) {
+  // Extract current phrase from unit
+  const phrase = unit.phrases[currentPhraseIndex];
   const isBeginner = AppState.profile.speaker_type === 'beginner';
   
   // Attach beginner listeners if needed

@@ -230,7 +230,7 @@ function renderSettingsTab() {
         </div>
         <div class="settings-item">
           <label>Email</label>
-          <p>${AppState.email || 'Guest'}</p>
+          <p>${AppState.user?.email || 'Guest'}</p>
         </div>
         <div class="settings-item">
           <label>Speaker Type</label>
@@ -374,14 +374,9 @@ function switchTab(tab, container) {
  */
 async function handleSignOut() {
   if (confirm('Are you sure you want to sign out?')) {
-    // Clear state
-    AppState.email = null;
-    AppState.userId = null;
-    AppState.isAya = false;
-    
-    // Clear localStorage
-    localStorage.removeItem('arabic_app_email');
-    localStorage.removeItem('arabic_app_v3');
+    // Clear state using proper reset function
+    const { reset } = await import('./state.js');
+    await reset();
     
     // Navigate to login
     import('./router.js').then(({ navigateTo }) => navigateTo('login'));
