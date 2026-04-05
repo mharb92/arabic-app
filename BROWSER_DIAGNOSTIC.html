@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Browser Diagnostic</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #1e1e1e; color: #d4d4d4; }
+        .pass { color: #4ec9b0; }
+        .fail { color: #f48771; }
+        pre { background: #252526; padding: 10px; overflow-x: auto; font-size: 11px; }
+    </style>
+</head>
+<body>
+    <h1>🔬 Browser-Specific Diagnostic</h1>
+    <div id="results"></div>
+    
+    <script type="module">
+        const results = document.getElementById('results');
+        
+        function log(msg, type = 'info') {
+            const className = type === 'pass' ? 'pass' : type === 'fail' ? 'fail' : '';
+            results.innerHTML += `<p class="${className}">${msg}</p>`;
+        }
+        
+        // Test 1: Browser info
+        log(`<h3>Browser Info:</h3>`);
+        log(`User Agent: ${navigator.userAgent}`);
+        log(`Platform: ${navigator.platform}`);
+        log(``);
+        
+        // Test 2: Try to load database.js and catch EXACT error
+        log(`<h3>Loading database.js with detailed error:</h3>`);
+        try {
+            const module = await import('./js/database.js');
+            log('✓ database.js loaded successfully', 'pass');
+            log(`Exports: ${Object.keys(module).join(', ')}`);
+        } catch (error) {
+            log('✗ database.js failed to load', 'fail');
+            log(`Error type: ${error.constructor.name}`);
+            log(`Error message: ${error.message}`);
+            
+            // Show stack with line numbers
+            if (error.stack) {
+                log(`<pre>${error.stack}</pre>`);
+            }
+            
+            // Try to get more details
+            if (error.fileName) log(`File: ${error.fileName}`);
+            if (error.lineNumber) log(`Line: ${error.lineNumber}`);
+            if (error.columnNumber) log(`Column: ${error.columnNumber}`);
+        }
+        
+        log(``);
+        log(`<h3>Attempting manual fetch and eval:</h3>`);
+        
+        // Test 3: Fetch the file and try to identify the problem
+        try {
+            const response = await fetch('./js/database.js');
+            const text = await response.text();
+            
+            log(`Fetched ${text.length} characters`);
+            log(`First 100 chars: ${text.substring(0, 100)}`);
+            log(`Last 100 chars: ${text.substring(text.length - 100)}`);
+            
+            // Check for BOM
+            const firstChar = text.charCodeAt(0);
+            if (firstChar === 0xFEFF) {
+                log('⚠️ File has BOM (Byte Order Mark)', 'fail');
+            }
+            
+            // Try to parse it
+            log(``);
+            log(`Attempting to create a module blob...`);
+            const blob = new Blob([text], { type: 'application/javascript; charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            
+            try {
+                await import(url);
+                log('✓ Blob import succeeded!', 'pass');
+            } catch (blobError) {
+                log('✗ Blob import failed', 'fail');
+                log(`${blobError.message}`);
+                log(`<pre>${blobError.stack}</pre>`);
+            }
+            
+        } catch (fetchError) {
+            log(`Fetch error: ${fetchError.message}`, 'fail');
+        }
+    </script>
+</body>
+</html>
