@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Deployment Validation Test</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #1e1e1e; color: #d4d4d4; }
+        .pass { color: #4ec9b0; }
+        .fail { color: #f48771; }
+        pre { background: #252526; padding: 10px; border-radius: 4px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Deployment Validation Test</h1>
+    <div id="results"></div>
+    
+    <script type="module">
+        const results = document.getElementById('results');
+        
+        function log(msg, status = 'info') {
+            const className = status === 'pass' ? 'pass' : status === 'fail' ? 'fail' : '';
+            results.innerHTML += `<p class="${className}">${status === 'pass' ? '✓' : status === 'fail' ? '✗' : 'ℹ'} ${msg}</p>`;
+        }
+        
+        async function runTests() {
+            log('Starting deployment validation...');
+            log('');
+            
+            // Test 1: Check if files are accessible
+            log('TEST 1: File Accessibility', 'info');
+            const files = [
+                'js/database.js',
+                'js/lesson.js',
+                'js/state.js',
+                'js/config.js'
+            ];
+            
+            for (const file of files) {
+                try {
+                    const response = await fetch(`./${file}`);
+                    if (response.ok) {
+                        const contentType = response.headers.get('content-type');
+                        log(`${file}: ${response.status} (${contentType})`, 'pass');
+                    } else {
+                        log(`${file}: ${response.status} ${response.statusText}`, 'fail');
+                    }
+                } catch (e) {
+                    log(`${file}: Fetch error - ${e.message}`, 'fail');
+                }
+            }
+            
+            log('');
+            log('TEST 2: Module Import Test', 'info');
+            
+            // Test 2: Try to import each module individually
+            const modules = [
+                { path: './js/config.js', name: 'config' },
+                { path: './js/database.js', name: 'database' },
+                { path: './js/state.js', name: 'state' },
+                { path: './js/lesson.js', name: 'lesson' }
+            ];
+            
+            for (const mod of modules) {
+                try {
+                    const imported = await import(mod.path);
+                    log(`${mod.name}: Imported successfully (${Object.keys(imported).length} exports)`, 'pass');
+                } catch (e) {
+                    log(`${mod.name}: Import failed`, 'fail');
+                    log(`Error: ${e.message}`, 'fail');
+                    results.innerHTML += `<pre>${e.stack}</pre>`;
+                }
+            }
+            
+            log('');
+            log('TEST 3: Function Availability', 'info');
+            
+            // Test 3: Check if specific functions exist
+            try {
+                const db = await import('./js/database.js');
+                const checks = [
+                    ['loadPhrasesMastery', db.loadPhrasesMastery],
+                    ['updatePhraseMastery', db.updatePhraseMastery],
+                    ['savePhrasesMastery', db.savePhrasesMastery]
+                ];
+                
+                for (const [name, func] of checks) {
+                    if (typeof func === 'function') {
+                        log(`database.${name}() exists`, 'pass');
+                    } else {
+                        log(`database.${name}() missing or not a function`, 'fail');
+                    }
+                }
+            } catch (e) {
+                log(`Cannot check functions: ${e.message}`, 'fail');
+            }
+            
+            log('');
+            log('Tests complete!');
+        }
+        
+        runTests();
+    </script>
+</body>
+</html>

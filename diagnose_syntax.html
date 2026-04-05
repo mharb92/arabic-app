@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head><title>Syntax Diagnosis</title></head>
+<body>
+<h1>Testing Module Imports</h1>
+<div id="results"></div>
+<script type="module">
+const results = document.getElementById('results');
+
+async function testImport(modulePath) {
+  try {
+    await import(modulePath);
+    results.innerHTML += `<p style="color:green">✓ ${modulePath} loaded successfully</p>`;
+    return true;
+  } catch (error) {
+    results.innerHTML += `<p style="color:red">✗ ${modulePath} failed: ${error.message}</p>`;
+    results.innerHTML += `<pre style="color:red;font-size:10px">${error.stack}</pre>`;
+    return false;
+  }
+}
+
+// Test each module in order
+(async () => {
+  results.innerHTML = '<h2>Testing module imports...</h2>';
+  
+  await testImport('./js/config.js');
+  await testImport('./js/database.js');
+  await testImport('./js/state.js');
+  await testImport('./js/lesson.js');
+  await testImport('./js/flashcards.js');
+  await testImport('./js/my-vocab.js');
+  
+  results.innerHTML += '<h2>Done!</h2>';
+})();
+</script>
+</body>
+</html>
