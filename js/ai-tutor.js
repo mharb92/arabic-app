@@ -117,21 +117,31 @@ function openQuickTutor() {
  * Render chat messages
  */
 function renderChatMessages() {
-  return chatHistory.map(msg => `
-    <div class="chat-message chat-message-${msg.role}">
-      <div class="message-content">
-        ${msg.content}
-        ${msg.role === 'assistant' ? extractArabicButtons(msg.content) : ''}
+  if (!chatHistory || chatHistory.length === 0) return '';
+  
+  return chatHistory.map(msg => {
+    // Skip messages without content
+    if (!msg || !msg.content) return '';
+    
+    return `
+      <div class="chat-message chat-message-${msg.role || 'user'}">
+        <div class="message-content">
+          ${msg.content}
+          ${msg.role === 'assistant' ? extractArabicButtons(msg.content) : ''}
+        </div>
+        <div class="message-timestamp">${formatTimestamp(msg.timestamp)}</div>
       </div>
-      <div class="message-timestamp">${formatTimestamp(msg.timestamp)}</div>
-    </div>
-  `).join('');
+    `;
+  }).filter(Boolean).join('');
 }
 
 /**
  * Extract Arabic text and add audio buttons
  */
 function extractArabicButtons(content) {
+  // Handle undefined or null content
+  if (!content || typeof content !== 'string') return '';
+  
   // Regex to find Arabic text
   const arabicRegex = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]+/g;
   const matches = content.match(arabicRegex);
