@@ -313,8 +313,8 @@ function renderPracticePhase(container, unit) {
       `;
       feedbackDiv.style.display = 'block';
       
-      // Update mastery
-      updatePhraseMastery(AppState.user.email, phrase.ar, true, 0);
+      // Update mastery - correct answer increases score
+      updatePhraseMastery(AppState.user.email, phrase.ar, phrase.en, Math.min(100, 80));
       
       // Remove from queue and continue
       practiceQueue.shift();
@@ -333,8 +333,8 @@ function renderPracticePhase(container, unit) {
       `;
       feedbackDiv.style.display = 'block';
       
-      // Update mastery
-      updatePhraseMastery(AppState.user.email, phrase.ar, false, 0);
+      // Update mastery - incorrect answer lowers score
+      updatePhraseMastery(AppState.user.email, phrase.ar, phrase.en, 20);
       
       // Re-queue this phrase 2 positions later (error correction)
       const incorrectPhrase = practiceQueue.shift();
@@ -494,13 +494,3 @@ async function finishLesson(container, unit) {
   });
 }
 
-/**
- * Back button handler
- */
-document.addEventListener('click', (e) => {
-  if (e.target.id === 'back-btn') {
-    if (confirm('Leave lesson? Progress will not be saved.')) {
-      import('./router.js').then(({ navigateTo }) => navigateTo('home'));
-    }
-  }
-});

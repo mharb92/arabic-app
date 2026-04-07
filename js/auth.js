@@ -1,4 +1,4 @@
-import { AppState, setUser, load } from './state.js';
+import { AppState, setUser } from './state.js';
 import { checkSpecialCourse } from './database.js';
 import { saveLocal, loadLocal } from './storage.js';
 
@@ -6,8 +6,8 @@ export async function initAuth() {
   const storedEmail = loadLocal('arabic_app_email');
   if (!storedEmail) return { loggedIn: false };
   
+  // Just set user — load() already called by app.js
   setUser({ id: storedEmail, email: storedEmail });
-  await load();
   
   return { loggedIn: true };
 }

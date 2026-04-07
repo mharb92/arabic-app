@@ -8,7 +8,7 @@ import { AppState, save } from './state.js';
 import { saveAITutorHistory, loadAITutorHistory } from './database.js';
 import { speakArabic } from './utils/audio.js';
 import { showError, showToast, showLoading, hideLoading } from './utils/ui.js';
-import { SUPABASE_ANON_KEY, EDGE_FUNCTION_URL } from './config.js';
+import { SUPABASE_ANON_KEY, EDGE_FUNCTION_URL, CLAUDE_MODEL } from './config.js';
 
 // Chat state
 let chatHistory = []; // Array of {role: 'user' | 'assistant', content: string, timestamp: string}
@@ -384,9 +384,10 @@ async function callClaudeAPI(systemPrompt, userMessage) {
       'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
     },
     body: JSON.stringify({
+      model: CLAUDE_MODEL,
+      max_tokens: 1000,
       system: systemPrompt,
-      prompt: userMessage,
-      max_tokens: 1000
+      messages: [{ role: 'user', content: userMessage }]
     })
   });
   
@@ -395,7 +396,7 @@ async function callClaudeAPI(systemPrompt, userMessage) {
   }
   
   const data = await response.json();
-  return data.response;
+  return data.content?.[0]?.text || data.response || '';
 }
 
 /**

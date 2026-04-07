@@ -86,7 +86,7 @@ function renderHeroSection() {
       <img class="mascot" src="${HOOPOE_ICONS.mascot}" alt="Hoopoe mascot" />
       ${isAya
         ? '<div class="greeting">&#x645;&#x631;&#x62D;&#x628;&#x627; &#x64A;&#x627; &#x622;&#x64A;&#x629; &#x1F339;</div><div class="countdown">' + getCountdownMessage() + '</div>'
-        : '<div class="greeting-en">Welcome back' + (displayName ? ', ' + displayName : '') + '!</div><div class="greeting">&#x623;&#x647;&#x644;&#x627;&#x8B; &#x648;&#x633;&#x647;&#x644;&#x627;&#x8B;</div>'
+        : '<div class="greeting-en">Welcome back' + (displayName ? ', ' + displayName : '') + '!</div><div class="greeting">أهلاً وسهلاً</div>'
       }
     </div>
   `;

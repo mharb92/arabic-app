@@ -25,7 +25,7 @@ let userAnswers = [];
  */
 export function renderQuizScreen(container) {
   const units = AppState.isAya ? AYA_UNITS : UNITS;
-  const progress = AppState.profile.unitProgress || {};
+  const progress = AppState.unitProgress || {};
   
   // Get unit index from lesson or find first unmastered
   currentUnitIndex = getCurrentUnitIndex();
@@ -188,10 +188,10 @@ function checkAnswer(container, unit, phrase, userAnswer) {
     correctCount++;
   } else {
     // Track weak word
-    if (!AppState.profile.weakWords) AppState.profile.weakWords = [];
+    if (!AppState.weakWords) AppState.weakWords = [];
     const phraseId = `unit${currentUnitIndex + 1}_phrase${currentQuestionIndex + 1}`;
-    if (!AppState.profile.weakWords.includes(phraseId)) {
-      AppState.profile.weakWords.push(phraseId);
+    if (!AppState.weakWords.includes(phraseId)) {
+      AppState.weakWords.push(phraseId);
     }
   }
   
@@ -254,34 +254,34 @@ async function showResults(container, unit) {
   let passed = percentage >= threshold;
   
   // Update progress
-  if (!AppState.profile.unitProgress) AppState.profile.unitProgress = {};
-  if (!AppState.profile.unitProgress[unitId]) {
-    AppState.profile.unitProgress[unitId] = { stage: 1, consec: 0, mastered: false };
+  if (!AppState.unitProgress) AppState.unitProgress = {};
+  if (!AppState.unitProgress[unitId]) {
+    AppState.unitProgress[unitId] = { stage: 1, consec: 0, mastered: false };
   }
   
   if (passed) {
     if (currentStage === 3 && !isAya) {
       // Stage 3: Need 2 consecutive passes
-      AppState.profile.unitProgress[unitId].consec++;
-      if (AppState.profile.unitProgress[unitId].consec >= 2) {
-        AppState.profile.unitProgress[unitId].mastered = true;
+      AppState.unitProgress[unitId].consec++;
+      if (AppState.unitProgress[unitId].consec >= 2) {
+        AppState.unitProgress[unitId].mastered = true;
       }
     } else if (currentStage === 2 && isAya) {
       // Aya Stage 2: Mastered
-      AppState.profile.unitProgress[unitId].mastered = true;
+      AppState.unitProgress[unitId].mastered = true;
     } else {
       // Advance to next stage
-      AppState.profile.unitProgress[unitId].stage = currentStage + 1;
-      AppState.profile.unitProgress[unitId].consec = 0;
+      AppState.unitProgress[unitId].stage = currentStage + 1;
+      AppState.unitProgress[unitId].consec = 0;
     }
   } else {
     // Reset consecutive count
-    AppState.profile.unitProgress[unitId].consec = 0;
+    AppState.unitProgress[unitId].consec = 0;
   }
   
   await save();
   
-  const isMastered = AppState.profile.unitProgress[unitId].mastered;
+  const isMastered = AppState.unitProgress[unitId].mastered;
   
   container.innerHTML = `
     <div class="quiz-results">

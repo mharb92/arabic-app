@@ -67,6 +67,18 @@ export const UNITS = [
         rom: 'allah yisalmak', 
         en: 'goodbye (response)',
         context: 'Response to ma\'a as-salama'
+      },
+      { 
+        ar: 'السلام عليكم', 
+        rom: 'as-salamu alaykum', 
+        en: 'peace be upon you',
+        context: 'Formal/religious greeting'
+      },
+      { 
+        ar: 'وعليكم السلام', 
+        rom: 'wa alaykum as-salam', 
+        en: 'and upon you peace',
+        context: 'Response to as-salamu alaykum'
       }
     ]
   }

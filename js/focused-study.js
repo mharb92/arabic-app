@@ -8,7 +8,7 @@ import { FOCUSED_CONTEXTS } from './data/focused-contexts.js';
 import { saveFocusedSession, loadFocusedSessions, upsertPersonalVocab } from './database.js';
 import { speakArabic } from './utils/audio.js';
 import { showError, showToast, showLoading, hideLoading } from './utils/ui.js';
-import { EDGE_FUNCTION_URL, SUPABASE_ANON_KEY } from './config.js';
+import { EDGE_FUNCTION_URL, SUPABASE_ANON_KEY, CLAUDE_MODEL } from './config.js';
 import { UNITS } from './data/units.js';
 import { AYA_UNITS } from './data/aya-course.js';
 
@@ -163,7 +163,10 @@ async function generateCustomContext(container, topic) {
         'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
       },
       body: JSON.stringify({
-        prompt: `Generate 8 useful Palestinian Arabic phrases for the topic: "${topic}". 
+        model: CLAUDE_MODEL,
+        max_tokens: 1500,
+        system: 'You are a Palestinian Arabic language expert. Return ONLY valid JSON arrays with no markdown or explanation.',
+        messages: [{ role: 'user', content: `Generate 8 useful Palestinian Arabic phrases for the topic: "${topic}". 
         
 Return ONLY a JSON array (no markdown, no explanation) with this exact structure:
 [
@@ -171,8 +174,7 @@ Return ONLY a JSON array (no markdown, no explanation) with this exact structure
   ...
 ]
 
-Make phrases natural, conversational, and specifically useful for "${topic}". Use Palestinian Arabic dialect.`,
-        max_tokens: 1500
+Make phrases natural, conversational, and specifically useful for "${topic}". Use Palestinian Arabic dialect.` }]
       })
     });
     
@@ -186,7 +188,7 @@ Make phrases natural, conversational, and specifically useful for "${topic}". Us
     let phrases;
     try {
       // Claude might wrap in markdown code blocks, so clean it
-      const cleaned = data.response
+      const cleaned = (data.content?.[0]?.text || data.response || '')
         .replace(/```json\n?/g, '')
         .replace(/```\n?/g, '')
         .trim();
