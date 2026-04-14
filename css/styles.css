@@ -3159,12 +3159,12 @@ textarea[dir="rtl"] {
   position: fixed;
   bottom: 2rem;
   right: 2rem;
-  width: 60px;
-  height: 60px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
-  border: none;
-  font-size: 1.75rem;
+  background: none;
+  border: 2px solid var(--gold);
+  padding: 0;
   cursor: pointer;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
   transition: all 0.3s ease;

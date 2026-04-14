@@ -15,7 +15,13 @@ export function saveLocal(key, data) {
 export function loadLocal(key, defaultValue = null) {
   try {
     const data = localStorage.getItem(key);
-    return data ? JSON.parse(data) : defaultValue;
+    if (data === null) return defaultValue;
+    try {
+      return JSON.parse(data);
+    } catch {
+      // Legacy value stored as raw string (not JSON-encoded) — return as-is
+      return data;
+    }
   } catch (error) {
     console.error('localStorage load error:', error);
     return defaultValue;

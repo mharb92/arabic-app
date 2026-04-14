@@ -38,7 +38,31 @@ function addFloatingButton() {
   const floatingBtn = document.createElement('button');
   floatingBtn.id = 'ai-tutor-float-btn';
   floatingBtn.className = 'ai-tutor-floating-btn';
-  floatingBtn.innerHTML = '💬';
+  floatingBtn.innerHTML = `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" width="52" height="52">
+    <circle cx="40" cy="40" r="38" fill="#1a6b50" stroke="#c4973a" stroke-width="2"/>
+    <!-- Crown/crest -->
+    <line x1="36" y1="12" x2="36" y2="20" stroke="#c4973a" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="40" y1="10" x2="40" y2="20" stroke="#c4973a" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="44" y1="12" x2="44" y2="20" stroke="#c4973a" stroke-width="2.5" stroke-linecap="round"/>
+    <!-- Head -->
+    <circle cx="40" cy="28" r="10" fill="#c4973a"/>
+    <!-- Eye -->
+    <circle cx="44" cy="26" r="2" fill="#4dd9d6"/>
+    <!-- Beak -->
+    <polygon points="50,28 60,30 50,32" fill="#c4973a"/>
+    <!-- Body -->
+    <ellipse cx="38" cy="46" rx="14" ry="16" fill="#c4973a"/>
+    <!-- Wing -->
+    <ellipse cx="30" cy="44" rx="8" ry="12" fill="#9d7422" transform="rotate(-15,30,44)"/>
+    <!-- Tail -->
+    <polygon points="24,56 16,64 28,60" fill="#c4973a"/>
+    <!-- Legs -->
+    <line x1="34" y1="60" x2="34" y2="68" stroke="#9d7422" stroke-width="2" stroke-linecap="round"/>
+    <line x1="42" y1="60" x2="42" y2="68" stroke="#9d7422" stroke-width="2" stroke-linecap="round"/>
+    <!-- Feet -->
+    <line x1="30" y1="68" x2="38" y2="68" stroke="#9d7422" stroke-width="2" stroke-linecap="round"/>
+    <line x1="38" y1="68" x2="46" y2="68" stroke="#9d7422" stroke-width="2" stroke-linecap="round"/>
+  </svg>`;
   floatingBtn.setAttribute('aria-label', 'Open AI Tutor');
   
   floatingBtn.addEventListener('click', () => {
