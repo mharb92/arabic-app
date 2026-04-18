@@ -16,7 +16,6 @@ import { renderFocusedStudyScreen } from './focused-study.js';
 import { renderMyVocabScreen } from './my-vocab.js';
 import { renderPushPromptScreen } from './push.js';
 import { renderAITutorPage } from './ai-tutor.js';
-import { renderGenerationScreen } from './generation.js';
 
 let currentRoute = null;
 let appContainer = null;
@@ -82,16 +81,6 @@ export function navigateTo(route, params = {}) {
       
     case 'ai-tutor':
       renderAITutorPage(appContainer);
-      break;
-      
-    // Unit generation
-    case 'generating':
-      renderGenerationScreen(appContainer, (success) => {
-        if (success) {
-          navigateTo('home');
-        }
-        // If failed, generation.js shows its own offline/retry UI
-      });
       break;
       
     // Aya's routes

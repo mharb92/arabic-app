@@ -3,7 +3,9 @@
  * Hoopoe flashcard styling, flip button, audio button
  */
 
-import { AppState, save, getAllUnits } from './state.js';
+import { AppState, save } from './state.js';
+import { UNITS } from './data/units.js';
+import { AYA_UNITS } from './data/aya-course.js';
 import { speakArabic } from './utils/audio.js';
 import { showToast } from './utils/ui.js';
 
@@ -13,7 +15,7 @@ let isFlipped = false;
 let studyMode = 'weak_to_strong';
 
 export function renderFlashcardsScreen(container) {
-  const units = getAllUnits();
+  const units = AppState.isAya ? AYA_UNITS : UNITS;
 
   // Build deck from current unit phrases
   flashcardDeck = buildSimpleDeck(units);
@@ -34,7 +36,7 @@ function buildSimpleDeck(units) {
   let currentUnitIndex = 0;
   for (let i = 0; i < units.length; i++) {
     const unitId = units[i].id;
-    if (!progress[unitId] || !progress[unitId].mastered) {
+    if (!progress[unitId] || progress[unitId].stage !== 'mastered') {
       currentUnitIndex = i;
       break;
     }
@@ -103,7 +105,7 @@ function renderCard(container) {
   const card = flashcardDeck[currentCardIndex];
   const arabic = card.ar || card.arabic || '';
   const english = card.en || card.english || '';
-  const roman = card.rom || card.roman || card.transliteration || card.romanization || '';
+  const roman = card.roman || card.transliteration || card.romanization || '';
   const progress = ((currentCardIndex + 1) / flashcardDeck.length) * 100;
 
   container.innerHTML = `

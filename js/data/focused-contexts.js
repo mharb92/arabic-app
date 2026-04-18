@@ -41,7 +41,7 @@ export const FOCUSED_CONTEXTS = [
       { ar: 'الأكل طيب كتير', rom: 'al-akl tayyib kteer', en: 'the food is very good', context: 'Complimenting food' },
       { ar: 'شو بدك تاكل؟', rom: 'shu biddak takul?', en: 'what do you want to eat?', context: 'Asking what someone wants' },
       { ar: 'انا شبعت', rom: 'ana shaba\'t', en: 'I\'m full', context: 'Saying you\'re full' },
-      { ar: 'يسلمو إيديكي', rom: 'yislamu idayki', en: 'bless your hands', context: 'Thanking cook (to a woman)' },
+      { ar: 'يسلمو إيديكي', rom: 'yislamو idayki', en: 'bless your hands', context: 'Thanking cook (to a woman)' },
       { ar: 'تفضل', rom: 'tafaddal', en: 'please, go ahead', context: 'Offering food (to a man)' },
       { ar: 'تفضلي', rom: 'tafaddali', en: 'please, go ahead', context: 'Offering food (to a woman)' }
     ]

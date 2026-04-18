@@ -3,12 +3,14 @@
  * Pre-defined contexts + AI-generated custom topic sessions
  */
 
-import { AppState, save, getAllUnits } from './state.js';
+import { AppState, save } from './state.js';
 import { FOCUSED_CONTEXTS } from './data/focused-contexts.js';
 import { saveFocusedSession, loadFocusedSessions, upsertPersonalVocab } from './database.js';
 import { speakArabic } from './utils/audio.js';
 import { showError, showToast, showLoading, hideLoading } from './utils/ui.js';
 import { EDGE_FUNCTION_URL, SUPABASE_ANON_KEY, CLAUDE_MODEL } from './config.js';
+import { UNITS } from './data/units.js';
+import { AYA_UNITS } from './data/aya-course.js';
 
 let currentContext = null;
 let currentPhraseIndex = 0;
@@ -17,11 +19,11 @@ let currentPhraseIndex = 0;
  * Render focused study home (context selection + custom input)
  */
 export function renderFocusedStudyScreen(container) {
-  const units = getAllUnits();
+  const units = AppState.isAya ? AYA_UNITS : UNITS;
   const progress = AppState.unitProgress || {};
   let currentUnitIndex = 0;
   for (let i = 0; i < units.length; i++) {
-    if (!progress[units[i].id] || !progress[units[i].id].mastered) {
+    if (!progress[units[i].id] || progress[units[i].id].stage !== 'mastered') {
       currentUnitIndex = i;
       break;
     }
@@ -104,11 +106,11 @@ function attachFocusedStudyListeners(container) {
   const todayBtn = container.querySelector('#todays-practice-btn');
   if (todayBtn) {
     todayBtn.addEventListener('click', () => {
-      const units = getAllUnits();
+      const units = AppState.isAya ? AYA_UNITS : UNITS;
       const progress = AppState.unitProgress || {};
       let idx = 0;
       for (let i = 0; i < units.length; i++) {
-        if (!progress[units[i].id] || !progress[units[i].id].mastered) { idx = i; break; }
+        if (!progress[units[i].id] || progress[units[i].id].stage !== 'mastered') { idx = i; break; }
       }
       const unit = units[idx];
       const ctx = { name: "Today's Practice", icon: '☀️', phrases: unit.phrases || [], topic: unit.title };
@@ -236,7 +238,7 @@ function startPracticeSession(container, context) {
   if (AppState.user && AppState.user.email && context.phrases && context.phrases.length > 0) {
     const entries = context.phrases.map(p => ({
       arabic: p.ar || p.arabic || '',
-      romanization: p.rom || p.roman || p.romanization || '',
+      transliteration: p.rom || p.roman || p.transliteration || p.romanization || '',
       english: p.en || p.english || '',
       mastery_score: 0,
       is_dialect: true,
@@ -252,10 +254,10 @@ function startPracticeSession(container, context) {
   // Save session
   if (AppState.user && AppState.user.email) {
     saveFocusedSession(AppState.user.email, {
-      context: context.name + (context.isCustom ? ' (custom)' : ''),
-      phrases_practiced: context.phrases.length,
-      correct_count: 0,
-      completed_at: new Date().toISOString()
+      contextName: context.name,
+      isCustom: context.isCustom || false,
+      phrasesCount: context.phrases.length,
+      timestamp: new Date().toISOString()
     }).catch(() => {});
   }
 

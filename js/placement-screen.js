@@ -458,7 +458,7 @@ async function finishPlacement(container) {
         .filter(a => a.arabic && a.english)
         .map(a => ({
           arabic: a.arabic,
-          romanization: a.romanization || '',
+          transliteration: a.romanization || '',
           english: a.english,
           mastery_score: a.correct ? 80 : 20,
           is_dialect: true,

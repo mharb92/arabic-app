@@ -3,7 +3,9 @@
  * Browse and search all learned phrases
  */
 
-import { AppState, save, getAllUnits } from './state.js';
+import { AppState, save } from './state.js';
+import { UNITS } from './data/units.js';
+import { AYA_UNITS } from './data/aya-course.js';
 import { speakArabic } from './utils/audio.js';
 
 let searchQuery = '';
@@ -13,7 +15,7 @@ let filteredPhrases = [];
  * Render vocabulary browser
  */
 export function renderVocabScreen(container) {
-  const units = getAllUnits();
+  const units = AppState.isAya ? AYA_UNITS : UNITS;
   const allPhrases = getAllPhrases(units);
   
   filteredPhrases = searchQuery ? 

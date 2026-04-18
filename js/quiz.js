@@ -5,7 +5,9 @@
  * Stage 3: Bare script (80% × 2 consecutive)
  */
 
-import { AppState, save, getAllUnits } from './state.js';
+import { AppState, save } from './state.js';
+import { UNITS } from './data/units.js';
+import { AYA_UNITS } from './data/aya-course.js';
 import { getCurrentUnitIndex } from './lesson.js';
 import { speakArabic } from './utils/audio.js';
 import { handleInputDirection } from './utils/rtl.js';
@@ -22,18 +24,18 @@ let userAnswers = [];
  * Render quiz screen
  */
 export function renderQuizScreen(container) {
-  const units = getAllUnits();
+  const units = AppState.isAya ? AYA_UNITS : UNITS;
   const progress = AppState.unitProgress || {};
   
   // Get unit index from lesson or find first unmastered
   currentUnitIndex = getCurrentUnitIndex();
-  const unit = units[currentUnitIndex];
-  const unitId = unit.id;
+  const unitId = `unit${currentUnitIndex + 1}`;
   const unitProgress = progress[unitId] || { stage: 1, consec: 0, mastered: false };
   
   currentStage = unitProgress.stage || 1;
   
   // Prepare quiz phrases
+  const unit = units[currentUnitIndex];
   quizPhrases = shuffleArray([...unit.phrases]);
   currentQuestionIndex = 0;
   correctCount = 0;
@@ -245,7 +247,7 @@ function showFeedback(container, unit, phrase, isCorrect, expectedAnswer) {
 async function showResults(container, unit) {
   const isAya = AppState.isAya;
   const percentage = Math.round((correctCount / quizPhrases.length) * 100);
-  const unitId = unit.id;
+  const unitId = `unit${currentUnitIndex + 1}`;
   
   // Determine if passed
   let threshold = isAya ? 75 : (currentStage === 3 ? 80 : 75);

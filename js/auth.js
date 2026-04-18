@@ -1,4 +1,4 @@
-import { AppState, setUser, load } from './state.js';
+import { AppState, setUser } from './state.js';
 import { checkSpecialCourse } from './database.js';
 import { saveLocal, loadLocal } from './storage.js';
 

@@ -41,7 +41,7 @@ export const AYA_UNITS = [
       { ar: 'انتو عائلة حلوة كتير', rom: 'intu \'a\'ila helwa kteer', en: 'you\'re a very nice family', context: 'A compliment they will love' },
       { ar: 'مروان حكالي عنكم', rom: 'Marwan hakali \'ankum', en: 'Marwan told me about you', context: 'Shows you care' },
       { ar: 'انا مبسوطة كتير إني هون', rom: 'ana mabsoota kteer inni hawn', en: 'I\'m very happy to be here', context: 'From your heart' },
-      { ar: 'بيتكم حلو', rom: 'baytkum helo', en: 'your house is beautiful', context: 'A kind compliment' },
+      { ar: 'بيتكم حلو', rom: 'baytkum helو', en: 'your house is beautiful', context: 'A kind compliment' },
       { ar: 'فلسطين حلوة كتير', rom: 'Falasteen helwa kteer', en: 'Palestine is very beautiful', context: 'They will be touched' }
     ]
   },

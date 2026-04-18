@@ -3,7 +3,9 @@
  * Adaptive card system with mascot icons, hero section, and fixed bugs
  */
 
-import { AppState, save, getAllUnits, needsUnitGeneration } from './state.js';
+import { AppState, save } from './state.js';
+import { UNITS } from './data/units.js';
+import { AYA_UNITS } from './data/aya-course.js';
 import { getCountdownMessage } from './utils/date.js';
 import { showToast } from './utils/ui.js';
 import { HOOPOE_ICONS } from './data/hoopoe-icons.js';
@@ -11,26 +13,13 @@ import { HOOPOE_ICONS } from './data/hoopoe-icons.js';
 let currentTab = 'home';
 
 export function renderHomeScreen(container) {
-  const units = getAllUnits();
+  const units = AppState.isAya ? AYA_UNITS : UNITS;
   const progress = AppState.unitProgress || {};
-
-  // Check if heritage/standard user needs to generate units
-  if (needsUnitGeneration()) {
-    // Placement done but no units yet — trigger generation
-    import('./router.js').then(({ navigateTo }) => navigateTo('generating'));
-    return;
-  }
-
-  // If no units available at all (heritage user, no placement yet)
-  if (units.length === 0) {
-    renderNoUnitsHome(container);
-    return;
-  }
 
   let currentUnitIndex = 0;
   for (let i = 0; i < units.length; i++) {
     const unitId = units[i].id;
-    if (!progress[unitId] || !progress[unitId].mastered) {
+    if (!progress[unitId] || progress[unitId].stage !== 'mastered') {
       currentUnitIndex = i;
       break;
     }
@@ -39,7 +28,7 @@ export function renderHomeScreen(container) {
 
   const currentUnit = units[currentUnitIndex];
   const unitId = currentUnit.id;
-  const unitProgress = progress[unitId] || { stage: 1, consec: 0, mastered: false };
+  const unitProgress = progress[unitId] || { stage: 'new', mastered: false };
 
   container.innerHTML = `
     <div class="home-screen">
@@ -68,7 +57,7 @@ export function renderHomeScreen(container) {
 function renderHomeTab(currentUnit, unitId, unitProgress, units) {
   const profile = AppState.profile;
   const isBeginner = profile.speaker_type === 'beginner' || AppState.isAya;
-  const hasPlacementScore = profile.placementLevel !== undefined || profile.placement_level !== undefined || AppState.hasCompletedPlacement;
+  const hasPlacementScore = profile.placementLevel !== undefined;
   const needsPlacement = !isBeginner && !hasPlacementScore;
   const canAccessLesson = isBeginner || hasPlacementScore;
   const adaptiveCards = getAdaptiveCards(profile);
@@ -96,8 +85,8 @@ function renderHeroSection() {
     <div class="home-hero">
       <img class="mascot" src="${HOOPOE_ICONS.mascot}" alt="Hoopoe mascot" />
       ${isAya
-        ? '<div class="greeting" dir="rtl">مرحبا يا آية 🌹</div><div class="countdown">' + getCountdownMessage() + '</div>'
-        : '<div class="greeting-en">Welcome back' + (displayName ? ', ' + displayName : '') + '!</div><div class="greeting" dir="rtl">أهلاً وسهلاً</div>'
+        ? '<div class="greeting">&#x645;&#x631;&#x62D;&#x628;&#x627; &#x64A;&#x627; &#x622;&#x64A;&#x629; &#x1F339;</div><div class="countdown">' + getCountdownMessage() + '</div>'
+        : '<div class="greeting-en">Welcome back' + (displayName ? ', ' + displayName : '') + '!</div><div class="greeting">أهلاً وسهلاً</div>'
       }
     </div>
   `;
@@ -108,7 +97,6 @@ function getAdaptiveCards(profile) {
   const cards = [
     { id: 'vocab',   icon: HOOPOE_ICONS.vocab,   label: 'My Vocabulary', cssClass: 'hoopoe-card-feature',                   route: 'my-vocab' },
     { id: 'focused', icon: HOOPOE_ICONS.focus,   label: 'Focused Study', cssClass: 'hoopoe-card-feature',                   route: 'focused-study' },
-    { id: 'flashcards', icon: HOOPOE_ICONS.vocab, label: 'Flashcards', cssClass: 'hoopoe-card-feature',                     route: 'flashcards' },
   ];
   if (isBeginner) {
     cards.push({ id: 'phonics', icon: HOOPOE_ICONS.phonics, label: AppState.isAya ? 'Arabic Phonics' : 'Alphabet', cssClass: 'hoopoe-card-feature', route: AppState.isAya ? 'aya-phonics' : 'alphabet' });
@@ -239,75 +227,6 @@ function renderSettingsTab() {
       </button>
     </div>
   `;
-}
-
-/**
- * Render home screen for heritage/standard users who haven't taken placement yet
- */
-function renderNoUnitsHome(container) {
-  container.innerHTML = `
-    <div class="home-screen">
-      <div class="tab-bar">
-        <button class="tab-btn active" data-tab="home">Home</button>
-        <button class="tab-btn" data-tab="settings">Settings</button>
-      </div>
-      <div class="tab-content">
-        <div id="home-tab-home" class="tab-pane active">
-          ${renderHeroSection()}
-          ${renderPlacementCard()}
-          <div style="padding:0 20px;">
-            <div class="hoopoe-card-feature" style="text-align:left;padding:20px;">
-              <h3 style="margin:0 0 8px;position:relative;z-index:1;">How it works</h3>
-              <p style="color:var(--text-soft);font-size:14px;margin:0;position:relative;z-index:1;">
-                Take the placement test to find your level. We'll then build a personalized course just for you, 
-                tailored to your goals and current Arabic ability.
-              </p>
-            </div>
-          </div>
-          <div style="padding:20px;">
-            <div class="hoopoe-grid-3">
-              ${getAdaptiveCards(AppState.profile).slice(0, 3).map(card => renderCard(card)).join('')}
-            </div>
-          </div>
-        </div>
-        <div id="home-tab-settings" class="tab-pane">
-          ${renderSettingsTab()}
-        </div>
-      </div>
-    </div>
-  `;
-
-  // Attach listeners
-  container.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => switchTab(container, btn.dataset.tab));
-  });
-
-  const placementBtn = container.querySelector('#placement-btn');
-  if (placementBtn) {
-    placementBtn.addEventListener('click', () => {
-      import('./router.js').then(({ navigateTo }) => navigateTo('placement'));
-    });
-  }
-
-  container.querySelectorAll('[data-route]').forEach(card => {
-    card.addEventListener('click', () => {
-      const route = card.dataset.route;
-      if (!route || route === 'speed-training') return;
-      import('./router.js').then(({ navigateTo }) => navigateTo(route));
-    });
-  });
-
-  const signOutBtn = container.querySelector('#sign-out-btn');
-  if (signOutBtn) {
-    signOutBtn.addEventListener('click', () => {
-      if (confirm('Are you sure you want to sign out?')) {
-        localStorage.removeItem('arabic_app_email');
-        localStorage.removeItem('arabic_app_v3');
-        localStorage.removeItem('arabic_welcome_seen');
-        window.location.reload();
-      }
-    });
-  }
 }
 
 function attachEventListeners(container, currentUnit, unitId) {

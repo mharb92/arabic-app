@@ -211,7 +211,7 @@ async function setupPushNotifications(preferredTime, onComplete) {
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     await savePushSubscription(AppState.user.email, {
       subscription: JSON.stringify(subscription),
-      preferred_time: preferredTime,
+      preferredTime: preferredTime,
       timezone: timezone
     });
     

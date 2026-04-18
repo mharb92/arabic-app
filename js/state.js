@@ -17,7 +17,6 @@ import {
   loadCheckpoints as dbLoadCheckpoints,
   loadFocusedSessions as dbLoadFocusedSessions,
   loadPersonalVocab as dbLoadPersonalVocab,
-  loadDynamicUnits as dbLoadDynamicUnits,
   // NEW: All comprehensive persistence functions
   savePlacementResults,
   loadPlacementResults,
@@ -34,8 +33,6 @@ import {
 } from './database.js';
 
 import { saveLocal, loadLocal, clearLocal } from './storage.js';
-import { UNITS } from './data/units.js';
-import { AYA_UNITS } from './data/aya-course.js';
 
 /**
  * Global Application State
@@ -75,10 +72,7 @@ export const AppState = {
   
   // App state
   currentPage: 'loading',
-  hasCompletedPlacement: false,
-  
-  // Dynamic units (generated for heritage/standard users)
-  dynamicUnits: []
+  hasCompletedPlacement: false
 };
 
 /**
@@ -110,7 +104,6 @@ export async function load() {
     AppState.unitProgress = localState.unitProgress || {};
     AppState.weakWords = localState.weakWords || [];
     AppState.hasCompletedPlacement = localState.hasCompletedPlacement || false;
-    AppState.dynamicUnits = localState.dynamicUnits || [];
     return;
   }
   
@@ -179,10 +172,6 @@ export async function load() {
   const { config: interleavingData } = await loadInterleavingConfig(userId);
   AppState.interleavingConfig = interleavingData || { enabled: false, threshold_lessons: 5, threshold_mastery: 0.65 };
   
-  // Load dynamic units (for heritage/standard users)
-  const { units: dynUnits } = await dbLoadDynamicUnits(userId);
-  AppState.dynamicUnits = dynUnits || [];
-  
   // Cache to localStorage for offline access
   saveLocal('arabic_app_v3', {
     profile: AppState.profile,
@@ -194,8 +183,7 @@ export async function load() {
     preferences: AppState.preferences,
     stats: AppState.stats,
     productionProgress: AppState.productionProgress,
-    interleavingConfig: AppState.interleavingConfig,
-    dynamicUnits: AppState.dynamicUnits
+    interleavingConfig: AppState.interleavingConfig
   });
 }
 
@@ -215,8 +203,7 @@ export async function save() {
     preferences: AppState.preferences,
     stats: AppState.stats,
     productionProgress: AppState.productionProgress,
-    interleavingConfig: AppState.interleavingConfig,
-    dynamicUnits: AppState.dynamicUnits
+    interleavingConfig: AppState.interleavingConfig
   });
   
   // If guest, don't save to Supabase
@@ -293,7 +280,6 @@ export async function reset() {
   AppState.productionProgress = null;
   AppState.interleavingConfig = null;
   AppState.phrasesMastery = {};
-  AppState.dynamicUnits = [];
   
   // Clear localStorage
   clearLocal('arabic_app_v3');
@@ -386,47 +372,4 @@ export function initAutoSync() {
       saveLocal('arabic_app_v3', stateSnapshot);
     }
   });
-}
-
-// ============================================================================
-// UNIT RESOLVER
-// ============================================================================
-
-/**
- * Get all available units for the current user
- * - Aya: static AYA_UNITS
- * - Beginner: static UNITS
- * - Heritage/Intermediate/Advanced: dynamic units from Supabase
- * @returns {Array} array of unit objects
- */
-export function getAllUnits() {
-  if (AppState.isAya) return AYA_UNITS;
-  
-  const speakerType = AppState.profile?.speaker_type;
-  if (speakerType === 'beginner') return UNITS;
-  
-  // Heritage/intermediate/advanced: use dynamic units
-  if (AppState.dynamicUnits && AppState.dynamicUnits.length > 0) {
-    return AppState.dynamicUnits;
-  }
-  
-  // No dynamic units yet — return empty (home screen will show placement prompt)
-  return [];
-}
-
-/**
- * Check if user needs to generate units (heritage/standard with no dynamic units)
- */
-export function needsUnitGeneration() {
-  if (AppState.isAya) return false;
-  const speakerType = AppState.profile?.speaker_type;
-  if (speakerType === 'beginner') return false;
-  
-  // Heritage/intermediate need units generated after placement
-  const hasPlacement = AppState.profile?.placementLevel !== undefined || 
-                       AppState.profile?.placement_level !== undefined ||
-                       AppState.hasCompletedPlacement;
-  const hasUnits = AppState.dynamicUnits && AppState.dynamicUnits.length > 0;
-  
-  return hasPlacement && !hasUnits;
 }

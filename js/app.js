@@ -156,29 +156,17 @@ export function onOnboardingComplete() {
 }
 
 /**
- * Handle app errors - only show error screen for truly fatal errors
+ * Handle app errors
  */
 export function handleAppError(error) {
   console.error('App error:', error);
-  
-  // Don't nuke UI for non-critical errors (Supabase timeouts, fetch failures, etc.)
-  const message = error?.message || String(error) || '';
-  const isFatal = message.includes('FATAL') || 
-                  message.includes('Cannot read properties of null') ||
-                  message.includes('is not a function') ||
-                  message.includes('is not defined');
-  
-  if (!isFatal || !appContainer) {
-    // Non-critical: just log, don't destroy the UI
-    return;
-  }
   
   appContainer.innerHTML = `
     <div class="error-screen">
       <div class="error-content">
         <h2>Something went wrong</h2>
         <p>We encountered an unexpected error.</p>
-        <p class="error-message">${message}</p>
+        <p class="error-message">${error.message || 'Unknown error'}</p>
         <button class="btn-primary" id="reload-btn">Reload App</button>
       </div>
     </div>
@@ -200,9 +188,7 @@ window.addEventListener('error', (event) => {
 });
 
 window.addEventListener('unhandledrejection', (event) => {
-  // Prevent unhandled promise rejections from nuking the UI
-  event.preventDefault();
-  console.error('Unhandled promise rejection:', event.reason);
+  handleAppError(event.reason);
 });
 
 // ============================================================================

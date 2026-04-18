@@ -16,29 +16,7 @@ export function initSupabase() {
 export async function saveProfile(userId, profileData) {
   const sb = initSupabase();
   if (!sb) return null;
-  
-  // Map camelCase AppState fields to snake_case DB columns
-  const mapped = {
-    email: userId,
-    name: profileData.name,
-    speaker_type: profileData.speaker_type,
-    dialect: profileData.dialect,
-    goals: profileData.goals,
-    placement_level: profileData.placementLevel ?? profileData.placement_level,
-    placement_score: profileData.placementScore ?? profileData.placement_score,
-    placement_rounds_completed: profileData.placementRoundsCompleted ?? profileData.placement_rounds_completed,
-    placement_date: profileData.placementDate ?? profileData.placement_date,
-    push_enabled: profileData.pushEnabled ?? profileData.push_enabled,
-    push_time: profileData.pushTime ?? profileData.push_time,
-    custom_goals: profileData.customGoals ?? profileData.custom_goals,
-    vocab_pool_opt_in: profileData.vocabPoolOptIn ?? profileData.vocab_pool_opt_in,
-    updated_at: new Date().toISOString()
-  };
-  
-  // Remove undefined values so Supabase doesn't try to set them to null
-  Object.keys(mapped).forEach(k => mapped[k] === undefined && delete mapped[k]);
-  
-  const { data, error } = await sb.from('profiles').upsert(mapped, { onConflict: 'email' }).select().single();
+  const { data, error } = await sb.from('profiles').upsert({ email: userId, ...profileData }, { onConflict: 'email' }).select().single();
   if (error) { console.error('Save profile error:', error); return null; }
   return data;
 }
@@ -370,7 +348,7 @@ export async function upsertPersonalVocab(email, vocabEntries) {
   const rows = vocabEntries.map(entry => ({
     email: email,
     arabic: entry.arabic,
-    romanization: entry.romanization || entry.transliteration || entry.rom || '',
+    transliteration: entry.transliteration || entry.romanization || '',
     english: entry.english,
     mastery_score: entry.mastery_score !== undefined ? entry.mastery_score : 0,
     is_dialect: entry.is_dialect !== undefined ? entry.is_dialect : true,
@@ -408,27 +386,15 @@ export async function loadPhrasesMastery(email) {
 }
 
 /**
- * Update mastery score incrementally for a single vocab entry
- * @param {number} delta - positive for correct, negative for incorrect (e.g. +15, -20)
+ * Update mastery score for a single vocab entry
  */
-export async function updatePhraseMastery(email, arabic, english, delta) {
+export async function updatePhraseMastery(email, arabic, english, masteryScore) {
   const sb = initSupabase();
   if (!sb || !email) return null;
 
-  // Read current score
-  const { data: current } = await sb
-    .from('personal_vocab')
-    .select('mastery_score')
-    .eq('email', email)
-    .eq('arabic', arabic)
-    .maybeSingle();
-
-  const oldScore = current?.mastery_score || 0;
-  const newScore = Math.max(0, Math.min(100, oldScore + delta));
-
   const { data, error } = await sb
     .from('personal_vocab')
-    .update({ mastery_score: newScore, updated_at: new Date().toISOString() })
+    .update({ mastery_score: masteryScore, updated_at: new Date().toISOString() })
     .eq('email', email)
     .eq('arabic', arabic)
     .select()
@@ -436,55 +402,4 @@ export async function updatePhraseMastery(email, arabic, english, delta) {
 
   if (error) console.error('Update mastery error:', error);
   return data;
-}
-
-// ============================================================================
-// DYNAMIC UNITS - Generated units for heritage/standard users
-// ============================================================================
-
-/**
- * Save a dynamically generated unit
- */
-export async function saveDynamicUnit(email, unitId, unitContent) {
-  const sb = initSupabase();
-  if (!sb || !email) return null;
-
-  const { data, error } = await sb
-    .from('dynamic_units')
-    .upsert({
-      email: email,
-      unit_id: unitId,
-      content: unitContent,
-      created_at: new Date().toISOString()
-    }, { onConflict: 'email,unit_id' })
-    .select()
-    .single();
-
-  if (error) { console.error('Save dynamic unit error:', error); return null; }
-  return data;
-}
-
-/**
- * Load all dynamic units for a user, sorted by unit_id
- */
-export async function loadDynamicUnits(email) {
-  const sb = initSupabase();
-  if (!sb || !email) return { units: [] };
-
-  const { data, error } = await sb
-    .from('dynamic_units')
-    .select('unit_id, content')
-    .eq('email', email)
-    .order('unit_id', { ascending: true });
-
-  if (error) { console.error('Load dynamic units error:', error); return { units: [] }; }
-
-  // Extract the content (which is the full unit object with id, title, subtitle, phrases)
-  const units = (data || []).map(row => {
-    const unit = typeof row.content === 'string' ? JSON.parse(row.content) : row.content;
-    unit.id = row.unit_id; // Ensure ID matches
-    return unit;
-  });
-
-  return { units };
 }

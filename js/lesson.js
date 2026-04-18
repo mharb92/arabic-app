@@ -5,11 +5,12 @@
  * Flashcards → Cumulative retrieval practice → Error correction
  */
 
-import { AppState, save, getAllUnits } from './state.js';
+import { AppState, save } from './state.js';
+import { UNITS } from './data/units.js';
+import { AYA_UNITS } from './data/aya-course.js';
 import { speakArabic } from './utils/audio.js';
 import { showError, showToast } from './utils/ui.js';
 import { updatePhraseMastery, upsertPersonalVocab } from './database.js';
-import { prefetchNextUnit, getMasteryContext } from './generation.js';
 
 // Lesson state
 let currentUnitIndex = 0;
@@ -25,13 +26,13 @@ let incorrectAnswers = []; // Track mistakes for re-testing
  * Main entry point - Start a lesson
  */
 export function renderLessonScreen(container) {
-  const units = getAllUnits();
+  const units = AppState.isAya ? AYA_UNITS : UNITS;
   const progress = AppState.unitProgress || {};
   
   // Find current unit
   for (let i = 0; i < units.length; i++) {
     const unitId = units[i].id;
-    if (!progress[unitId] || !progress[unitId].mastered) {
+    if (!progress[unitId] || progress[unitId].stage !== 'mastered') {
       currentUnitIndex = i;
       break;
     }
@@ -55,12 +56,12 @@ export function renderLessonScreen(container) {
  * Get current unit index (for quiz.js)
  */
 export function getCurrentUnitIndex() {
-  const units = getAllUnits();
+  const units = AppState.isAya ? AYA_UNITS : UNITS;
   const progress = AppState.unitProgress || {};
   
   for (let i = 0; i < units.length; i++) {
     const unitId = units[i].id;
-    if (!progress[unitId] || !progress[unitId].mastered) {
+    if (!progress[unitId] || progress[unitId].stage !== 'mastered') {
       return i;
     }
   }
@@ -312,10 +313,8 @@ function renderPracticePhase(container, unit) {
       `;
       feedbackDiv.style.display = 'block';
       
-      // Update mastery - correct answer increases score incrementally
-      if (AppState.user && AppState.user.email) {
-        updatePhraseMastery(AppState.user.email, phrase.ar, phrase.en, 15);
-      }
+      // Update mastery - correct answer increases score
+      updatePhraseMastery(AppState.user.email, phrase.ar, phrase.en, Math.min(100, 80));
       
       // Remove from queue and continue
       practiceQueue.shift();
@@ -334,10 +333,8 @@ function renderPracticePhase(container, unit) {
       `;
       feedbackDiv.style.display = 'block';
       
-      // Update mastery - incorrect answer decreases score incrementally
-      if (AppState.user && AppState.user.email) {
-        updatePhraseMastery(AppState.user.email, phrase.ar, phrase.en, -20);
-      }
+      // Update mastery - incorrect answer lowers score
+      updatePhraseMastery(AppState.user.email, phrase.ar, phrase.en, 20);
       
       // Re-queue this phrase 2 positions later (error correction)
       const incorrectPhrase = practiceQueue.shift();
@@ -418,24 +415,7 @@ function renderSelfAssessment(container, unit) {
         currentCardIndex = 0;
         lessonPhase = 'teach';
         
-        // Background prefetch: at cycle 2 (50% through), generate next unit
-        if (currentCycle === 2 && !AppState.isAya && AppState.profile?.speaker_type !== 'beginner') {
-          const units = getAllUnits();
-          const nextUnitNumber = units.length + 1;
-          const context = getMasteryContext();
-          prefetchNextUnit(nextUnitNumber, context).then(newUnit => {
-            if (newUnit) {
-              if (!AppState.dynamicUnits) AppState.dynamicUnits = [];
-              // Only add if not already present
-              if (!AppState.dynamicUnits.find(u => u.id === newUnit.id)) {
-                AppState.dynamicUnits.push(newUnit);
-                save();
-              }
-            }
-          });
-        }
-        
-        showToast(`\u2705 Cycle ${currentCycle} complete! Starting Cycle ${currentCycle + 1}...`);
+        showToast(`✅ Cycle ${currentCycle} complete! Starting Cycle ${currentCycle + 1}...`);
         
         setTimeout(() => {
           renderTeachPhase(container, unit);
@@ -457,10 +437,9 @@ async function finishLesson(container, unit) {
   if (!AppState.unitProgress) AppState.unitProgress = {};
 
   AppState.unitProgress[unit.id] = {
-    stage: 3,
-    consec: 2,
+    stage: 'mastered',
     mastered: true,
-    last_practiced: new Date().toISOString()
+    lastReviewed: new Date().toISOString()
   };
 
   // Auto-save all phrases to My Vocab
@@ -468,7 +447,7 @@ async function finishLesson(container, unit) {
     try {
       const entries = unit.phrases.map(p => ({
         arabic: p.ar || p.arabic || '',
-        romanization: p.rom || p.roman || p.romanization || '',
+        transliteration: p.roman || p.transliteration || p.romanization || '',
         english: p.en || p.english || '',
         mastery_score: 0,
         is_dialect: true,
