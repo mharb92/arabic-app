@@ -403,3 +403,340 @@ export async function updatePhraseMastery(email, arabic, english, masteryScore) 
   if (error) console.error('Update mastery error:', error);
   return data;
 }
+// ============================================================================
+// DICTIONARY, PHASE PLANS, LESSON PROGRESS — v2 Lesson Redesign
+// ============================================================================
+
+// DICTIONARY QUERIES
+
+/**
+ * Query dictionary for vocabulary pool (B++ approach)
+ * Primary categories: full dump. Related categories: rank-filtered.
+ * @param {string[]} primaryCategories - full dump for these categories
+ * @param {string[]} relatedCategories - rank-filtered for these categories
+ * @param {number} rankThreshold - max rank for related categories
+ * @returns {Array} dictionary entries
+ */
+export async function queryDictionary(primaryCategories, relatedCategories, rankThreshold) {
+  const sb = initSupabase();
+  if (!sb) return [];
+
+  const cols = 'id,rank,arabic,romanization,english,pos,category,root,conjugation,gender,dialect_tag,notes';
+  let entries = [];
+
+  // Primary: full dump
+  if (primaryCategories && primaryCategories.length > 0) {
+    const { data, error } = await sb
+      .from('dictionary')
+      .select(cols)
+      .in('category', primaryCategories)
+      .order('rank', { ascending: true });
+    if (error) console.error('Dictionary primary query error:', error);
+    else entries = entries.concat(data || []);
+  }
+
+  // Related: rank-filtered
+  if (relatedCategories && relatedCategories.length > 0) {
+    const { data, error } = await sb
+      .from('dictionary')
+      .select(cols)
+      .in('category', relatedCategories)
+      .lte('rank', rankThreshold || 500)
+      .order('rank', { ascending: true })
+      .limit(30);
+    if (error) console.error('Dictionary related query error:', error);
+    else entries = entries.concat(data || []);
+  }
+
+  // Deduplicate by id
+  const seen = new Set();
+  return entries.filter(e => {
+    if (seen.has(e.id)) return false;
+    seen.add(e.id);
+    return true;
+  });
+}
+
+/**
+ * Get all unique category names from dictionary
+ * Used by Focused Study "General Topics" mode
+ */
+export async function getDictionaryCategories() {
+  const sb = initSupabase();
+  if (!sb) return [];
+
+  const { data, error } = await sb
+    .from('dictionary')
+    .select('category')
+    .order('category', { ascending: true });
+
+  if (error) { console.error('Dictionary categories error:', error); return []; }
+  return [...new Set((data || []).map(r => r.category))];
+}
+
+/**
+ * Query dictionary by a single category (for Focused Study)
+ */
+export async function queryDictionaryByCategory(category) {
+  const sb = initSupabase();
+  if (!sb) return [];
+
+  const { data, error } = await sb
+    .from('dictionary')
+    .select('id,rank,arabic,romanization,english,pos,category,root,conjugation,gender,dialect_tag,notes')
+    .eq('category', category)
+    .order('rank', { ascending: true });
+
+  if (error) { console.error('Dictionary category query error:', error); return []; }
+  return data || [];
+}
+
+// PHASE PLANS
+
+export async function savePhasePlan(email, plan) {
+  const sb = initSupabase();
+  if (!sb || !email || !plan) return null;
+
+  const row = {
+    phase_id: plan.phase_id,
+    phase_number: plan.phase_number || parseInt(plan.phase_id?.replace('phase_', '')) || 1,
+    user_email: email,
+    start_date: plan.start_date || new Date().toISOString().split('T')[0],
+    end_date: plan.end_date || new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
+    day_90_goal: plan.day_90_goal || null,
+    content_ratios: plan.content_ratios,
+    weeks: plan.weeks,
+    revised: plan.revised || false,
+    revision_history: plan.revision_history || [],
+    generated_at: plan.generated_at || new Date().toISOString()
+  };
+
+  const { data, error } = await sb
+    .from('phase_plans')
+    .upsert(row, { onConflict: 'user_email,phase_id' })
+    .select()
+    .single();
+
+  if (error) { console.error('Save phase plan error:', error); return null; }
+  return data;
+}
+
+export async function loadPhasePlan(email, phaseNumber) {
+  const sb = initSupabase();
+  if (!sb || !email) return null;
+
+  const { data, error } = await sb
+    .from('phase_plans')
+    .select('*')
+    .eq('user_email', email)
+    .eq('phase_number', phaseNumber)
+    .maybeSingle();
+
+  if (error) { console.error('Load phase plan error:', error); return null; }
+  return data;
+}
+
+export async function loadLatestPhasePlan(email) {
+  const sb = initSupabase();
+  if (!sb || !email) return null;
+
+  const { data, error } = await sb
+    .from('phase_plans')
+    .select('*')
+    .eq('user_email', email)
+    .order('phase_number', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) { console.error('Load latest phase plan error:', error); return null; }
+  return data;
+}
+
+// LESSON PROGRESS
+
+export async function saveLessonProgress(email, progress) {
+  const sb = initSupabase();
+  if (!sb || !email || !progress) return null;
+
+  const row = {
+    lesson_id: progress.lesson_id,
+    user_email: email,
+    phase_id: progress.phase_id || null,
+    week: progress.week || null,
+    day_in_phase: progress.day_in_phase || null,
+    theme: progress.theme || null,
+    estimated_minutes: progress.estimated_minutes || null,
+    is_remedial: progress.is_remedial || false,
+    remedial_context: progress.remedial_context || null,
+    lesson_content: progress.lesson_content || null,
+    status: progress.status || 'not_started',
+    current_block_index: progress.current_block_index || 0,
+    block_results: progress.block_results || {},
+    quiz_result: progress.quiz_result || null,
+    started_at: progress.started_at || null,
+    completed_at: progress.completed_at || null
+  };
+
+  const { data, error } = await sb
+    .from('lesson_progress')
+    .upsert(row, { onConflict: 'user_email,lesson_id' })
+    .select()
+    .single();
+
+  if (error) { console.error('Save lesson progress error:', error); return null; }
+  return data;
+}
+
+export async function loadLessonProgress(email, lessonId) {
+  const sb = initSupabase();
+  if (!sb || !email) return null;
+
+  const { data, error } = await sb
+    .from('lesson_progress')
+    .select('*')
+    .eq('user_email', email)
+    .eq('lesson_id', lessonId)
+    .maybeSingle();
+
+  if (error) { console.error('Load lesson progress error:', error); return null; }
+  return data;
+}
+
+/**
+ * Load the most recent unfinished lesson, or null if all done
+ */
+export async function loadCurrentLesson(email) {
+  const sb = initSupabase();
+  if (!sb || !email) return null;
+
+  const { data, error } = await sb
+    .from('lesson_progress')
+    .select('*')
+    .eq('user_email', email)
+    .in('status', ['not_started', 'in_progress'])
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) { console.error('Load current lesson error:', error); return null; }
+  return data;
+}
+
+/**
+ * Count completed + mastered lessons for a phase
+ */
+export async function countLessonsInPhase(email, phaseId) {
+  const sb = initSupabase();
+  if (!sb || !email) return { total: 0, completed: 0, mastered: 0 };
+
+  const { data, error } = await sb
+    .from('lesson_progress')
+    .select('status')
+    .eq('user_email', email)
+    .eq('phase_id', phaseId);
+
+  if (error) { console.error('Count lessons error:', error); return { total: 0, completed: 0, mastered: 0 }; }
+  const rows = data || [];
+  return {
+    total: rows.length,
+    completed: rows.filter(r => r.status === 'completed' || r.status === 'mastered').length,
+    mastered: rows.filter(r => r.status === 'mastered').length
+  };
+}
+
+/**
+ * Load last completed lesson's quiz result (for remedial detection)
+ */
+export async function loadLastQuizResult(email, phaseId) {
+  const sb = initSupabase();
+  if (!sb || !email) return null;
+
+  const { data, error } = await sb
+    .from('lesson_progress')
+    .select('lesson_id, quiz_result, status')
+    .eq('user_email', email)
+    .eq('phase_id', phaseId)
+    .not('quiz_result', 'is', null)
+    .order('completed_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) { console.error('Load last quiz error:', error); return null; }
+  return data;
+}
+
+// MASTERY — last_reviewed update
+
+/**
+ * Update mastery score AND last_reviewed timestamp
+ */
+export async function updateMasteryWithReview(email, arabic, english, correct, source) {
+  const sb = initSupabase();
+  if (!sb || !email) return null;
+
+  // Calculate delta based on source
+  let delta;
+  if (source === 'ai_tutor') delta = correct ? 5 : 0;
+  else delta = correct ? 15 : -10;
+
+  // First load current score
+  const { data: current } = await sb
+    .from('personal_vocab')
+    .select('mastery_score')
+    .eq('email', email)
+    .eq('arabic', arabic)
+    .maybeSingle();
+
+  const currentScore = current?.mastery_score || 0;
+  const newScore = Math.max(0, Math.min(100, currentScore + delta));
+
+  const { data, error } = await sb
+    .from('personal_vocab')
+    .update({
+      mastery_score: newScore,
+      last_reviewed: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    })
+    .eq('email', email)
+    .eq('arabic', arabic)
+    .select()
+    .maybeSingle();
+
+  if (error) console.error('Update mastery error:', error);
+  return data;
+}
+
+/**
+ * Load vocab with effective mastery (time decay applied)
+ * Returns words grouped by mastery level for generation prompts
+ */
+export async function loadMasteryForGeneration(email) {
+  const sb = initSupabase();
+  if (!sb || !email) return { mastered: [], reinforcing: [], weak: [] };
+
+  const { data, error } = await sb
+    .from('personal_vocab')
+    .select('arabic, english, mastery_score, last_reviewed')
+    .eq('email', email);
+
+  if (error) { console.error('Load mastery for gen error:', error); return { mastered: [], reinforcing: [], weak: [] }; }
+
+  const now = Date.now();
+  const mastered = [];
+  const reinforcing = [];
+  const weak = [];
+
+  for (const row of (data || [])) {
+    const daysSince = row.last_reviewed
+      ? (now - new Date(row.last_reviewed).getTime()) / 86400000
+      : 30;
+    const effective = Math.max(0, (row.mastery_score || 0) - (daysSince * 2));
+
+    const entry = { arabic: row.arabic, english: row.english, effective };
+    if (effective > 80) mastered.push(entry);
+    else if (effective >= 30) reinforcing.push(entry);
+    else weak.push(entry);
+  }
+
+  return { mastered, reinforcing, weak };
+}
