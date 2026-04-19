@@ -53,8 +53,6 @@ export function renderLoginScreen(container) {
       AppState.ayaConfig = config;
     }
     
-    await load();
-    
     import('./app.js').then(({ onAuthSuccess }) => onAuthSuccess());
   });
   

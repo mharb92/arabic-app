@@ -131,7 +131,8 @@ async function showWelcomeScreen() {
 /**
  * Export for auth success callback
  */
-export function onAuthSuccess() {
+export async function onAuthSuccess() {
+  await load();
   handlePostAuth();
 }
 
