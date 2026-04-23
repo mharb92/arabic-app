@@ -57,7 +57,8 @@ export function renderHomeScreen(container) {
 function renderHomeTab(currentUnit, unitId, unitProgress, units) {
   const profile = AppState.profile;
   const isBeginner = profile.speaker_type === 'beginner' || AppState.isAya;
-  const hasPlacementScore = profile.placementLevel !== undefined;
+  const isHeritage = profile.speaker_type === 'heritage';
+  const hasPlacementScore = profile.placementLevel !== undefined || profile.placement_profile !== undefined;
   const needsPlacement = !isBeginner && !hasPlacementScore;
   const canAccessLesson = isBeginner || hasPlacementScore;
   const adaptiveCards = getAdaptiveCards(profile);
@@ -237,14 +238,18 @@ function attachEventListeners(container, currentUnit, unitId) {
   const continueBtn = container.querySelector('#continue-btn');
   if (continueBtn) {
     continueBtn.addEventListener('click', () => {
-      import('./router.js').then(({ navigateTo }) => navigateTo('lesson'));
+      const isHeritage = AppState.profile?.speaker_type === 'heritage';
+      const route = isHeritage ? 'lesson-v2' : 'lesson';
+      import('./router.js').then(({ navigateTo }) => navigateTo(route));
     });
   }
 
   const placementBtn = container.querySelector('#placement-btn');
   if (placementBtn) {
     placementBtn.addEventListener('click', () => {
-      import('./router.js').then(({ navigateTo }) => navigateTo('placement'));
+      const isHeritage = AppState.profile?.speaker_type === 'heritage';
+      const route = isHeritage ? 'placement-v2' : 'placement';
+      import('./router.js').then(({ navigateTo }) => navigateTo(route));
     });
   }
 

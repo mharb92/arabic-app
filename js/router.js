@@ -16,6 +16,8 @@ import { renderFocusedStudyScreen } from './focused-study.js';
 import { renderMyVocabScreen } from './my-vocab.js';
 import { renderPushPromptScreen } from './push.js';
 import { renderAITutorPage } from './ai-tutor.js';
+import { renderPlacementV2Screen } from './placement-v2.js';
+import { renderLessonV2Screen } from './lesson-engine.js';
 
 let currentRoute = null;
 let appContainer = null;
@@ -69,6 +71,14 @@ export function navigateTo(route, params = {}) {
       
     case 'placement':
       renderPlacementScreen(appContainer);
+      break;
+      
+    case 'placement-v2':
+      renderPlacementV2Screen(appContainer);
+      break;
+      
+    case 'lesson-v2':
+      renderLessonV2Screen(appContainer);
       break;
       
     case 'focused-study':
