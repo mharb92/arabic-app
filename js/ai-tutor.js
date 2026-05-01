@@ -5,7 +5,7 @@
  */
 
 import { AppState, save } from './state.js';
-import { saveAITutorHistory, loadAITutorHistory } from './database.js';
+import { saveAITutorHistory, loadAITutorHistory, updateMasteryWithReview } from './database.js';
 import { speakArabic } from './utils/audio.js';
 import { showError, showToast, showLoading, hideLoading } from './utils/ui.js';
 import { SUPABASE_ANON_KEY, EDGE_FUNCTION_URL, CLAUDE_MODEL } from './config.js';
@@ -13,6 +13,7 @@ import { SUPABASE_ANON_KEY, EDGE_FUNCTION_URL, CLAUDE_MODEL } from './config.js'
 // Chat state
 let chatHistory = []; // Array of {role: 'user' | 'assistant', content: string, timestamp: string}
 let isModalOpen = false;
+let lastExtractionTime = 0; // Prevent duplicate extractions on rapid close/reopen
 
 /**
  * Initialize AI Tutor (called from app.js)
@@ -254,6 +255,78 @@ function closeTutorModal() {
     modal.remove();
     isModalOpen = false;
   }
+  extractMasteryFromChat();
+}
+
+/**
+ * Extract vocabulary demonstrated by the student from chat history.
+ * Fire-and-forget — never blocks UI. Errors silently caught.
+ */
+function extractMasteryFromChat() {
+  const email = AppState.user?.email;
+  if (!email) return;
+  if (chatHistory.length < 4) return; // Need at least 2 exchanges
+  if (Date.now() - lastExtractionTime < 300000) return; // 5 min cooldown
+  lastExtractionTime = Date.now();
+
+  // Build transcript from chat history
+  const transcript = chatHistory.map(m =>
+    `${m.role === 'user' ? 'Student' : 'Tutor'}: ${m.content}`
+  ).join('\n');
+
+  // Fire and forget
+  (async () => {
+    try {
+      const response = await fetch(EDGE_FUNCTION_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+        },
+        body: JSON.stringify({
+          model: CLAUDE_MODEL,
+          max_tokens: 1000,
+          system: `Extract vocabulary and grammar demonstrated by the STUDENT in this conversation.
+Return ONLY valid JSON, no markdown:
+{
+  "demonstrated": [
+    { "arabic": "...", "english": "...", "correct": true }
+  ]
+}
+Rules:
+- Only include words/phrases the STUDENT used or attempted, not the tutor
+- "correct" means the student used it correctly in context
+- Maximum 30 items
+- Include both single words and short phrases
+- If the student made errors, include the correct form with "correct": false`,
+          messages: [{ role: 'user', content: transcript }]
+        })
+      });
+
+      if (!response.ok) return;
+
+      const data = await response.json();
+      const text = (data.content?.[0]?.text || '')
+        .replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      const result = JSON.parse(text);
+
+      if (!result.demonstrated || !Array.isArray(result.demonstrated)) return;
+
+      const items = result.demonstrated.slice(0, 30);
+      for (const item of items) {
+        if (item.arabic && item.english) {
+          await updateMasteryWithReview(email, item.arabic, item.english, item.correct !== false, 'ai_tutor');
+        }
+      }
+
+      if (items.length > 0) {
+        showToast(`📚 ${items.length} words updated from conversation`);
+      }
+    } catch (e) {
+      // Silent — extraction failure must never affect UX
+      console.warn('Mastery extraction failed (non-critical):', e.message);
+    }
+  })();
 }
 
 /**
@@ -514,6 +587,7 @@ function attachPageListeners(container) {
   
   if (backBtn) {
     backBtn.addEventListener('click', () => {
+      extractMasteryFromChat();
       import('./router.js').then(({ navigateTo }) => navigateTo('home'));
     });
   }

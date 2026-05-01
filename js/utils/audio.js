@@ -1,9 +1,9 @@
 /**
- * audio.js - Arabic TTS with ElevenLabs + Web Speech fallback
- * Imports keys from config.js, uses in-memory cache (fixes blob URL bug)
+ * audio.js - Arabic TTS with ElevenLabs (via Edge Function proxy) + Web Speech fallback
+ * Imports config from config.js, uses in-memory cache (fixes blob URL bug)
  */
 
-import { ELEVENLABS_API_KEY, ELEVENLABS_VOICE_ID } from '../config.js';
+import { ELEVENLABS_FUNCTION_URL, ELEVENLABS_VOICE_ID } from '../config.js';
 
 // In-memory audio cache (session-scoped, not persisted — fixes the blob URL stale cache bug)
 const audioCache = new Map();
@@ -21,28 +21,22 @@ export async function speakArabic(text, useElevenLabs = true) {
     return;
   }
 
-  // Try ElevenLabs
-  if (useElevenLabs && ELEVENLABS_API_KEY) {
+  // Try ElevenLabs via Edge Function proxy
+  if (useElevenLabs && ELEVENLABS_FUNCTION_URL) {
     try {
-      const response = await fetch(
-        'https://api.elevenlabs.io/v1/text-to-speech/' + ELEVENLABS_VOICE_ID,
-        {
-          method: 'POST',
-          headers: {
-            'Accept': 'audio/mpeg',
-            'xi-api-key': ELEVENLABS_API_KEY,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            text: text,
-            model_id: 'eleven_multilingual_v2',
-            voice_settings: { stability: 0.5, similarity_boost: 0.75 }
-          })
-        }
-      );
+      const response = await fetch(ELEVENLABS_FUNCTION_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          text: text,
+          voice_id: ELEVENLABS_VOICE_ID
+        })
+      });
 
       if (!response.ok) {
-        console.warn('ElevenLabs ' + response.status + ', using Web Speech fallback');
+        console.warn('ElevenLabs proxy ' + response.status + ', using Web Speech fallback');
         webSpeechSpeak(text);
         return;
       }
@@ -52,7 +46,7 @@ export async function speakArabic(text, useElevenLabs = true) {
       playBlob(blob);
       return;
     } catch (err) {
-      console.warn('ElevenLabs error, using Web Speech fallback:', err.message);
+      console.warn('ElevenLabs proxy error, using Web Speech fallback:', err.message);
     }
   }
 

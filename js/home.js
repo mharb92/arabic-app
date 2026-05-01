@@ -7,8 +7,11 @@ import { AppState, save } from './state.js';
 import { UNITS } from './data/units.js';
 import { AYA_UNITS } from './data/aya-course.js';
 import { getCountdownMessage } from './utils/date.js';
-import { showToast } from './utils/ui.js';
+import { showToast, showLoading, hideLoading } from './utils/ui.js';
 import { HOOPOE_ICONS } from './data/hoopoe-icons.js';
+import { loadLatestPhasePlan, countLessonsInPhase } from './database.js';
+import { generatePhasePlan } from './generation.js';
+import { EDGE_FUNCTION_URL, SUPABASE_ANON_KEY, CLAUDE_MODEL } from './config.js';
 
 let currentTab = 'home';
 
@@ -160,6 +163,22 @@ function calculateProgress(progress) {
 }
 
 function renderProgressTab(units, progress) {
+  const isHeritage = AppState.profile?.speaker_type === 'heritage';
+  const pp = AppState.profile?.placement_profile;
+
+  if (isHeritage && pp) {
+    // Heritage: show phase plan view (async-loaded)
+    return `
+      <div class="progress-tab" style="padding:var(--space-md);">
+        <h2>Your Progress</h2>
+        <div id="phase-plan-container">
+          <div style="text-align:center;padding:40px 0;color:var(--text-soft);">Loading your plan...</div>
+        </div>
+      </div>
+    `;
+  }
+
+  // Legacy: unit list for Aya/beginners
   const totalUnits = units.length;
   const completedUnits = Object.values(progress).filter(p => p.mastered).length;
   const percentComplete = Math.round((completedUnits / totalUnits) * 100);
@@ -189,6 +208,282 @@ function renderProgressTab(units, progress) {
       </div>
     </div>
   `;
+}
+
+/**
+ * Load and render phase plan for heritage speakers (called after DOM render)
+ */
+async function loadPhasePlanView(container) {
+  const planContainer = container.querySelector('#phase-plan-container');
+  if (!planContainer) return;
+
+  const email = AppState.user?.email;
+  if (!email) {
+    planContainer.innerHTML = '<p style="color:var(--text-soft);text-align:center;">Sign in to see your plan.</p>';
+    return;
+  }
+
+  const plan = await loadLatestPhasePlan(email);
+  if (!plan || !plan.weeks) {
+    planContainer.innerHTML = `
+      <div style="text-align:center;padding:20px;">
+        <p style="color:var(--text-soft);margin-bottom:16px;">No learning plan yet. Complete the placement test to generate your plan.</p>
+      </div>
+    `;
+    return;
+  }
+
+  // Calculate phase progress
+  const phaseId = plan.phase_id || 'phase_1';
+  const phaseNumber = plan.phase_number || 1;
+  const startDate = plan.start_date ? new Date(plan.start_date) : new Date();
+  const dayInPhase = Math.max(1, Math.ceil((Date.now() - startDate.getTime()) / 86400000));
+  const currentWeek = Math.min(Math.ceil(dayInPhase / 7), 4);
+
+  const lessonStats = await countLessonsInPhase(email, phaseId);
+  const lessonsCompleted = lessonStats || 0;
+  const phaseProgress = Math.min(Math.round((dayInPhase / 30) * 100), 100);
+
+  // Skill profile bars
+  const pp = AppState.profile.placement_profile;
+  const dimensions = [
+    { key: 'recognition', label: 'Recognition' },
+    { key: 'production', label: 'Production' },
+    { key: 'grammar_intuition', label: 'Grammar' },
+    { key: 'script_comfort', label: 'Script' },
+    { key: 'vocab_breadth', label: 'Vocabulary' },
+    { key: 'listening', label: 'Listening' }
+  ];
+
+  const skillBars = dimensions.map(d => {
+    const score = pp[d.key] || 0;
+    const pct = (score / 5) * 100;
+    return `
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+        <div style="width:80px;font-size:13px;color:var(--text-soft);">${d.label}</div>
+        <div style="flex:1;background:rgba(0,0,0,0.08);height:8px;border-radius:4px;overflow:hidden;">
+          <div style="height:100%;background:var(--green);width:${pct}%;border-radius:4px;"></div>
+        </div>
+        <div style="width:24px;font-size:13px;color:var(--text-soft);text-align:right;">${score}</div>
+      </div>
+    `;
+  }).join('');
+
+  // Weekly breakdown
+  const weekCards = (plan.weeks || []).map(w => {
+    const weekNum = w.week;
+    const isCurrent = weekNum === currentWeek;
+    const isPast = weekNum < currentWeek;
+    const opacity = (!isPast && !isCurrent) ? 'opacity:0.5;' : '';
+    const border = isCurrent ? 'border:2px solid var(--green);' : 'border:1px solid var(--border-light);';
+
+    return `
+      <div class="week-card" data-week="${weekNum}" style="background:var(--sand);border-radius:var(--radius-lg);padding:16px;margin-bottom:10px;cursor:pointer;${border}${opacity}">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <div style="font-family:var(--font-display);font-size:15px;font-weight:600;">
+            ${isCurrent ? '▶ ' : ''}Week ${weekNum}
+          </div>
+          <div style="font-size:13px;color:var(--text-soft);">
+            ${isPast ? '✅ Complete' : isCurrent ? 'Current' : 'Upcoming'}
+          </div>
+        </div>
+        <div style="font-size:14px;color:var(--text);margin-bottom:4px;">${w.theme || ''}</div>
+        <div class="week-details" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--border-light);">
+          ${w.skills && w.skills.length ? `<div style="font-size:13px;color:var(--text-soft);margin-bottom:6px;"><strong>Skills:</strong> ${w.skills.join(', ')}</div>` : ''}
+          ${w.target_patterns && w.target_patterns.length ? `<div style="font-size:13px;color:var(--text-soft);margin-bottom:6px;"><strong>Patterns:</strong> ${w.target_patterns.join(', ')}</div>` : ''}
+          ${w.heritage_notes ? `<div style="font-size:13px;color:var(--green-m);font-style:italic;">${w.heritage_notes}</div>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  planContainer.innerHTML = `
+    <div style="background:var(--sand);border-radius:var(--radius-lg);padding:20px;margin-bottom:16px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <h3 style="margin:0;font-size:17px;">Phase ${phaseNumber} of 3</h3>
+        <span style="font-size:14px;color:var(--text-soft);">Day ${dayInPhase}/30</span>
+      </div>
+      <div style="background:rgba(0,0,0,0.08);height:6px;border-radius:3px;overflow:hidden;margin-bottom:6px;">
+        <div style="height:100%;background:var(--green);width:${phaseProgress}%;border-radius:3px;"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text-soft);">
+        <span>${lessonsCompleted} lessons completed</span>
+        <span>${plan.day_90_goal || ''}</span>
+      </div>
+    </div>
+
+    <div style="background:var(--sand);border-radius:var(--radius-lg);padding:20px;margin-bottom:16px;">
+      <h3 style="margin:0 0 14px;font-size:15px;">Skill Profile</h3>
+      ${skillBars}
+    </div>
+
+    <h3 style="margin:0 0 10px;font-size:15px;">Weekly Plan</h3>
+    ${weekCards}
+
+    <button id="adjust-plan-btn" style="width:100%;padding:14px;border-radius:var(--radius-md);font-size:15px;background:var(--cream);color:var(--green);border:2px solid var(--green);cursor:pointer;font-family:var(--font-body);margin-top:8px;">
+      Adjust My Plan
+    </button>
+  `;
+
+  // Week card expand/collapse
+  planContainer.querySelectorAll('.week-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const details = card.querySelector('.week-details');
+      if (details) {
+        const isOpen = details.style.display !== 'none';
+        details.style.display = isOpen ? 'none' : 'block';
+      }
+    });
+  });
+
+  // Adjust plan button
+  const adjustBtn = planContainer.querySelector('#adjust-plan-btn');
+  if (adjustBtn) {
+    adjustBtn.addEventListener('click', () => showAdjustPlanFlow(container));
+  }
+}
+
+/**
+ * Show "Adjust My Plan" flow
+ */
+function showAdjustPlanFlow(container) {
+  const progressPane = container.querySelector('#home-tab-progress');
+  if (!progressPane) return;
+
+  progressPane.innerHTML = `
+    <div style="padding:var(--space-md);">
+      <button id="adjust-back-btn" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--text);margin-bottom:16px;">← Back to Progress</button>
+      <h2 style="margin:0 0 8px;">Adjust Your Plan</h2>
+      <p style="font-size:14px;color:var(--text-soft);margin:0 0 20px;">Tell us what you'd like to change and we'll regenerate your learning plan.</p>
+
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
+        <button class="adjust-option" data-reason="too_easy" style="background:var(--sand);border:2px solid var(--border-light);border-radius:var(--radius-lg);padding:16px;cursor:pointer;text-align:left;font-size:15px;font-family:var(--font-body);color:var(--text);">
+          🚀 Too easy — I want more challenge
+        </button>
+        <button class="adjust-option" data-reason="too_hard" style="background:var(--sand);border:2px solid var(--border-light);border-radius:var(--radius-lg);padding:16px;cursor:pointer;text-align:left;font-size:15px;font-family:var(--font-body);color:var(--text);">
+          🐢 Too hard — slow it down
+        </button>
+        <button class="adjust-option" data-reason="different_focus" style="background:var(--sand);border:2px solid var(--border-light);border-radius:var(--radius-lg);padding:16px;cursor:pointer;text-align:left;font-size:15px;font-family:var(--font-body);color:var(--text);">
+          🎯 Different focus
+        </button>
+        <button class="adjust-option" data-reason="start_fresh" style="background:var(--sand);border:2px solid var(--border-light);border-radius:var(--radius-lg);padding:16px;cursor:pointer;text-align:left;font-size:15px;font-family:var(--font-body);color:var(--text);">
+          🔄 Start fresh — regenerate everything
+        </button>
+      </div>
+
+      <div id="focus-input-area" style="display:none;margin-bottom:20px;">
+        <label style="font-size:14px;color:var(--text-soft);margin-bottom:6px;display:block;">What would you like to focus on?</label>
+        <input type="text" id="focus-text" placeholder="e.g., more conversation practice, focus on reading..."
+          style="width:100%;padding:12px 14px;border:2px solid var(--border);border-radius:var(--radius-md);font-size:15px;background:var(--cream);color:var(--text);font-family:var(--font-body);box-sizing:border-box;" />
+      </div>
+    </div>
+  `;
+
+  let selectedReason = null;
+
+  // Back
+  progressPane.querySelector('#adjust-back-btn')?.addEventListener('click', () => {
+    const units = AppState.isAya ? AYA_UNITS : UNITS;
+    const progress = AppState.unitProgress || {};
+    progressPane.innerHTML = renderProgressTab(units, progress);
+    loadPhasePlanView(container);
+  });
+
+  // Option selection
+  progressPane.querySelectorAll('.adjust-option').forEach(btn => {
+    btn.addEventListener('click', () => {
+      // Deselect all
+      progressPane.querySelectorAll('.adjust-option').forEach(b => {
+        b.style.borderColor = 'var(--border-light)';
+      });
+      // Select this one
+      btn.style.borderColor = 'var(--green)';
+      selectedReason = btn.dataset.reason;
+
+      // Show focus input for "different_focus"
+      const focusArea = progressPane.querySelector('#focus-input-area');
+      if (focusArea) {
+        focusArea.style.display = selectedReason === 'different_focus' ? 'block' : 'none';
+      }
+
+      // Show confirm button if not already there
+      if (!progressPane.querySelector('#confirm-adjust-btn')) {
+        const confirmHtml = `
+          <div style="padding:0 var(--space-md) var(--space-md);">
+            <div style="background:var(--amber-light, #fff8f0);border:1px solid var(--amber);border-radius:var(--radius-md);padding:14px;margin-bottom:16px;">
+              <p style="font-size:14px;color:var(--text);margin:0;line-height:1.4;">
+                ⚠️ This will regenerate your remaining lessons. Completed lessons and vocabulary progress are kept.
+              </p>
+            </div>
+            <button id="confirm-adjust-btn" class="btn-primary" style="width:100%;padding:14px;font-size:16px;">
+              Regenerate My Plan
+            </button>
+          </div>
+        `;
+        progressPane.insertAdjacentHTML('beforeend', confirmHtml);
+
+        progressPane.querySelector('#confirm-adjust-btn')?.addEventListener('click', () => {
+          const focusText = progressPane.querySelector('#focus-text')?.value || '';
+          executeAdjustPlan(container, selectedReason, focusText);
+        });
+      }
+    });
+  });
+}
+
+/**
+ * Execute plan adjustment — regenerate phase plan
+ */
+async function executeAdjustPlan(container, reason, focusText) {
+  showLoading('Regenerating your learning plan...');
+
+  try {
+    const email = AppState.user?.email;
+    if (!email) throw new Error('Not signed in');
+
+    const currentPlan = await loadLatestPhasePlan(email);
+    const phaseNumber = currentPlan?.phase_number || 1;
+
+    // Build performance context from the adjustment reason
+    const reasonMap = {
+      too_easy: 'Student reports content is too easy. Increase difficulty, push more production and script reading.',
+      too_hard: 'Student reports content is too hard. Reduce difficulty, more repetition, simpler patterns.',
+      different_focus: `Student wants a different focus: ${focusText || 'general change'}`,
+      start_fresh: 'Student wants to start fresh. Generate a completely new plan.'
+    };
+
+    const prevPerformance = {
+      completed: 0,
+      avgQuizScore: 0,
+      weakAreas: [],
+      strongAreas: [],
+      adjustmentReason: reasonMap[reason] || reason
+    };
+
+    const newPlan = await generatePhasePlan(email, phaseNumber, prevPerformance);
+
+    hideLoading();
+
+    if (!newPlan) {
+      showToast('Failed to regenerate plan. Please try again.');
+      return;
+    }
+
+    showToast('✅ Plan regenerated!');
+
+    // Re-render progress tab with new plan
+    const units = AppState.isAya ? AYA_UNITS : UNITS;
+    const progress = AppState.unitProgress || {};
+    const progressPane = container.querySelector('#home-tab-progress');
+    if (progressPane) {
+      progressPane.innerHTML = renderProgressTab(units, progress);
+      loadPhasePlanView(container);
+    }
+  } catch (err) {
+    hideLoading();
+    showToast('Failed to regenerate plan. Please try again.');
+    console.error('Adjust plan error:', err);
+  }
 }
 
 function renderSettingsTab() {
@@ -234,6 +529,11 @@ function attachEventListeners(container, currentUnit, unitId) {
   container.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => switchTab(container, btn.dataset.tab));
   });
+
+  // Load phase plan view if heritage speaker (async, after DOM ready)
+  if (AppState.profile?.speaker_type === 'heritage' && AppState.profile?.placement_profile) {
+    loadPhasePlanView(container);
+  }
 
   const continueBtn = container.querySelector('#continue-btn');
   if (continueBtn) {

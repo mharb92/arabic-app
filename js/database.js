@@ -740,3 +740,41 @@ export async function loadMasteryForGeneration(email) {
 
   return { mastered, reinforcing, weak };
 }
+
+/**
+ * Count focused sessions for a given scenario name
+ * Used by focused study to determine new/review phrase split
+ */
+export async function countFocusedSessionsByScenario(email, scenarioName) {
+  const sb = initSupabase();
+  if (!sb || !email) return 0;
+
+  const { data, error } = await sb
+    .from('focused_sessions')
+    .select('id', { count: 'exact' })
+    .eq('email', email)
+    .eq('scenario', scenarioName);
+
+  if (error) { console.error('Count focused sessions error:', error); return 0; }
+  return data ? data.length : 0;
+}
+
+/**
+ * Load lowest-mastery vocab entries for a given source prefix
+ * Used by focused study to pick review phrases from past scenario sessions
+ */
+export async function loadWeakVocabBySource(email, sourcePrefix, limit = 5) {
+  const sb = initSupabase();
+  if (!sb || !email) return [];
+
+  const { data, error } = await sb
+    .from('personal_vocab')
+    .select('arabic, romanization:transliteration, english, mastery_score')
+    .eq('email', email)
+    .like('source', `${sourcePrefix}%`)
+    .order('mastery_score', { ascending: true })
+    .limit(limit);
+
+  if (error) { console.error('Load weak vocab error:', error); return []; }
+  return data || [];
+}
